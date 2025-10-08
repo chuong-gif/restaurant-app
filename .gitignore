@@ -1,0 +1,19 @@
+# Node
+node_modules
+dist
+.env
+.env.local
+packages/*/node_modules
+packages/*/dist
+
+# Prisma
+prisma/dev.db
+prisma/*.sqlite
+
+# Logs
+*.log
+
+# Build artifacts
+.DS_Store
+.idea
+.vscode

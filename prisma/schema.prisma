@@ -1,0 +1,298 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model bai_viet {
+  id               Int              @id @default(autoincrement())
+  anh_bia_id       Int?
+  tieu_de          String           @db.VarChar(255)
+  noi_dung         String           @db.Text
+  tac_gia          String           @db.VarChar(255)
+  danh_muc_blog_id Int?
+  slug             String           @db.VarChar(255)
+  created_at       DateTime         @default(now()) @db.Timestamp(0)
+  updated_at       DateTime         @default(now()) @db.Timestamp(0)
+  danh_muc_blog    danh_muc_blog?   @relation(fields: [danh_muc_blog_id], references: [id], onDelete: Restrict, map: "fk_baiviet_danhmuc")
+  media_files      media_files?     @relation(fields: [anh_bia_id], references: [id], map: "fk_baiviet_media")
+  binh_luan_blog   binh_luan_blog[]
+
+  @@index([danh_muc_blog_id], map: "fk_baiviet_danhmuc")
+  @@index([anh_bia_id], map: "fk_baiviet_media")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model ban_an {
+  id                                           Int          @id @default(autoincrement())
+  so_ban                                       Int          @unique(map: "so_ban")
+  suc_chua                                     Int
+  trang_thai                                   Boolean      @default(true)
+  anh_ban_id                                   Int?
+  video_ban_id                                 Int?
+  mo_ta_vi_tri                                 String?      @db.Text
+  created_at                                   DateTime?    @default(now()) @db.Timestamp(0)
+  updated_at                                   DateTime     @default(now()) @db.Timestamp(0)
+  media_files_ban_an_anh_ban_idTomedia_files   media_files? @relation("ban_an_anh_ban_idTomedia_files", fields: [anh_ban_id], references: [id], map: "fk_banan_anh")
+  media_files_ban_an_video_ban_idTomedia_files media_files? @relation("ban_an_video_ban_idTomedia_files", fields: [video_ban_id], references: [id], map: "fk_banan_video")
+  dat_ban                                      dat_ban[]
+
+  @@index([anh_ban_id], map: "fk_banan_anh")
+  @@index([video_ban_id], map: "fk_banan_video")
+}
+
+model binh_luan_blog {
+  id            Int        @id @default(autoincrement())
+  bai_viet_id   Int
+  nguoi_dung_id Int
+  noi_dung      String     @db.Text
+  created_at    DateTime   @default(now()) @db.Timestamp(0)
+  updated_at    DateTime   @default(now()) @db.Timestamp(0)
+  bai_viet      bai_viet   @relation(fields: [bai_viet_id], references: [id], onDelete: Cascade, map: "fk_binhluan_baiviet")
+  nguoi_dung    nguoi_dung @relation(fields: [nguoi_dung_id], references: [id], map: "fk_binhluan_nguoidung")
+
+  @@index([bai_viet_id], map: "fk_binhluan_baiviet")
+  @@index([nguoi_dung_id], map: "fk_binhluan_nguoidung")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model chi_tiet_dat_ban {
+  id                Int      @id @default(autoincrement())
+  dat_ban_id        Int
+  san_pham_id       Int
+  so_luong          Int
+  gia_tai_thoi_diem Int
+  created_at        DateTime @default(now()) @db.Timestamp(0)
+  updated_at        DateTime @default(now()) @db.Timestamp(0)
+  dat_ban           dat_ban  @relation(fields: [dat_ban_id], references: [id], onDelete: Cascade, map: "fk_chitietdatban_datban")
+  san_pham          san_pham @relation(fields: [san_pham_id], references: [id], map: "fk_chitietdatban_sanpham")
+
+  @@index([dat_ban_id], map: "fk_chitietdatban_datban")
+  @@index([san_pham_id], map: "fk_chitietdatban_sanpham")
+}
+
+model danh_muc_blog {
+  id           Int        @id @default(autoincrement())
+  ten_danh_muc String     @unique(map: "ten_danh_muc") @db.VarChar(255)
+  trang_thai   Boolean    @default(true)
+  created_at   DateTime   @default(now()) @db.Timestamp(0)
+  updated_at   DateTime   @default(now()) @db.Timestamp(0)
+  bai_viet     bai_viet[]
+}
+
+model danh_muc_san_pham {
+  id           Int        @id @default(autoincrement())
+  ten_danh_muc String     @unique(map: "ten_danh_muc") @db.VarChar(255)
+  trang_thai   Boolean    @default(true)
+  created_at   DateTime   @default(now()) @db.Timestamp(0)
+  updated_at   DateTime   @default(now()) @db.Timestamp(0)
+  san_pham     san_pham[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model dat_ban {
+  id                     Int                      @id @default(autoincrement())
+  ma_dat_ban             String?                  @db.VarChar(50)
+  khach_hang_id          Int?
+  so_lan_doi             Boolean                  @default(true)
+  ban_an_id              Int?
+  khuyen_mai_id          Int?
+  ho_ten_khach           String                   @db.VarChar(255)
+  dien_thoai             String                   @db.VarChar(15)
+  email                  String?                  @db.VarChar(60)
+  ngay_dat_ban           DateTime                 @db.DateTime(0)
+  so_luong_khach         Int
+  ghi_chu                String?                  @db.Text
+  tong_tien              Int?
+  tien_dat_coc           Int                      @default(0)
+  trang_thai             Boolean                  @default(true)
+  momo_order_id          String?                  @db.VarChar(255)
+  created_at             DateTime                 @default(now()) @db.Timestamp(0)
+  updated_at             DateTime                 @default(now()) @db.Timestamp(0)
+  chi_tiet_dat_ban       chi_tiet_dat_ban[]
+  ban_an                 ban_an?                  @relation(fields: [ban_an_id], references: [id], onDelete: Restrict, map: "fk_datban_banan")
+  nguoi_dung             nguoi_dung?              @relation(fields: [khach_hang_id], references: [id], map: "fk_datban_khachhang")
+  khuyen_mai             khuyen_mai?              @relation(fields: [khuyen_mai_id], references: [id], map: "fk_datban_khuyenmai")
+  phuong_thuc_thanh_toan phuong_thuc_thanh_toan[]
+  thay_doi_mon_an        thay_doi_mon_an[]
+
+  @@index([ban_an_id], map: "fk_datban_banan")
+  @@index([khach_hang_id], map: "fk_datban_khachhang")
+  @@index([khuyen_mai_id], map: "fk_datban_khuyenmai")
+}
+
+model hang_thanh_vien {
+  id             Int              @id @default(autoincrement())
+  ten_hang       String           @db.VarChar(50)
+  diem_toi_thieu Int
+  mo_ta_uu_dai   String           @db.Text
+  created_at     DateTime         @default(now()) @db.Timestamp(0)
+  updated_at     DateTime         @default(now()) @db.Timestamp(0)
+  the_thanh_vien the_thanh_vien[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model khuyen_mai {
+  id            Int       @id @default(autoincrement())
+  ma_khuyen_mai String    @db.VarChar(255)
+  giam_gia      Int
+  loai_giam_gia Boolean
+  so_luong      Int
+  ngay_hieu_luc DateTime  @db.DateTime(0)
+  ngay_ket_thuc DateTime  @db.DateTime(0)
+  created_at    DateTime  @default(now()) @db.Timestamp(0)
+  updated_at    DateTime  @default(now()) @db.Timestamp(0)
+  dat_ban       dat_ban[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model media_files {
+  id                                      Int          @id @default(autoincrement())
+  file_path                               String       @db.VarChar(255)
+  file_url                                String       @db.VarChar(255)
+  file_type                               String       @db.VarChar(50)
+  storage_service                         String?      @default("firebase") @db.VarChar(50)
+  created_at                              DateTime     @default(now()) @db.Timestamp(0)
+  updated_at                              DateTime     @default(now()) @db.Timestamp(0)
+  bai_viet                                bai_viet[]
+  ban_an_ban_an_anh_ban_idTomedia_files   ban_an[]     @relation("ban_an_anh_ban_idTomedia_files")
+  ban_an_ban_an_video_ban_idTomedia_files ban_an[]     @relation("ban_an_video_ban_idTomedia_files")
+  nguoi_dung                              nguoi_dung[]
+  san_pham                                san_pham[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model nguoi_dung {
+  id                     Int                        @id @default(autoincrement())
+  ho_ten                 String                     @db.VarChar(255)
+  tai_khoan              String?                    @db.VarChar(255)
+  anh_dai_dien_id        Int?
+  email                  String                     @unique(map: "email") @db.VarChar(255)
+  dien_thoai             String?                    @db.VarChar(20)
+  dia_chi                String?                    @db.VarChar(255)
+  mat_khau               String                     @db.VarChar(255)
+  vai_tro_id             Int?
+  trang_thai             Boolean?                   @default(true)
+  loai_nguoi_dung        nguoi_dung_loai_nguoi_dung
+  luong                  Int?
+  created_at             DateTime?                  @default(now()) @db.Timestamp(0)
+  updated_at             DateTime?                  @default(now()) @db.Timestamp(0)
+  binh_luan_blog         binh_luan_blog[]
+  dat_ban                dat_ban[]
+  media_files            media_files?               @relation(fields: [anh_dai_dien_id], references: [id], map: "fk_nguoidung_media")
+  vai_tro                vai_tro?                   @relation(fields: [vai_tro_id], references: [id], onDelete: Restrict, map: "fk_nguoidung_vaitro")
+  phuong_thuc_thanh_toan phuong_thuc_thanh_toan[]
+  the_thanh_vien         the_thanh_vien?
+
+  @@index([anh_dai_dien_id], map: "fk_nguoidung_media")
+  @@index([vai_tro_id], map: "fk_nguoidung_vaitro")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model phuong_thuc_thanh_toan {
+  id                  Int        @id @default(autoincrement())
+  dat_ban_id          Int
+  nguoi_thanh_toan_id Int
+  phuong_thuc         String     @db.VarChar(50)
+  so_tien             Int
+  created_at          DateTime   @default(now()) @db.Timestamp(0)
+  updated_at          DateTime   @default(now()) @db.Timestamp(0)
+  dat_ban             dat_ban    @relation(fields: [dat_ban_id], references: [id], map: "fk_thanhtoan_datban")
+  nguoi_dung          nguoi_dung @relation(fields: [nguoi_thanh_toan_id], references: [id], map: "fk_thanhtoan_nguoidung")
+
+  @@index([dat_ban_id], map: "fk_thanhtoan_datban")
+  @@index([nguoi_thanh_toan_id], map: "fk_thanhtoan_nguoidung")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model quyen {
+  id             Int             @id @default(autoincrement())
+  ten_nhom_quyen String?         @db.VarChar(255)
+  ten_chuc_nang  String          @db.VarChar(255)
+  ma_quyen       String          @unique(map: "ma_quyen") @db.VarChar(255)
+  created_at     DateTime        @default(now()) @db.Timestamp(0)
+  updated_at     DateTime        @default(now()) @db.Timestamp(0)
+  vai_tro_quyen  vai_tro_quyen[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model san_pham {
+  id                Int                @id @default(autoincrement())
+  ma_san_pham       String             @unique(map: "ma_san_pham") @db.VarChar(10)
+  ten_san_pham      String             @db.VarChar(255)
+  gia_ban           Int
+  gia_khuyen_mai    Int                @default(0)
+  hinh_anh_id       Int?
+  mo_ta             String?            @db.Text
+  trang_thai        Boolean            @default(true)
+  danh_muc_id       Int
+  created_at        DateTime           @default(now()) @db.Timestamp(0)
+  updated_at        DateTime           @default(now()) @db.Timestamp(0)
+  chi_tiet_dat_ban  chi_tiet_dat_ban[]
+  danh_muc_san_pham danh_muc_san_pham  @relation(fields: [danh_muc_id], references: [id], map: "fk_sanpham_danhmuc")
+  media_files       media_files?       @relation(fields: [hinh_anh_id], references: [id], map: "fk_sanpham_media")
+  thay_doi_mon_an   thay_doi_mon_an[]
+
+  @@index([danh_muc_id], map: "fk_sanpham_danhmuc")
+  @@index([hinh_anh_id], map: "fk_sanpham_media")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model thay_doi_mon_an {
+  id                Int      @id @default(autoincrement())
+  dat_ban_id        Int
+  san_pham_id       Int
+  so_luong          Int
+  gia_tai_thoi_diem Int
+  loai_thay_doi     Boolean
+  ghi_chu           String?  @db.Text
+  created_at        DateTime @default(now()) @db.Timestamp(0)
+  dat_ban           dat_ban  @relation(fields: [dat_ban_id], references: [id], map: "fk_thaydoi_datban")
+  san_pham          san_pham @relation(fields: [san_pham_id], references: [id], map: "fk_thaydoi_sanpham")
+
+  @@index([dat_ban_id], map: "fk_thaydoi_datban")
+  @@index([san_pham_id], map: "fk_thaydoi_sanpham")
+}
+
+model the_thanh_vien {
+  id                 Int             @id @default(autoincrement())
+  khach_hang_id      Int             @unique(map: "khach_hang_id")
+  hang_thanh_vien_id Int
+  diem_tich_luy      Int             @default(0)
+  created_at         DateTime        @default(now()) @db.Timestamp(0)
+  updated_at         DateTime        @default(now()) @db.Timestamp(0)
+  hang_thanh_vien    hang_thanh_vien @relation(fields: [hang_thanh_vien_id], references: [id], map: "fk_thethanhvien_hang")
+  nguoi_dung         nguoi_dung      @relation(fields: [khach_hang_id], references: [id], onDelete: Cascade, map: "fk_thethanhvien_khachhang")
+
+  @@index([hang_thanh_vien_id], map: "fk_thethanhvien_hang")
+}
+
+model vai_tro {
+  id            Int             @id @default(autoincrement())
+  ten_vai_tro   String          @unique(map: "ten_vai_tro") @db.VarChar(255)
+  mo_ta         String?         @db.Text
+  created_at    DateTime        @default(now()) @db.Timestamp(0)
+  updated_at    DateTime        @default(now()) @db.Timestamp(0)
+  nguoi_dung    nguoi_dung[]
+  vai_tro_quyen vai_tro_quyen[]
+}
+
+model vai_tro_quyen {
+  id         Int     @id @default(autoincrement())
+  vai_tro_id Int
+  quyen_id   Int
+  quyen      quyen   @relation(fields: [quyen_id], references: [id], onDelete: Cascade, map: "fk_vaitroquyen_quyen")
+  vai_tro    vai_tro @relation(fields: [vai_tro_id], references: [id], onDelete: Cascade, map: "fk_vaitroquyen_vaitro")
+
+  @@index([quyen_id], map: "fk_vaitroquyen_quyen")
+  @@index([vai_tro_id], map: "fk_vaitroquyen_vaitro")
+}
+
+enum nguoi_dung_loai_nguoi_dung {
+  Kh_ch_H_ng @map("Khách Hàng")
+  Nh_n_Vi_n  @map("Nhân Viên")
+}

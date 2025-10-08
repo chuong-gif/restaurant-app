@@ -1,0 +1,25 @@
+{
+  "name": "restaurant-app",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:server": "npm --workspace=packages/server run dev",
+    "dev:admin": "npm --workspace=packages/web-admin run dev",
+    "dev:client": "npm --workspace=packages/web-client run dev",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:admin\"",
+    "build": "npm run -w packages/server build && npm run -w packages/web-admin build && npm run -w packages/web-client build",
+    "lint": "eslint \"packages/**/src/**/*.{ts,tsx,js,jsx}\" --fix"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.0",
+    "eslint": "^8.0.0",
+    "prettier": "^2.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.17.0"
+  }
+}
