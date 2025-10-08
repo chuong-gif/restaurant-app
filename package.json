@@ -14,12 +14,11 @@
     "lint": "eslint \"packages/**/src/**/*.{ts,tsx,js,jsx}\" --fix"
   },
   "devDependencies": {
+    "@prisma/client": "^6.17.0",
     "concurrently": "^8.0.0",
     "eslint": "^8.0.0",
     "prettier": "^2.0.0",
+    "prisma": "^6.17.0",
     "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "@prisma/client": "^6.17.0"
   }
 }

@@ -1,14 +1,22 @@
-import express from 'express';
+// packages/server/src/app.ts
+import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
-import morgan from 'morgan';
-import reservationRouter from './routes/reservations';
+// Sẽ tạo sau
+import apiRoutes from './routes';
 
-const app = express();
-app.use(cors());
-app.use(express.json());
-app.use(morgan('dev'));
+const app: Application = express();
 
-app.get('/', (_, res) => res.send('Restaurant API'));
-app.use('/api/reservations', reservationRouter);
+// Middlewares
+app.use(cors()); // Cho phép cross-origin requests
+app.use(express.json()); // Parse JSON bodies
+app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+
+// Health check route
+app.get('/health', (req: Request, res: Response) => {
+    res.status(200).send('Server is healthy!');
+});
+
+// API Routes - Sẽ thêm vào sau
+app.use('/api/v1', apiRoutes);
 
 export default app;
