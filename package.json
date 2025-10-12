@@ -23,6 +23,8 @@
   },
   "dependencies": {
     "@prisma/client": "^6.17.0",
-    "react-hook-form": "^7.64.0"
+    "@types/redux": "^3.6.31",
+    "react-hook-form": "^7.64.0",
+    "redux": "^5.0.1"
   }
 }

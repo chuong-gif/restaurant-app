@@ -10,10 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/redux": "^3.6.31",
     "axios": "^1.12.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.9.4",
+    "redux": "^5.0.1",
     "unidecode": "^1.1.0"
   },
   "devDependencies": {
