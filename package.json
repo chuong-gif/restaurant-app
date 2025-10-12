@@ -20,6 +20,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@prisma/client": "^6.17.0"
+    "@prisma/client": "^6.17.0",
+    "react-hook-form": "^7.64.0"
   }
 }
