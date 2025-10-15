@@ -1,8 +1,28 @@
-// packages/server/src/index.ts
-import app from './app';
+import dotenv from "dotenv";
+import { PrismaClient } from "@prisma/client";
+import app from "./app";
 
-const PORT = process.env.PORT || 5000;
+dotenv.config();
 
-app.listen(PORT, () => {
-    console.log(`🚀 Server is running on port ${PORT}`);
+const prisma = new PrismaClient();
+const PORT = process.env.PORT || 3307;
+
+(async () => {
+    try {
+        await prisma.$connect();
+        console.log("✅ Connected to database");
+
+        app.listen(PORT, () => {
+            console.log(`🚀 Server running on http://localhost:${PORT}`);
+        });
+    } catch (err) {
+        console.error("❌ Database connection failed:", err);
+        process.exit(1);
+    }
+})();
+
+process.on("SIGINT", async () => {
+    await prisma.$disconnect();
+    console.log("🛑 Database connection closed");
+    process.exit(0);
 });
