@@ -2,7 +2,7 @@
 import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 // Sẽ tạo sau
-import apiRoutes from './routes';
+import apiRoutes from './routes/index';
 
 const app: Application = express();
 
