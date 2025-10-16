@@ -31,8 +31,8 @@ export interface ApiData {
 
 // Lấy từ biến môi trường React
 // (phải được khai báo trong file `.env` như: REACT_APP_API_ENDPOINT=http://localhost:6969/api)
-export const API_ENDPOINT: string =
-    process.env.REACT_APP_API_ENDPOINT || "http://localhost:6969/api";
+//export const API_ENDPOINT: string =
+//  process.env.REACT_APP_API_ENDPOINT || "http://localhost:6969/api";
 
 // ===============================
 // 🔹 Danh sách endpoint API cụ thể

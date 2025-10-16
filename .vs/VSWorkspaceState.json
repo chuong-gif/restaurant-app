@@ -1,0 +1,11 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\packages",
+    "\\packages\\web-admin",
+    "\\packages\\web-admin\\src",
+    "\\packages\\web-admin\\src\\action"
+  ],
+  "SelectedNode": "\\packages\\web-admin\\src\\action\\authaction.ts",
+  "PreviewInSolutionExplorer": false
+}
