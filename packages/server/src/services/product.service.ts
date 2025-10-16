@@ -1,63 +1,79 @@
-// packages/server/src/services/product.service.ts
+// 📦 Import các thư viện cần thiết
 import prisma from '../models';
 import { Prisma } from '@prisma/client';
 
-// Service để lấy danh sách sản phẩm có phân trang và tìm kiếm
+/* 
+==========================================================
+🧭 SERVICE: LẤY DANH SÁCH SẢN PHẨM (CÓ PHÂN TRANG + TÌM KIẾM)
+==========================================================
+*/
 export const getProducts = async (
-    searchName: string = '',
-    page: number = 1,
-    pageSize: number = 10,
-    status?: number // Optional: 1 cho hoạt động, 0 cho ngưng
+    searchName: string = '', // 🔍 Từ khóa tìm kiếm theo tên sản phẩm
+    page: number = 1,        // 📄 Số trang hiện tại
+    pageSize: number = 10,   // 📦 Số lượng sản phẩm mỗi trang
+    status?: number          // ⚙️ Trạng thái sản phẩm (1 = hoạt động, 0 = ngưng)
 ) => {
-    // Dòng này sẽ hết báo lỗi sau khi bạn chạy generate và reload
+    // 🧩 Tạo điều kiện tìm kiếm theo Prisma
     const whereCondition: Prisma.san_phamWhereInput = {
         ten_san_pham: {
-            contains: searchName,
+            contains: searchName, // 🔍 Tìm theo tên sản phẩm có chứa từ khóa
         },
     };
 
+    // 🟢 Nếu có truyền tham số trạng thái thì thêm điều kiện vào where
     if (status !== undefined) {
-        // Trong schema.prisma, `trang_thai` là kiểu Boolean
+        // Trong schema.prisma, `trang_thai` là kiểu Boolean → chuyển 1|0 sang true|false
         whereCondition.trang_thai = status === 1;
     }
 
+    // ⚡ Thực hiện 2 truy vấn song song trong transaction:
+    //   1️⃣ Lấy danh sách sản phẩm
+    //   2️⃣ Đếm tổng số sản phẩm phù hợp
     const [products, totalCount] = await prisma.$transaction([
         prisma.san_pham.findMany({
             where: whereCondition,
             orderBy: {
-                id: 'desc',
+                id: 'desc', // 🔽 Sắp xếp sản phẩm mới nhất lên đầu
             },
-            skip: (page - 1) * pageSize,
-            take: pageSize,
+            skip: (page - 1) * pageSize, // ⏭️ Bỏ qua sản phẩm của các trang trước
+            take: pageSize,               // ⏹️ Giới hạn số lượng sản phẩm lấy ra
             include: {
-                danh_muc_san_pham: true,
-                media_files: true,
+                danh_muc_san_pham: true,  // 🏷️ Join thêm danh mục sản phẩm
+                media_files: true,         // 🖼️ Join thêm ảnh/video liên quan
             },
         }),
-        prisma.san_pham.count({ where: whereCondition }),
+        prisma.san_pham.count({ where: whereCondition }), // 🔢 Đếm tổng số kết quả
     ]);
 
+    // 📤 Trả về dữ liệu đã được xử lý + thông tin phân trang
     return {
-        data: products,
-        total: totalCount,
-        totalPages: Math.ceil(totalCount / pageSize),
-        currentPage: page,
+        data: products,                              // 🧾 Danh sách sản phẩm
+        total: totalCount,                           // 🔢 Tổng số sản phẩm
+        totalPages: Math.ceil(totalCount / pageSize),// 📊 Tổng số trang
+        currentPage: page,                           // 📍 Trang hiện tại
     };
 };
-// Service để lấy sản phẩm mới nhất
+
+
+/* 
+===========================================
+🆕 SERVICE: LẤY DANH SÁCH SẢN PHẨM MỚI NHẤT
+===========================================
+*/
 export const getNewestProducts = async (limit: number = 8) => {
+    // 🔥 Lấy ra `limit` sản phẩm mới nhất đang hoạt động
     return await prisma.san_pham.findMany({
         where: {
-            trang_thai: true, // Chỉ lấy sản phẩm hoạt động
+            trang_thai: true, // ✅ Chỉ lấy sản phẩm đang hoạt động
         },
         orderBy: {
-            created_at: 'desc',
+            created_at: 'desc', // 🕒 Sắp xếp theo thời gian tạo mới nhất
         },
-        take: limit,
+        take: limit, // 📦 Giới hạn số lượng sản phẩm trả về
         include: {
-            media_files: true,
+            media_files: true, // 🖼️ Lấy kèm thông tin file ảnh/video
         },
     });
 };
 
-// Các service khác cho create, update, delete...
+// ✨ Các service khác như create, update, delete... sẽ được bổ sung sau

@@ -2,28 +2,33 @@ import prisma from '../models';
 import { Prisma } from '@prisma/client';
 
 /**
- * Lấy danh sách khuyến mãi với phân trang và tìm kiếm
- * @param search - Từ khóa tìm kiếm theo mã khuyến mãi
- * @param page - Trang hiện tại
- * @param pageSize - Số lượng mục trên mỗi trang
+ * 📜 Lấy danh sách khuyến mãi với phân trang và tìm kiếm
+ * @param search - 🔍 Từ khóa tìm kiếm theo mã khuyến mãi
+ * @param page - 📄 Trang hiện tại
+ * @param pageSize - 📦 Số lượng mục trên mỗi trang
  */
 export const getPromotions = async (search: string, page: number, pageSize: number) => {
+    // 🧩 Tạo điều kiện tìm kiếm: lọc theo mã khuyến mãi có chứa từ khóa
     const where: Prisma.khuyen_maiWhereInput = {
         ma_khuyen_mai: {
             contains: search,
         },
     };
 
+    // ⚙️ Dùng transaction để thực hiện 2 truy vấn song song:
+    // 1️⃣ Lấy danh sách khuyến mãi theo điều kiện, có sắp xếp và phân trang
+    // 2️⃣ Đếm tổng số khuyến mãi để tính tổng số trang
     const [promotions, total] = await prisma.$transaction([
         prisma.khuyen_mai.findMany({
             where,
-            orderBy: { id: 'desc' },
-            skip: (page - 1) * pageSize,
-            take: pageSize,
+            orderBy: { id: 'desc' },      // ⬇️ Sắp xếp theo ID giảm dần (mới nhất lên đầu)
+            skip: (page - 1) * pageSize,  // ⏩ Bỏ qua các bản ghi trước trang hiện tại
+            take: pageSize,               // 📦 Giới hạn số bản ghi trên mỗi trang
         }),
-        prisma.khuyen_mai.count({ where }),
+        prisma.khuyen_mai.count({ where }), // 🔢 Đếm tổng số kết quả phù hợp
     ]);
 
+    // 📤 Trả về dữ liệu kèm thông tin phân trang
     return {
         data: promotions,
         total,
@@ -33,18 +38,23 @@ export const getPromotions = async (search: string, page: number, pageSize: numb
 };
 
 /**
- * Lấy thông tin khuyến mãi theo ID
- * @param id - ID của khuyến mãi
+ * 🧾 Lấy thông tin chi tiết của một khuyến mãi theo ID
+ * @param id - 🆔 ID của khuyến mãi
  */
 export const getPromotionById = async (id: number) => {
+    // 🔍 Tìm khuyến mãi theo ID duy nhất
     const promotion = await prisma.khuyen_mai.findUnique({ where: { id } });
+
+    // ⚠️ Nếu không tìm thấy, báo lỗi
     if (!promotion) throw new Error('Khuyến mãi không tồn tại.');
+
+    // ✅ Trả về thông tin khuyến mãi
     return promotion;
 };
 
 /**
- * Tạo khuyến mãi mới
- * @param data - Dữ liệu để tạo khuyến mãi
+ * 🆕 Tạo khuyến mãi mới
+ * @param data - 📦 Dữ liệu dùng để tạo khuyến mãi
  */
 export const createPromotion = async (data: {
     code_name: string;
@@ -54,30 +64,33 @@ export const createPromotion = async (data: {
     valid_to: Date;
     type: boolean;
 }) => {
+    // 🏗️ Gọi Prisma để tạo bản ghi khuyến mãi mới trong DB
     return prisma.khuyen_mai.create({
         data: {
-            ma_khuyen_mai: data.code_name,
-            giam_gia: data.discount,
-            so_luong: data.quantity,
-            ngay_hieu_luc: data.valid_from,
-            ngay_ket_thuc: data.valid_to,
-            loai_giam_gia: data.type,
+            ma_khuyen_mai: data.code_name,   // 🔤 Mã khuyến mãi
+            giam_gia: data.discount,         // 💰 Mức giảm giá
+            so_luong: data.quantity,         // 📦 Số lượng khuyến mãi
+            ngay_hieu_luc: data.valid_from,  // ⏰ Ngày bắt đầu hiệu lực
+            ngay_ket_thuc: data.valid_to,    // ⏳ Ngày hết hạn
+            loai_giam_gia: data.type,        // ⚖️ Kiểu giảm (theo % hay giá cố định)
         },
     });
 };
 
 /**
- * Cập nhật khuyến mãi
- * @param id - ID của khuyến mãi cần cập nhật
- * @param data - Dữ liệu cập nhật
+ * 🛠️ Cập nhật thông tin khuyến mãi
+ * @param id - 🆔 ID của khuyến mãi cần cập nhật
+ * @param data - ✏️ Dữ liệu cập nhật mới
  */
 export const updatePromotion = async (id: number, data: any) => {
+    // 🔧 Cập nhật bản ghi theo ID, chỉ thay đổi các trường được truyền vào
     return prisma.khuyen_mai.update({
         where: { id },
         data: {
             ma_khuyen_mai: data.code_name,
             giam_gia: data.discount,
             so_luong: data.quantity,
+            // 🕐 Chuyển đổi ngày sang đối tượng Date (nếu có)
             ngay_hieu_luc: data.valid_from ? new Date(data.valid_from) : undefined,
             ngay_ket_thuc: data.valid_to ? new Date(data.valid_to) : undefined,
             loai_giam_gia: data.type,
@@ -86,10 +99,10 @@ export const updatePromotion = async (id: number, data: any) => {
 };
 
 /**
- * Xóa khuyến mãi
- * @param id - ID của khuyến mãi cần xóa
+ * 🗑️ Xóa khuyến mãi khỏi hệ thống
+ * @param id - 🆔 ID của khuyến mãi cần xóa
  */
 export const deletePromotion = async (id: number) => {
+    // ❌ Xóa bản ghi khuyến mãi theo ID
     return prisma.khuyen_mai.delete({ where: { id } });
 };
-
