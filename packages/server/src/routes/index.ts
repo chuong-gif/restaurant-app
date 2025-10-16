@@ -47,16 +47,16 @@ const adminRouter = Router();
 adminRouter.use(authenticateToken);
 
 // ⚙️ --- Các nhóm route chỉ dành cho Admin ---
-adminRouter.use('/products', productRoutes);
-adminRouter.use('/blogs', blogRoutes);
-adminRouter.use('/blog-categories', blogCategoryRoutes);
-adminRouter.use('/blog-comments', blogCommentRoutes);
-adminRouter.use('/promotions', promotionRoutes);
-adminRouter.use('/tables', tableRoutes);
-adminRouter.use('/reservations', reservationRoutes);
-adminRouter.use('/users', userRoutes);
-adminRouter.use('/permissions', permissionRoutes);
-adminRouter.use('/roles', roleRoutes);
+adminRouter.use('/products', productRoutes);                                // 🛠️ Quản lý sản phẩm (CRUD sản phẩm)
+adminRouter.use('/blogs', blogRoutes);                                      // 📰 Quản lý bài viết/blog
+adminRouter.use('/blog-categories', blogCategoryRoutes);                    // 🏷️ Quản lý danh mục blog
+adminRouter.use('/blog-comments', blogCommentRoutes);                       // 💬 Quản lý bình luận blog
+adminRouter.use('/promotions', promotionRoutes);                            // 🎟️ Quản lý khuyến mãi và mã giảm giá
+adminRouter.use('/tables', tableRoutes);                                    // 🪑 Quản lý bàn ăn
+adminRouter.use('/reservations', reservationRoutes);                        // 📅 Quản lý đặt bàn (đặt lịch, xác nhận, hủy)
+adminRouter.use('/users', userRoutes);                                      // 👥 Quản lý người dùng (admin, khách hàng, nhân viên)
+adminRouter.use('/permissions', permissionRoutes);                          // 🔐 Quản lý quyền truy cập (permissions)
+adminRouter.use('/roles', roleRoutes);                                      // 🏷️ Quản lý vai trò (roles - gán quyền, xóa, cập nhật)
 
 // 🔑 --- Router xác thực dành riêng cho Admin ---
 router.use('/admin/auth', adminAuthRoutes);
