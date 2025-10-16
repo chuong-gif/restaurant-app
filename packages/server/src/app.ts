@@ -1,22 +1,23 @@
-// packages/server/src/app.ts
+// 📁 packages/server/src/app.ts
+
 import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
-// Sẽ tạo sau
-import apiRoutes from './routes';
+// ⚙️ Sẽ tạo sau - file tổng hợp tất cả route API
+import apiRoutes from './routes/index';
 
-const app: Application = express();
+const app: Application = express();                             // 🚀 Khởi tạo ứng dụng Express
 
-// Middlewares
-app.use(cors()); // Cho phép cross-origin requests
-app.use(express.json()); // Parse JSON bodies
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+// 🧩 Middleware cấu hình cho server
+app.use(cors());                                                // 🌍 Cho phép truy cập từ domain khác (Cross-Origin)
+app.use(express.json());                                        // 📦 Cho phép server đọc dữ liệu JSON trong request body
+app.use(express.urlencoded({ extended: true }));                // 🧾 Hỗ trợ parse dữ liệu form URL-encoded
 
-// Health check route
+// ❤️ Health check route (kiểm tra server có hoạt động không)
 app.get('/health', (req: Request, res: Response) => {
-    res.status(200).send('Server is healthy!');
+    res.status(200).send('Server is healthy!');                 // ✅ Trả phản hồi khi server ok
 });
 
-// API Routes - Sẽ thêm vào sau
-app.use('/api/v1', apiRoutes);
+// 🔗 Kết nối route API chính (được định nghĩa trong ./routes/index)
+app.use('/api/v1', apiRoutes);                                  // 🌐 Tất cả endpoint sẽ bắt đầu bằng /api/v1/...
 
-export default app;
+export default app;                                             // 📤 Xuất app để dùng trong file server chính (vd: server.ts)

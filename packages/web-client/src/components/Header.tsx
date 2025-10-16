@@ -1,77 +1,63 @@
-// packages/web-client/src/components/Header.tsx
-import React, { useEffect } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-
-// SỬA Ở ĐÂY: Thay thế '@/' bằng '../'
-import { useUser } from '../hooks/useUser';
-import normalAvatar from '../assets/images/default-avatar.png'; // Giả sử thư mục assets ngang hàng với components
-
-// Định nghĩa kiểu dữ liệu cho User
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface User {
-    fullname: string;
-    avatar: string;
-}
+import React, { useState, useEffect } from 'react';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import UserDropdown from '../components/UserDropdown'; // Import component mới
 
 const Header: React.FC = () => {
-    const { user, setUser } = useUser();
+    const [user, setUser] = useState<{ fullname: string } | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
+        // Kiểm tra localStorage khi component được tải
+        const userData = localStorage.getItem('user');
+        if (userData) {
+            setUser(JSON.parse(userData));
         }
-    }, [setUser]);
+    }, []);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const handleLogout = () => {
+        // Xóa thông tin người dùng khỏi localStorage
         localStorage.removeItem('user');
         localStorage.removeItem('accessToken');
         setUser(null);
-        navigate('/');
+        navigate('/'); // Chuyển về trang chủ
+        window.location.reload(); // Tải lại để đảm bảo mọi thứ được cập nhật
     };
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const truncateName = (name: string, maxLength: number): string => {
-        return name.length > maxLength ? name.slice(0, maxLength) + '...' : name;
-    };
+
+    const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+        isActive ? 'text-yellow-500 font-bold' : 'text-white hover:text-yellow-500 transition-colors';
 
     return (
-        <header className="bg-gray-900 text-white px-5 lg:px-8 py-3">
-            <nav className="flex justify-between items-center">
-                {/* Logo */}
-                <NavLink to="/" className="flex items-center gap-2">
-                    <img src="/huong-sen-logo.png" alt="Logo" className="h-10" /> {/* Ảnh từ thư mục public */}
-                    <h1 className="text-2xl text-yellow-500 font-serif m-0">Ẩm Thực</h1>
-                </NavLink>
+        <header className="bg-gray-900/80 backdrop-blur-sm sticky top-0 z-40">
+            <div className="container mx-auto flex justify-between items-center p-4">
+                <Link to="/" className="text-2xl font-bold text-yellow-500 font-serif">
+                    Ẩm Thực
+                </Link>
 
-                {/* Menu cho Desktop */}
-                <div className="hidden lg:flex items-center gap-4">
-                    <NavLink to="/" className={({ isActive }) => (isActive ? 'text-yellow-500' : 'hover:text-yellow-400')}>Trang chủ</NavLink>
-                    <NavLink to="/menu" className={({ isActive }) => (isActive ? 'text-yellow-500' : 'hover:text-yellow-400')}>Thực đơn</NavLink>
-                    {/* ... các link khác ... */}
-                </div>
+                <nav className="hidden md:flex items-center gap-8">
+                    <NavLink to="/" className={navLinkClass}>Trang chủ</NavLink>
+                    <NavLink to="/about" className={navLinkClass}>Về chúng tôi</NavLink>
+                    <NavLink to="/menu" className={navLinkClass}>Thực đơn</NavLink>
+                    <NavLink to="/contact" className={navLinkClass}>Liên hệ</NavLink>
+                </nav>
 
-                {/* Nút Đặt bàn và User */}
-                <div className="flex items-center gap-3">
-                    <NavLink to="/booking" className="bg-yellow-500 text-black font-bold py-2 px-4 rounded-full hover:bg-yellow-600">
-                        Đặt bàn
-                    </NavLink>
+                <div className="flex items-center gap-4">
                     {user ? (
-                        <div className="relative">
-                            {/* Nút Avatar */}
-                            <button className="w-10 h-10 rounded-full overflow-hidden border-2 border-yellow-500">
-                                <img src={user.avatar || normalAvatar} alt="Avatar" className="w-full h-full object-cover" />
-                            </button>
-                            {/* Dropdown Menu (Cần thêm logic để ẩn/hiện) */}
-                        </div>
+                        // Nếu đã đăng nhập, hiển thị UserDropdown
+                        <UserDropdown username={user.fullname} onLogout={handleLogout} />
                     ) : (
-                        <NavLink to="/login" className="bg-yellow-500 text-black font-bold py-2 px-4 rounded-full hover:bg-yellow-600">
-                            Đăng nhập
-                        </NavLink>
+                        // Nếu chưa đăng nhập, hiển thị nút Đăng nhập/Đăng ký
+                        <div className="hidden md:flex items-center gap-4">
+                            <Link to="/login" className="text-white hover:text-yellow-500 transition-colors">Đăng nhập</Link>
+                            <Link to="/register" className="bg-yellow-500 text-black font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 transition">
+                                Đăng ký
+                            </Link>
+                        </div>
                     )}
+                    <Link to="/booking" className="bg-yellow-500 text-black font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 transition ml-4">
+                        Đặt bàn
+                    </Link>
                 </div>
-            </nav>
+            </div>
         </header>
     );
 };
