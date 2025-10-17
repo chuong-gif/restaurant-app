@@ -1,9 +1,8 @@
 import type { ThunkAction } from "redux-thunk";
-import type { AnyAction } from "redux";
+import type { Action } from "redux"; // ✅ Thay thế AnyAction
 import { API_ENDPOINT } from "../configs/client/APIs";
 import AdminConfig from "../configs/client/index";
 import http from "../Utils/Http";
-
 
 // ------------------------------
 // 🔹 Action Types
@@ -53,7 +52,7 @@ export interface BlogAction {
 // ------------------------------
 // 🔹 Thunk Type
 // ------------------------------
-type ThunkResult<R> = ThunkAction<R, BlogState, undefined, AnyAction>;
+type ThunkResult<R> = ThunkAction<R, BlogState, undefined, Action<string>>; // ✅ Đã cập nhật
 
 // ------------------------------
 // 🔹 Action Creators

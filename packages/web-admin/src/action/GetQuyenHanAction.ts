@@ -1,7 +1,7 @@
 import axios from "axios";
-import { ThunkAction } from "redux-thunk";
-import { AnyAction } from "redux";
-import { API_ENDPOINT } from "../Config/APIs";
+import type { ThunkAction } from "redux-thunk";
+import type { AnyAction } from "redux";
+import { API_ENDPOINT } from "../configs/client/APIs";
 
 // ------------------------------
 // 🔹 Action Types

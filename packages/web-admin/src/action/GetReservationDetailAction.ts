@@ -1,6 +1,6 @@
-import { ThunkAction } from "redux-thunk";
-import { AnyAction } from "redux";
-import { API_ENDPOINT, API_DATA } from "../Config/APIs";
+import type { ThunkAction } from "redux-thunk";
+import type { AnyAction } from "redux";
+import { API_ENDPOINT, API_DATA } from "../configs/client/APIs";
 import http from "../Utils/Http";
 
 // ------------------------------

@@ -1,8 +1,9 @@
 import axios from "axios";
 import type { ThunkAction } from "redux-thunk";
-import type { Action } from "redux";
+import type { AnyAction } from "redux";
 import { API_ENDPOINT, API_DATA } from "../configs/client/APIs";
 import AdminConfig from "../configs/client/index";
+
 
 // ------------------------------
 // 🔹 Action Type Constants
