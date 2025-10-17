@@ -1,8 +1,9 @@
-import { ThunkAction } from "redux-thunk";
-import { AnyAction } from "redux";
-import { API_ENDPOINT } from "../Config/APIs";
-import AdminConfig from "../Config/index";
+import type { ThunkAction } from "redux-thunk";
+import type { AnyAction } from "redux";
+import { API_ENDPOINT } from "../configs/client/APIs";
+import AdminConfig from "../configs/client/index";
 import http from "../Utils/Http";
+
 
 // ------------------------------
 // 🔹 Action Types
