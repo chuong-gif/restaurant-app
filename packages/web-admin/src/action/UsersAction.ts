@@ -1,7 +1,9 @@
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import type { PayloadAction } from "@reduxjs/toolkit";
+
 import { AxiosError } from "axios";
-import { API_ENDPOINT } from "../Config/APIs";
-import AdminConfig from "../Config";
+import { API_ENDPOINT } from "../configs/client/APIs";
+import AdminConfig from "../configs/client/index";
 import http from "../Utils/Http";
 
 // ------------------------------

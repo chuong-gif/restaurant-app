@@ -1,9 +1,10 @@
-import { ThunkAction } from "redux-thunk";
-import { AnyAction } from "redux";
-import { AxiosResponse, AxiosError } from "axios";
-import { API_ENDPOINT, API_DATA } from "../Config/APIs";
+import type { ThunkAction } from "redux-thunk";
+import type { AnyAction } from "redux";
+import { type AxiosResponse, AxiosError } from "axios";
+import { API_ENDPOINT, API_DATA } from "../configs/client/APIs";
 import http from "../Utils/Http";
-import { RootState } from "../store"; // ⚠️ Cập nhật đúng đường dẫn store của bạn
+import type { RootState } from "../store"; // ⚠️ Cập nhật đúng đường dẫn store của bạn
+ // ⚠️ Cập nhật đúng đường dẫn store của bạn
 
 // ------------------------------
 // 🔹 Action Types
