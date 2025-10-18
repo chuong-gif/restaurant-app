@@ -2,7 +2,7 @@ import {
   FETCH_CATEGORY_PRODUCT_NOPAGE_REQUEST,
   FETCH_CATEGORY_PRODUCT_NOPAGE_SUCCESS,
   FETCH_CATEGORY_PRODUCT_NOPAGE_FAILURE
-} from '../Actions/CategoryProductNoPageActions';
+} from '../action/CategoryProductNoPageActions';
 
 const initialState = {
   loading: false,

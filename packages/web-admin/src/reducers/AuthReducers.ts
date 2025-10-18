@@ -7,19 +7,36 @@ import {
     CHECK_PASSWORD_FAILURE,
     SHOW_SUCCESS_ALERT,
     SHOW_ERROR_ALERT
-} from "../Actions/AuthActions";
+} from "../action/AuthActions";
+
+// Định nghĩa kiểu cho state
+interface AuthState {
+    loading: boolean;
+    auth: any; // bạn có thể thay any bằng kiểu dữ liệu user thật nếu có interface riêng
+    error: string;
+    passwordCheckMessage: string;
+    successAlert: string | null;
+    errorAlert: string | null;
+}
+
+// Kiểu cho action
+interface AuthAction {
+    type: string;
+    payload?: any;
+}
 
 // Khởi tạo state mặc định
-const initialState = {
-    loading: false,           // trạng thái loading khi gọi API
-    auth: null,               // dữ liệu user
-    error: '',                // lỗi chung
-    passwordCheckMessage: '', // thông báo kiểm tra mật khẩu
-    successAlert: null,       // thông báo thành công
-    errorAlert: null,         // thông báo lỗi
+const initialState: AuthState = {
+    loading: false,
+    auth: null,
+    error: '',
+    passwordCheckMessage: '',
+    successAlert: null,
+    errorAlert: null,
 };
 
-const authReducer = (state = initialState, action) => {
+// Reducer
+const authReducer = (state: AuthState = initialState, action: AuthAction): AuthState => {
     switch (action.type) {
         case FETCH_AUTH_REQUEST:
             return {

@@ -1,86 +1,114 @@
 import {
-  FETCH_CATEGORY_BLOG_REQUEST,
-  FETCH_CATEGORY_BLOG_SUCCESS,
-  FETCH_CATEGORY_BLOG_FAILURE,
+  FETCH_BLOG_FAILURE,
+  FETCH_BLOG_REQUEST,
+  FETCH_BLOG_SUCCESS,
   SET_CURRENT_PAGE,
-  SET_LIMIT
-} from '../Actions/BlogsCategoriesActions';
+  SET_LIMIT,
+} from "../action/BlogActions";
 
-const initialState = {
-  allCategories: [],       // Tất cả danh mục
-  categories: [],          // Danh mục hiển thị trang hiện tại
-  currentPage: parseInt(localStorage.getItem('currentPage'), 10) || 1,
-  limit: localStorage.getItem('limit') ? parseInt(localStorage.getItem('limit'), 10) : 5,
-  loading: false,
-  error: '',
-  totalCount: 0,
-  totalPages: 0
+// ---- Kiểu dữ liệu ----
+interface BlogState {
+  allBlogs: any[];
+  blog: any[];
+  currentPage: number;
+  limit: number;
+  loading: boolean;
+  error: string;
+  totalCount: number;
+  totalPages: number;
+}
+
+interface BlogAction {
+  type: string;
+  payload?: any;
+}
+
+// ---- Lấy dữ liệu từ localStorage một cách an toàn ----
+const getStoredNumber = (key: string, defaultValue: number): number => {
+  const value = localStorage.getItem(key);
+  return value ? parseInt(value, 10) : defaultValue;
 };
 
-const blogsCategoriesReducer = (state = initialState, action) => {
+// ---- State mặc định ----
+const initialState: BlogState = {
+  allBlogs: [],
+  blog: [],
+  currentPage: getStoredNumber("currentPage", 1),
+  limit: getStoredNumber("limit", 10),
+  loading: false,
+  error: "",
+  totalCount: 0,
+  totalPages: 0,
+};
+
+// ---- Reducer ----
+const blogReducer = (
+  state: BlogState = initialState,
+  action: BlogAction
+): BlogState => {
   switch (action.type) {
-    case FETCH_CATEGORY_BLOG_REQUEST:
+    case FETCH_BLOG_REQUEST:
       return {
         ...state,
         loading: true,
-        error: ''
+        error: "",
       };
 
-    case FETCH_CATEGORY_BLOG_SUCCESS: {
+    case FETCH_BLOG_SUCCESS: {
       const { results, totalCount, totalPages, currentPage } = action.payload;
 
-      // Lưu currentPage vào localStorage
-      localStorage.setItem('currentPage', currentPage);
+      // Lưu thông tin trang hiện tại
+      localStorage.setItem("currentPage", String(currentPage));
 
       return {
         ...state,
         loading: false,
-        allCategories: results,
+        allBlogs: results,
         totalCount,
         totalPages,
         currentPage,
-        categories: results.slice(0, state.limit) // Trang đầu tiên
+        blog: results.slice(0, state.limit), // lấy số lượng theo limit
       };
     }
 
-    case FETCH_CATEGORY_BLOG_FAILURE:
+    case FETCH_BLOG_FAILURE:
       return {
         ...state,
         loading: false,
+        blog: [],
+        allBlogs: [],
         error: action.payload,
-        categories: []
       };
 
     case SET_CURRENT_PAGE: {
       const start = (action.payload - 1) * state.limit;
       const end = start + state.limit;
 
-      // Lưu currentPage vào localStorage
-      localStorage.setItem('currentPage', action.payload);
+      localStorage.setItem("currentPage", String(action.payload));
 
       return {
         ...state,
         currentPage: action.payload,
-        categories: state.allCategories.slice(start, end)
+        blog: state.allBlogs.slice(start, end),
       };
     }
 
     case SET_LIMIT: {
       const newLimit = action.payload;
-      const totalPages = Math.ceil(state.allCategories.length / newLimit);
-      const currentPage = state.currentPage > totalPages ? totalPages : state.currentPage;
+      const totalPages = Math.ceil(state.allBlogs.length / newLimit);
+      const currentPage =
+        state.currentPage > totalPages ? totalPages : state.currentPage;
 
       const start = (currentPage - 1) * newLimit;
       const end = start + newLimit;
 
-      // Lưu limit vào localStorage
-      localStorage.setItem('limit', newLimit);
+      localStorage.setItem("limit", String(newLimit));
 
       return {
         ...state,
         limit: newLimit,
         currentPage,
-        categories: state.allCategories.slice(start, end)
+        blog: state.allBlogs.slice(start, end),
       };
     }
 
@@ -89,4 +117,4 @@ const blogsCategoriesReducer = (state = initialState, action) => {
   }
 };
 
-export default blogsCategoriesReducer;
+export default blogReducer;
