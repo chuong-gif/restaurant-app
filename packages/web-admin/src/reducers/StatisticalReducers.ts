@@ -2,15 +2,31 @@ import {
     FETCH_STATISTICAL_REQUEST,
     FETCH_STATISTICAL_SUCCESS,
     FETCH_STATISTICAL_FAILURE
-} from '../Actions/StatisticalActions';
+} from '../action/StatisticalActions';
 
-const initialState = {
+// Kiểu cho action
+interface StatisticalAction {
+    type: string;
+    payload?: any;
+}
+
+// Kiểu cho state
+interface StatisticalState {
+    loading: boolean;
+    data: any | null;
+    error: string;
+}
+
+const initialState: StatisticalState = {
     loading: false,
     data: null,
     error: ''
 };
 
-const StatisticalReducer = (state = initialState, action) => {
+const StatisticalReducer = (
+    state: StatisticalState = initialState,
+    action: StatisticalAction
+): StatisticalState => {
     switch (action.type) {
         case FETCH_STATISTICAL_REQUEST:
             return { ...state, loading: true, error: '' };

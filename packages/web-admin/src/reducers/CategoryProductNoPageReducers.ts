@@ -4,13 +4,31 @@ import {
   FETCH_CATEGORY_PRODUCT_NOPAGE_FAILURE
 } from '../action/CategoryProductNoPageActions';
 
-const initialState = {
+// Định nghĩa kiểu cho state
+interface CategoryProductNoPageState {
+  loading: boolean;
+  product_category: any[];
+  error: string;
+}
+
+// Định nghĩa kiểu cho action
+interface CategoryProductNoPageAction {
+  type: string;
+  payload?: any;
+}
+
+// State mặc định
+const initialState: CategoryProductNoPageState = {
   loading: false,
   product_category: [],
   error: ''
 };
 
-const categoryProductNoPageReducer = (state = initialState, action) => {
+// Reducer
+const categoryProductNoPageReducer = (
+  state: CategoryProductNoPageState = initialState,
+  action: CategoryProductNoPageAction
+): CategoryProductNoPageState => {
   switch (action.type) {
     case FETCH_CATEGORY_PRODUCT_NOPAGE_REQUEST:
       return {

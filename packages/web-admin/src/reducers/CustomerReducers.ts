@@ -3,12 +3,34 @@ import {
     FETCH_CUSTOMER_REQUEST,
     FETCH_CUSTOMER_SUCCESS,
     SET_CURRENT_PAGE
-} from '../Actions/CustomerActions';
+} from '../action/CustomerActions';
 
-const initialState = {
+// Định nghĩa kiểu cho action
+interface CustomerAction {
+    type: string;
+    payload?: any;
+}
+
+// Định nghĩa kiểu cho state
+interface CustomerState {
+    allCustomers: any[];
+    customer: any[];
+    currentPage: number;
+    pageSize: number;
+    loading: boolean;
+    error: string;
+    totalCount: number;
+    totalPages: number;
+}
+
+// Xử lý localStorage trả về null
+const storedPage = localStorage.getItem("currentPage");
+const initialPage = storedPage !== null ? parseInt(storedPage, 10) : 1;
+
+const initialState: CustomerState = {
     allCustomers: [],
     customer: [],
-    currentPage: parseInt(localStorage.getItem("currentPage"), 10) || 1,
+    currentPage: initialPage,
     pageSize: 5,
     loading: false,
     error: '',
@@ -16,7 +38,7 @@ const initialState = {
     totalPages: 0 // Tổng số trang
 };
 
-const customerReducer = (state = initialState, action) => {
+const customerReducer = (state: CustomerState = initialState, action: CustomerAction): CustomerState => {
     switch (action.type) {
         case FETCH_CUSTOMER_REQUEST:
             return {
@@ -28,7 +50,7 @@ const customerReducer = (state = initialState, action) => {
             const { results, totalCount, totalPages, currentPage } = action.payload;
 
             // Lưu thông tin currentPage vào localStorage
-            localStorage.setItem("currentPage", currentPage);
+            localStorage.setItem("currentPage", currentPage.toString());
 
             return {
                 ...state,
@@ -53,7 +75,7 @@ const customerReducer = (state = initialState, action) => {
             const end = start + state.pageSize;
 
             // Lưu trang hiện tại vào localStorage
-            localStorage.setItem("currentPage", action.payload);
+            localStorage.setItem("currentPage", action.payload.toString());
 
             return {
                 ...state,

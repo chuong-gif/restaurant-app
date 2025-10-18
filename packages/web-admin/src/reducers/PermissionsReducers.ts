@@ -3,20 +3,41 @@ import {
     FETCH_PERMISSIONS_SUCCESS,
     FETCH_PERMISSIONS_FAILURE,
     SET_CURRENT_PAGE
-} from '../Actions/PermissionsActions';
+} from '../action/PermissionsActions';
 
-const initialState = {
+// Kiểu cho action
+interface PermissionsAction {
+    type: string;
+    payload?: any;
+}
+
+// Kiểu cho state
+interface PermissionsState {
+    allPermissions: any[];
+    permissions: any[];
+    currentPage: number;
+    pageSize: number;
+    loading: boolean;
+    error: string;
+    totalCount: number;
+    totalPages: number;
+}
+
+const initialState: PermissionsState = {
     allPermissions: [],
     permissions: [],
     currentPage: 1,
-    pageSize: 5, // Thêm pageSize để phân trang
+    pageSize: 5, // Số lượng phân trang
     loading: false,
     error: '',
     totalCount: 0, 
     totalPages: 0 
 };
 
-const permissionsReducer = (state = initialState, action) => {
+const permissionsReducer = (
+    state: PermissionsState = initialState, 
+    action: PermissionsAction
+): PermissionsState => {
     switch (action.type) {
         case FETCH_PERMISSIONS_REQUEST:
             return {
@@ -28,11 +49,13 @@ const permissionsReducer = (state = initialState, action) => {
             return {
                 ...state,
                 loading: false,
-                allPermissions: action.payload.results,
+                allPermissions: Array.isArray(action.payload.results) ? action.payload.results : [],
                 totalCount: action.payload.totalCount,
                 totalPages: action.payload.totalPages,
                 currentPage: action.payload.currentPage,
-                permissions: action.payload.results.slice(0, state.pageSize) // Dữ liệu cho trang đầu tiên
+                permissions: Array.isArray(action.payload.results)
+                    ? action.payload.results.slice(0, state.pageSize)
+                    : []
             };
         case FETCH_PERMISSIONS_FAILURE:
             return {
@@ -46,7 +69,7 @@ const permissionsReducer = (state = initialState, action) => {
             return {
                 ...state,
                 currentPage: action.payload,
-                permissions: state.allPermissions.slice(start, end) // Dữ liệu cho trang hiện tại
+                permissions: state.allPermissions.slice(start, end)
             };
         }
         default:

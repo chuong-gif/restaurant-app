@@ -3,20 +3,42 @@ import {
     FETCH_EMPLOYEE_REQUEST,
     FETCH_EMPLOYEE_SUCCESS,
     SET_CURRENT_PAGE
-} from '../Actions/EmployeeActions';
+} from '../action/EmployeeActions';
 
-const initialState = {
+// Kiểu cho action
+interface EmployeeAction {
+    type: string;
+    payload?: any;
+}
+
+// Kiểu cho state
+interface EmployeeState {
+    allEmployees: any[];
+    employee: any[];
+    currentPage: number;
+    pageSize: number;
+    loading: boolean;
+    error: string;
+    totalCount: number;
+    totalPages: number;
+}
+
+// Kiểm tra giá trị từ localStorage
+const storedPage = localStorage.getItem("currentPage");
+const initialPage = storedPage !== null ? parseInt(storedPage, 10) : 1;
+
+const initialState: EmployeeState = {
     allEmployees: [],
     employee: [],
-    currentPage: parseInt(localStorage.getItem("currentPage"), 10) || 1,
+    currentPage: initialPage,
     pageSize: 5, // Số lượng nhân viên trên mỗi trang
     loading: false,
     error: '',
-    totalCount: 0, // Tổng số nhân viên
-    totalPages: 0 // Tổng số trang
+    totalCount: 0,
+    totalPages: 0
 };
 
-const employeeReducer = (state = initialState, action) => {
+const employeeReducer = (state: EmployeeState = initialState, action: EmployeeAction): EmployeeState => {
     switch (action.type) {
         case FETCH_EMPLOYEE_REQUEST:
             return {
@@ -28,7 +50,7 @@ const employeeReducer = (state = initialState, action) => {
             const { results, totalCount, totalPages, currentPage } = action.payload;
 
             // Lưu trang hiện tại vào localStorage
-            localStorage.setItem("currentPage", currentPage);
+            localStorage.setItem("currentPage", currentPage.toString());
 
             return {
                 ...state,
@@ -53,7 +75,7 @@ const employeeReducer = (state = initialState, action) => {
             const end = start + state.pageSize;
 
             // Lưu trang hiện tại vào localStorage
-            localStorage.setItem("currentPage", action.payload);
+            localStorage.setItem("currentPage", action.payload.toString());
 
             return {
                 ...state,

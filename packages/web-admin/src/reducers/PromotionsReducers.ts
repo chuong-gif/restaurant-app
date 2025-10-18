@@ -4,20 +4,45 @@ import {
     FETCH_PROMOTION_FAILURE,
     SET_CURRENT_PAGE,
     SET_LIMIT
-} from '../Actions/PromotionActions';
+} from '../action/PromotionActions';
 
-const initialState = {
+// Kiểu cho action
+interface PromotionAction {
+    type: string;
+    payload?: any;
+}
+
+// Kiểu cho state
+interface PromotionState {
+    allPromotions: any[];
+    promotionsOnPage: any[];
+    loading: boolean;
+    error: string;
+    totalCount: number;
+    totalPages: number;
+    currentPage: number;
+    limit: number;
+}
+
+// Xử lý localStorage trả về null
+const storedPage = localStorage.getItem('currentPage');
+const storedLimit = localStorage.getItem('limit');
+
+const initialState: PromotionState = {
     allPromotions: [],
     promotionsOnPage: [],
     loading: false,
     error: '',
     totalCount: 0, 
     totalPages: 0,
-    currentPage: parseInt(localStorage.getItem('currentPage'), 10) || 1,
-    limit: localStorage.getItem('limit') ? parseInt(localStorage.getItem('limit')) : 10,
+    currentPage: storedPage !== null ? parseInt(storedPage, 10) : 1,
+    limit: storedLimit !== null ? parseInt(storedLimit, 10) : 10,
 };
 
-const promotionReducer = (state = initialState, action) => {
+const promotionReducer = (
+    state: PromotionState = initialState,
+    action: PromotionAction
+): PromotionState => {
     switch (action.type) {
         case FETCH_PROMOTION_REQUEST:
             return {
@@ -28,7 +53,7 @@ const promotionReducer = (state = initialState, action) => {
         case FETCH_PROMOTION_SUCCESS: {
             const { results = [], totalCount, totalPages, currentPage } = action.payload;
 
-            localStorage.setItem('currentPage', currentPage);
+            localStorage.setItem('currentPage', currentPage.toString());
 
             return {
                 ...state,
@@ -50,7 +75,7 @@ const promotionReducer = (state = initialState, action) => {
             const start = (action.payload - 1) * state.limit;
             const end = start + state.limit;
 
-            localStorage.setItem('currentPage', action.payload);
+            localStorage.setItem('currentPage', action.payload.toString());
 
             return {
                 ...state,
@@ -66,7 +91,7 @@ const promotionReducer = (state = initialState, action) => {
             const start = (currentPage - 1) * newLimit;
             const end = start + newLimit;
 
-            localStorage.setItem('limit', newLimit);
+            localStorage.setItem('limit', newLimit.toString());
 
             return {
                 ...state,

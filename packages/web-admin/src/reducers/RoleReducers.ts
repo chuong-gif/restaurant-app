@@ -4,20 +4,45 @@ import {
   FETCH_ROLE_SUCCESS,
   SET_CURRENT_PAGE,
   SET_LIMIT,
-} from "../Actions/RoleActions";
+} from "../action/RoleActions";
 
-const initialState = {
+// Kiểu cho action
+interface RoleAction {
+  type: string;
+  payload?: any;
+}
+
+// Kiểu cho state
+interface RoleState {
+  allRoles: any[];
+  role: any[];
+  currentPage: number;
+  limit: number;
+  loading: boolean;
+  error: string;
+  totalCount: number;
+  totalPages: number;
+}
+
+// Kiểm tra localStorage trả về null
+const storedPage = localStorage.getItem("currentPage");
+const storedLimit = localStorage.getItem("limit");
+
+const initialState: RoleState = {
   allRoles: [],
   role: [],
-  currentPage: parseInt(localStorage.getItem("currentPage"), 10) || 1,
-  limit: localStorage.getItem("limit") ? parseInt(localStorage.getItem("limit")) : 5,
+  currentPage: storedPage !== null ? parseInt(storedPage, 10) : 1,
+  limit: storedLimit !== null ? parseInt(storedLimit, 10) : 5,
   loading: false,
   error: "",
   totalCount: 0,
   totalPages: 0,
 };
 
-const roleReducer = (state = initialState, action) => {
+const roleReducer = (
+  state: RoleState = initialState,
+  action: RoleAction
+): RoleState => {
   switch (action.type) {
     case FETCH_ROLE_REQUEST:
       return {
@@ -33,7 +58,7 @@ const roleReducer = (state = initialState, action) => {
         currentPage = 1,
       } = action.payload || {};
       const rolesArray = Array.isArray(results) ? results : [];
-      localStorage.setItem("currentPage", currentPage);
+      localStorage.setItem("currentPage", currentPage.toString());
 
       return {
         ...state,
@@ -54,7 +79,7 @@ const roleReducer = (state = initialState, action) => {
     case SET_CURRENT_PAGE: {
       const start = (action.payload - 1) * state.limit;
       const end = start + state.limit;
-      localStorage.setItem("currentPage", action.payload);
+      localStorage.setItem("currentPage", action.payload.toString());
       return {
         ...state,
         currentPage: action.payload,
@@ -64,11 +89,14 @@ const roleReducer = (state = initialState, action) => {
     case SET_LIMIT: {
       const newLimit = action.payload;
       const totalPages = Math.ceil(state.allRoles.length / newLimit);
-      const currentPage = Math.max(1, state.currentPage > totalPages ? totalPages : state.currentPage);
+      const currentPage = Math.max(
+        1,
+        state.currentPage > totalPages ? totalPages : state.currentPage
+      );
       const start = (currentPage - 1) * newLimit;
       const end = start + newLimit;
 
-      localStorage.setItem("limit", newLimit);
+      localStorage.setItem("limit", newLimit.toString());
       return {
         ...state,
         limit: newLimit,
