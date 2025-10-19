@@ -28,6 +28,7 @@
 // }
 
 
+
 import { Layout, Menu } from "antd";
 import {
     DashboardOutlined,
@@ -44,20 +45,39 @@ export default function Sidebar() {
     const location = useLocation();
 
     const items = [
-        { key: "/", icon: <DashboardOutlined />, label: "Dashboard" },
-        { key: "/customers", icon: <UserOutlined />, label: "Customers" },
-        { key: "/products", icon: <ShoppingOutlined />, label: "Products" },
-        { key: "/reservations", icon: <CalendarOutlined />, label: "Reservations" },
+        { key: "/admin", icon: <DashboardOutlined />, label: "Dashboard" },
+        { key: "/admin/customers", icon: <UserOutlined />, label: "Customers" },
+        { key: "/admin/products", icon: <ShoppingOutlined />, label: "Products" },
+        { key: "/admin/reservations", icon: <CalendarOutlined />, label: "Reservations" },
     ];
 
     return (
-        <Sider theme="light" width={220}>
-            <div className="p-4 font-bold text-xl text-center">Admin</div>
+        <Sider
+            theme="light"
+            width={220}
+            style={{
+                height: "100vh",
+                position: "sticky",
+                top: 0,
+                left: 0,
+                overflowY: "auto",
+                borderRight: "1px solid #f0f0f0",
+                flexShrink: 0,
+            }}
+        >
+            <div className="p-5 text-xl font-bold text-center border-b border-gray-200">
+                Admin Panel
+            </div>
+
             <Menu
                 mode="inline"
                 selectedKeys={[location.pathname]}
                 items={items}
                 onClick={(item) => navigate(item.key)}
+                style={{
+                    height: "100%",
+                    borderRight: 0,
+                }}
             />
         </Sider>
     );

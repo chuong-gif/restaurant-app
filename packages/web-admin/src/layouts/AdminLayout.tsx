@@ -48,6 +48,9 @@
 // }
 
 
+
+
+
 import { Layout } from "antd";
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
@@ -57,21 +60,41 @@ const { Content } = Layout;
 
 export default function AdminLayout() {
     return (
-        <Layout className="min-h-screen w-screen overflow-hidden">
+        <Layout
+            className="h-screen w-screen overflow-hidden"
+            style={{
+                height: "100vh",
+                width: "100vw",
+            }}
+        >
             {/* Sidebar cố định bên trái */}
             <Sidebar />
 
-            {/* Khu vực bên phải (header + content) */}
-            <Layout className="flex flex-col flex-1 min-h-screen">
+            {/* Khu vực bên phải */}
+            <Layout
+                className="flex flex-col flex-1 bg-gray-100 overflow-hidden"
+                style={{
+                    height: "100vh",
+                    width: "100%",
+                }}
+            >
                 <Header />
+
                 <Content
-                    className="flex-1 overflow-auto bg-gray-50 p-6"
+                    className="
+            flex-1 
+            overflow-y-auto 
+            overflow-x-hidden 
+            p-6 
+            bg-gray-100
+          "
                     style={{
-                        height: "100%",
+                        height: "calc(100vh - 64px)", // trừ phần header
                         width: "100%",
                     }}
                 >
-                    <div className="max-w-[1600px] mx-auto bg-white p-8 rounded-xl shadow-md h-full">
+                    {/* ❗ Bỏ căn giữa, để nội dung full width */}
+                    <div className="w-full h-full bg-white rounded-xl shadow p-6">
                         <Outlet />
                     </div>
                 </Content>
@@ -79,3 +102,4 @@ export default function AdminLayout() {
         </Layout>
     );
 }
+

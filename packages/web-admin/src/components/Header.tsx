@@ -7,6 +7,7 @@
 // }
 
 
+
 import { Layout, Avatar, Dropdown } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 
@@ -21,15 +22,26 @@ export default function Header() {
     return (
         <AntHeader
             style={{
-                background: "#fff",
+                background: "#ffffff",
                 padding: "0 24px",
                 display: "flex",
                 justifyContent: "flex-end",
                 alignItems: "center",
+                height: "64px",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+                zIndex: 10,
+                position: "sticky",
+                top: 0,
             }}
         >
-            <Dropdown menu={{ items }}>
-                <Avatar icon={<UserOutlined />} style={{ cursor: "pointer" }} />
+            <Dropdown menu={{ items }} placement="bottomRight">
+                <Avatar
+                    icon={<UserOutlined />}
+                    style={{
+                        cursor: "pointer",
+                        backgroundColor: "#1677ff",
+                    }}
+                />
             </Dropdown>
         </AntHeader>
     );
