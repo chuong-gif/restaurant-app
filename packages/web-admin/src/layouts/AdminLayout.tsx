@@ -1,49 +1,81 @@
+// import { Outlet } from "react-router-dom";
+// import Sidebar from "../components/Sidebar";
+// import Header from "../components/Header";
+
+// export default function AdminLayout() {
+// return (
+//     <div className="flex min-h-screen bg-white text-gray-800">
+//         <Sidebar />
+//         <div className="flex-1 flex flex-col bg-gray-50">
+//             <Header />
+//             <main className="p-6 flex-1 overflow-y-auto">
+//                 <Outlet />
+//             </main>
+//         </div>
+//     </div>
+// );
+
+
+//     return (
+//         <div className="flex min-h-screen bg-gray-900 text-white">
+
+//             {/* Sidebar cố định bên trái */}
+//             <Sidebar />
+
+//             {/* Phần nội dung chính */}
+//             <div className="flex-1 flex flex-col">
+//                 <Header />
+
+//                 {/* Khu vực nội dung */}
+//                 <main className="flex-1 overflow-y-auto p-6">
+//                     <div
+//                         className="
+//               w-full
+//               max-w-[1600px]   /* Giới hạn rộng tối đa ~ full màn hình lớn */
+//               mx-auto           /* Căn giữa theo chiều ngang */
+//               bg-white          /* Nền trắng */
+//               p-8               /* Padding đều */
+//               rounded-xl        /* Bo góc mềm mại */
+//               shadow-md         /* Bóng nhẹ tạo chiều sâu */
+//             "
+//                     >
+//                         <Outlet />
+//                     </div>
+//                 </main>
+//             </div>
+//         </div>
+//     );
+// }
+
+
+import { Layout } from "antd";
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 
+const { Content } = Layout;
+
 export default function AdminLayout() {
-    // return (
-    //     <div className="flex min-h-screen bg-white text-gray-800">
-    //         <Sidebar />
-    //         <div className="flex-1 flex flex-col bg-gray-50">
-    //             <Header />
-    //             <main className="p-6 flex-1 overflow-y-auto">
-    //                 <Outlet />
-    //             </main>
-    //         </div>
-    //     </div>
-    // );
-
-
     return (
-        <div className="flex min-h-screen bg-gray-900 text-white">
-
+        <Layout className="min-h-screen w-screen overflow-hidden">
             {/* Sidebar cố định bên trái */}
             <Sidebar />
 
-            {/* Phần nội dung chính */}
-            <div className="flex-1 flex flex-col">
+            {/* Khu vực bên phải (header + content) */}
+            <Layout className="flex flex-col flex-1 min-h-screen">
                 <Header />
-
-                {/* Khu vực nội dung */}
-                <main className="flex-1 overflow-y-auto p-6">
-                    <div
-                        className="
-              w-full
-              max-w-[1600px]   /* Giới hạn rộng tối đa ~ full màn hình lớn */
-              mx-auto           /* Căn giữa theo chiều ngang */
-              bg-white          /* Nền trắng */
-              p-8               /* Padding đều */
-              rounded-xl        /* Bo góc mềm mại */
-              shadow-md         /* Bóng nhẹ tạo chiều sâu */
-            "
-                    >
+                <Content
+                    className="flex-1 overflow-auto bg-gray-50 p-6"
+                    style={{
+                        height: "100%",
+                        width: "100%",
+                    }}
+                >
+                    <div className="max-w-[1600px] mx-auto bg-white p-8 rounded-xl shadow-md h-full">
                         <Outlet />
                     </div>
-                </main>
-            </div>
-        </div>
+                </Content>
+            </Layout>
+        </Layout>
     );
 }
-

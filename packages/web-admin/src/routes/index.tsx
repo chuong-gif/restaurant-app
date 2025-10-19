@@ -21,3 +21,28 @@ export const router = createBrowserRouter([
         ],
     },
 ]);
+
+// import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+// import AdminLayout from "../layouts/AdminLayout";
+// import Dashboard from "../pages/Dashboard";
+// import Customers from "../pages/Customers";
+// import Products from "../pages/Products";
+// import Reservations from "../pages/Reservations";
+// import { Login } from "../pages/Login/Login";
+
+// export default function AppRoutes() {
+//     return (
+//         <Router>
+//             <Routes>
+//                 <Route path="/login" element={<Login />} />
+//                 <Route element={<AdminLayout />}>
+//                     <Route path="/" element={<Dashboard />} />
+//                     <Route path="/customers" element={<Customers />} />
+//                     <Route path="/products" element={<Products />} />
+//                     <Route path="/reservations" element={<Reservations />} />
+//                 </Route>
+//             </Routes>
+//         </Router>
+//     );
+// }
+

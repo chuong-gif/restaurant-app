@@ -36,24 +36,13 @@ const initialState: CustomerState = {
 
 // 🧠 1. Fetch danh sách khách hàng
 export const fetchCustomers = createAsyncThunk(
-  "customers/fetch",
-  async (
-    { fullname = "", page = 1, pageSize = 5 }: { fullname?: string; page?: number; pageSize?: number },
-    { rejectWithValue }
-  ) => {
-    try {
-      const url = new URL("/customers", api.defaults.baseURL);
-      if (fullname) url.searchParams.append("search", fullname);
-      url.searchParams.append("page", String(page));
-      url.searchParams.append("pageSize", String(pageSize));
-
-      const res = await api.get(url.toString());
-      return res.data; // { results, totalCount, totalPages, currentPage }
-    } catch (error: any) {
-      return rejectWithValue(error.message);
-    }
+  "customers/fetchCustomers",
+  async (params?: { fullname?: string; page?: number; pageSize?: number }) => {
+    const res = await api.get("/customers", { params });
+    return res.data;
   }
 );
+
 
 // 🧠 2. Thêm khách hàng
 export const addCustomer = createAsyncThunk(
@@ -94,6 +83,22 @@ export const deleteCustomer = createAsyncThunk(
   }
 );
 
+
+// 🟢 Thêm customer mới
+export const createCustomer = createAsyncThunk<
+  Customer,                          // return type
+  Omit<Customer, "id" | "createdAt">, // input type
+  { rejectValue: string }
+>("customers/create", async (newCustomer, thunkAPI) => {
+  try {
+    const res = await api.post("/customers", newCustomer);
+    return res.data;
+  } catch (err: any) {
+    return thunkAPI.rejectWithValue(err?.response?.data?.message || "Create failed");
+  }
+});
+
+
 // 🧠 5. Kiểm tra email tồn tại (API riêng, không cần Redux)
 export const checkEmailExists = async (email: string) => {
   const res = await api.get("/auth/check-email", { params: { email } });
@@ -132,6 +137,10 @@ const customerSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
+      .addCase(createCustomer.fulfilled, (state, action: PayloadAction<Customer>) => {
+        state.allCustomers.unshift(action.payload);
+      })
+
       // ADD / UPDATE / DELETE
       .addCase(addCustomer.pending, (state) => {
         state.loading = true;

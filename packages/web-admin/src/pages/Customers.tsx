@@ -51,3 +51,43 @@ export default function Customers() {
         </div>
     );
 }
+
+
+
+
+// import { Table, Button, Space } from "antd";
+
+// interface Customer {
+//     id: number;
+//     name: string;
+//     email: string;
+//     phone: string;
+// }
+
+// export default function Customers() {
+//     const data: Customer[] = [
+//         { id: 1, name: "Nguyen Van A", email: "a@gmail.com", phone: "0123456789" },
+//         { id: 2, name: "Tran Thi B", email: "b@gmail.com", phone: "0987654321" },
+//     ];
+
+//     const columns = [
+//         { title: "ID", dataIndex: "id", key: "id" },
+//         { title: "Name", dataIndex: "name", key: "name" },
+//         { title: "Phone", dataIndex: "phone", key: "phone" },
+//         {
+//             title: "Actions",
+//             key: "actions",
+//             render: () => (
+//                 <Space>
+//                     <Button type="link">Edit</Button>
+//                     <Button danger type="link">
+//                         Delete
+//                     </Button>
+//                 </Space>
+//             ),
+//         },
+//     ];
+
+//     return <Table dataSource={data} columns={columns} rowKey="id" />;
+// }
+
