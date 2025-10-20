@@ -91,77 +91,77 @@ export const setLimit = (limit: number): BlogAction => ({
 // ------------------------------
 export const fetchBlog =
   (name = "", page = 1): ThunkResult<Promise<void>> =>
-  async (dispatch) => {
-    dispatch(fetchBlogRequest());
+    async (dispatch) => {
+      dispatch(fetchBlogRequest());
 
-    const limit = parseInt(localStorage.getItem("limit") || "5", 10);
+      const limit = parseInt(localStorage.getItem("limit") || "5", 10);
 
-    try {
-      const url = new URL(`${API_ENDPOINT}/${AdminConfig.routes.blog}`);
-      if (name) url.searchParams.append("searchName", name);
-      url.searchParams.append("page", page.toString());
-      url.searchParams.append("limit", limit.toString());
+      try {
+        const url = new URL(`${API_ENDPOINT}/${AdminConfig.routes.blog}`);
+        if (name) url.searchParams.append("searchName", name);
+        url.searchParams.append("page", page.toString());
+        url.searchParams.append("limit", limit.toString());
 
-      const response = await http.get(url.toString());
-      const { results, totalCount, totalPages, currentPage } = response.data;
+        const response = await http.get(url.toString());
+        const { results, totalCount, totalPages, currentPage } = response.data;
 
-      dispatch(fetchBlogSuccess({ results, totalCount, totalPages, currentPage }));
-    } catch (error: any) {
-      const errorMsg =
-        error.response?.data?.message || error.message || "Failed to fetch blogs";
-      dispatch(fetchBlogFailure(errorMsg));
-    }
-  };
+        dispatch(fetchBlogSuccess({ results, totalCount, totalPages, currentPage }));
+      } catch (error: any) {
+        const errorMsg =
+          error.response?.data?.message || error.message || "Failed to fetch blogs";
+        dispatch(fetchBlogFailure(errorMsg));
+      }
+    };
 
 // ------------------------------
 // 🔹 Add Blog
 // ------------------------------
 export const addBlog =
   (blog: Partial<Blog>): ThunkResult<void> =>
-  async (dispatch) => {
-    dispatch(fetchBlogRequest());
-    try {
-      const response = await http.post(
-        `${API_ENDPOINT}/${AdminConfig.routes.blog}`,
-        blog
-      );
-      dispatch(fetchBlogSuccess(response.data.data));
-      dispatch(fetchBlog());
-    } catch (error: any) {
-      dispatch(fetchBlogFailure(error.message));
-    }
-  };
+    async (dispatch) => {
+      dispatch(fetchBlogRequest());
+      try {
+        const response = await http.post(
+          `${API_ENDPOINT}/${AdminConfig.routes.blog}`,
+          blog
+        );
+        dispatch(fetchBlogSuccess(response.data.data));
+        dispatch(fetchBlog());
+      } catch (error: any) {
+        dispatch(fetchBlogFailure(error.message));
+      }
+    };
 
 // ------------------------------
 // 🔹 Update Blog
 // ------------------------------
 export const updateBlog =
   (id: number, data: Partial<Blog>): ThunkResult<void> =>
-  async (dispatch) => {
-    dispatch(fetchBlogRequest());
-    try {
-      const response = await http.patch(
-        `${API_ENDPOINT}/${AdminConfig.routes.blog}/${id}`,
-        data
-      );
-      dispatch(fetchBlogSuccess(response.data.data));
-      dispatch(fetchBlog());
-    } catch (error: any) {
-      dispatch(fetchBlogFailure(error.message));
-    }
-  };
+    async (dispatch) => {
+      dispatch(fetchBlogRequest());
+      try {
+        const response = await http.patch(
+          `${API_ENDPOINT}/${AdminConfig.routes.blog}/${id}`,
+          data
+        );
+        dispatch(fetchBlogSuccess(response.data.data));
+        dispatch(fetchBlog());
+      } catch (error: any) {
+        dispatch(fetchBlogFailure(error.message));
+      }
+    };
 
 // ------------------------------
 // 🔹 Delete Blog
 // ------------------------------
 export const deleteBlog =
   (id: number): ThunkResult<void> =>
-  async (dispatch) => {
-    dispatch(fetchBlogRequest());
-    try {
-      await http.delete(`${API_ENDPOINT}/${AdminConfig.routes.blog}/${id}`);
-      dispatch(fetchBlog());
-    } catch (error: any) {
-      dispatch(fetchBlogFailure(error.message));
-    }
-  };
+    async (dispatch) => {
+      dispatch(fetchBlogRequest());
+      try {
+        await http.delete(`${API_ENDPOINT}/${AdminConfig.routes.blog}/${id}`);
+        dispatch(fetchBlog());
+      } catch (error: any) {
+        dispatch(fetchBlogFailure(error.message));
+      }
+    };
