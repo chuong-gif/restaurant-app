@@ -55,7 +55,7 @@ const NewProductsSection: React.FC = () => {
     return (
         <div className="container mx-auto px-4 py-16">
             <div className="text-center mb-12">
-                <h5 className="font-serif text-yellow-500 text-xl">Nhà Hàng Hương Sen</h5>
+                <h5 className="font-serif text-yellow-500 text-xl">Nhà Hàng Ẩm Thực</h5>
                 <h1 className="text-4xl font-bold">Món ăn mới</h1>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
