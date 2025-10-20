@@ -2,15 +2,31 @@ import {
     FETCH_RESERVATIONDETAIL_REQUEST,
     FETCH_RESERVATIONDETAIL_SUCCESS,
     FETCH_RESERVATIONDETAIL_FAILURE
-} from '../Actions/GetReservationDetailAction';
+} from '../action/GetReservationDetailAction';
 
-const initialState = {
+// Kiểu cho action
+interface ReservationDetailAction {
+    type: string;
+    payload?: any;
+}
+
+// Kiểu cho state
+interface ReservationDetailState {
+    loading: boolean;
+    reservationDetail: any[];
+    error: string;
+}
+
+const initialState: ReservationDetailState = {
     loading: false,
     reservationDetail: [],
     error: ''
 };
 
-const ReservationDetailReducer = (state = initialState, action) => {
+const ReservationDetailReducer = (
+    state: ReservationDetailState = initialState,
+    action: ReservationDetailAction
+): ReservationDetailState => {
     switch (action.type) {
         case FETCH_RESERVATIONDETAIL_REQUEST:
             return {

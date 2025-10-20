@@ -2,15 +2,31 @@ import {
     FETCH_REVENUE_REQUEST,
     FETCH_REVENUE_SUCCESS,
     FETCH_REVENUE_FAILURE
-} from '../Actions/RevenueTimeAction';
+} from '../action/RevenueTimeAction';
 
-const initialState = {
+// Kiểu cho action
+interface RevenueTimeAction {
+    type: string;
+    payload?: any;
+}
+
+// Kiểu cho state
+interface RevenueTimeState {
+    loading: boolean;
+    revenueData: any | null;
+    error: string;
+}
+
+const initialState: RevenueTimeState = {
     loading: false,
-    revenueData: null, // đổi tên rõ nghĩa hơn
+    revenueData: null,
     error: '',
 };
 
-const revenueTimeReducer = (state = initialState, action) => {
+const revenueTimeReducer = (
+    state: RevenueTimeState = initialState,
+    action: RevenueTimeAction
+): RevenueTimeState => {
     switch (action.type) {
         case FETCH_REVENUE_REQUEST:
             return { ...state, loading: true, error: '' };

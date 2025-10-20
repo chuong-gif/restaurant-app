@@ -2,16 +2,33 @@ import {
     FETCH_ROLEPERMISSIONS_REQUEST,
     FETCH_ROLEPERMISSIONS_SUCCESS,
     FETCH_ROLEPERMISSIONS_FAILURE,
-} from '../Actions/RolePermissionsActions';
+} from '../action/RolePermissionsActions';
 
-const initialState = {
-    allRolePermissions: [], // Danh sách tất cả quyền của vai trò
-    rolePermissions: [],    // Danh sách quyền của vai trò hiện tại
+// Kiểu cho action
+interface RolePermissionsAction {
+    type: string;
+    payload?: any;
+}
+
+// Kiểu cho state
+interface RolePermissionsState {
+    allRolePermissions: any[]; // Danh sách tất cả quyền của vai trò
+    rolePermissions: any[];    // Danh sách quyền của vai trò hiện tại
+    loading: boolean;
+    error: string;
+}
+
+const initialState: RolePermissionsState = {
+    allRolePermissions: [],
+    rolePermissions: [],
     loading: false,
     error: '',
 };
 
-const RolePermissionsReducer = (state = initialState, action) => {
+const RolePermissionsReducer = (
+    state: RolePermissionsState = initialState,
+    action: RolePermissionsAction
+): RolePermissionsState => {
     switch (action.type) {
         case FETCH_ROLEPERMISSIONS_REQUEST:
             return {
@@ -23,8 +40,12 @@ const RolePermissionsReducer = (state = initialState, action) => {
             return {
                 ...state,
                 loading: false,
-                allRolePermissions: Array.isArray(action.payload.results) ? action.payload.results : [],
-                rolePermissions: Array.isArray(action.payload.results) ? action.payload.results : [],
+                allRolePermissions: Array.isArray(action.payload.results)
+                    ? action.payload.results
+                    : [],
+                rolePermissions: Array.isArray(action.payload.results)
+                    ? action.payload.results
+                    : [],
             };
         case FETCH_ROLEPERMISSIONS_FAILURE:
             return {

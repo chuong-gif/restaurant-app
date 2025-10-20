@@ -1,76 +1,82 @@
-import {
-  FETCH_TABLE_REQUEST,
-  FETCH_TABLE_SUCCESS,
-  FETCH_TABLE_FAILURE,
-  SET_CURRENT_PAGE,
-  SET_LIMIT,
-} from "../Actions/TablesActions";
+import { fetchTables } from "../action/TablesActions"; // async thunk
 
-const initialState = {
-  allTables: [], // Tất cả dữ liệu bảng
-  tables: [], // Dữ liệu bảng cho trang hiện tại
-  currentPage: parseInt(localStorage.getItem("currentPage"), 10) || 1,
-  limit: localStorage.getItem("limit")
-    ? parseInt(localStorage.getItem("limit"))
-    : 10,
-  loading: false,
-  error: "",
+// ------------------------------
+// 🔹 Interface Table
+// ------------------------------
+export interface Table {
+  id: number;
+  number: string;
+  capacity: number;
+  status: string;
+  [key: string]: any;
+}
+
+// ------------------------------
+// 🔹 State Interface
+// ------------------------------
+export interface TablesState {
+  allTables: Table[];
+  tables: Table[];
+  currentPage: number;
+  limit: number;
+  totalCount: number;
+  totalPages: number;
+  loading: boolean;
+  error: string | null;
+}
+
+// ------------------------------
+// 🔹 Initial State
+// ------------------------------
+const initialState: TablesState = {
+  allTables: [],
+  tables: [],
+  currentPage: parseInt(localStorage.getItem("currentPage") ?? "1", 10),
+  limit: parseInt(localStorage.getItem("limit") ?? "10", 10),
   totalCount: 0,
   totalPages: 0,
+  loading: false,
+  error: null,
 };
 
-const tablesReducer = (state = initialState, action) => {
+// ------------------------------
+// 🔹 Reducer
+// ------------------------------
+const tablesReducer = (
+  state: TablesState = initialState,
+  action: { type: string; payload?: any }
+): TablesState => {
   switch (action.type) {
-    case FETCH_TABLE_REQUEST:
-      return {
-        ...state,
-        loading: true,
-        error: "",
-      };
-    case FETCH_TABLE_SUCCESS: {
-      const { results = [], totalCount = 0, totalPages = 0, currentPage = 1 } = action.payload;
-      localStorage.setItem("currentPage", currentPage);
+    case fetchTables.pending.type:
+      return { ...state, loading: true, error: null };
+
+    case fetchTables.fulfilled.type: {
+      const { results = [], totalCount = 0, totalPages = 0, currentPage = 1 } =
+        action.payload || {};
+
+      // Lưu currentPage vào localStorage
+      localStorage.setItem("currentPage", String(currentPage));
+
       return {
         ...state,
         loading: false,
         allTables: results,
+        tables: results.slice(0, state.limit),
         totalCount,
         totalPages,
         currentPage,
-        tables: results.slice(0, state.limit),
+        error: null,
       };
     }
-    case FETCH_TABLE_FAILURE:
+
+    case fetchTables.rejected.type:
       return {
         ...state,
         loading: false,
-        error: action.payload,
+        error: action.payload || "Không thể tải danh sách bàn",
         tables: [],
       };
-    case SET_CURRENT_PAGE: {
-      const start = (action.payload - 1) * state.limit;
-      const end = start + state.limit;
-      localStorage.setItem("currentPage", action.payload);
-      return {
-        ...state,
-        currentPage: action.payload,
-        tables: state.allTables.slice(start, end),
-      };
-    }
-    case SET_LIMIT: {
-      const newLimit = action.payload;
-      const totalPages = Math.ceil(state.allTables.length / newLimit);
-      const currentPage = state.currentPage > totalPages ? totalPages : state.currentPage;
-      const start = (currentPage - 1) * newLimit;
-      const end = start + newLimit;
-      localStorage.setItem("limit", newLimit);
-      return {
-        ...state,
-        limit: newLimit,
-        currentPage,
-        tables: state.allTables.slice(start, end),
-      };
-    }
+
     default:
       return state;
   }

@@ -88,72 +88,72 @@ export const setLimit = (limit: number): CategoryBlogAction => ({
 // ------------------------------
 export const fetchCategoryBlog =
   (name = "", status = "", page = 1): ThunkResult<Promise<void>> =>
-  async (dispatch) => {
-    dispatch(fetchCategoryBlogRequest());
+    async (dispatch) => {
+      dispatch(fetchCategoryBlogRequest());
 
-    const limit = parseInt(localStorage.getItem("limit") || "5", 10);
+      const limit = parseInt(localStorage.getItem("limit") || "5", 10);
 
-    try {
-      const url = new URL(`${API_ENDPOINT}/${AdminConfig.routes.categoryBlog}`);
-      if (name) url.searchParams.append("search", name);
-      if (status) url.searchParams.append("searchStatus", status);
-      url.searchParams.append("page", page.toString());
-      url.searchParams.append("limit", limit.toString());
+      try {
+        const url = new URL(`${API_ENDPOINT}/${AdminConfig.routes.categoryBlog}`);
+        if (name) url.searchParams.append("search", name);
+        if (status) url.searchParams.append("searchStatus", status);
+        url.searchParams.append("page", page.toString());
+        url.searchParams.append("limit", limit.toString());
 
-      const response = await http.get(url.toString());
-      const { results, totalCount, totalPages, currentPage } = response.data;
+        const response = await http.get(url.toString());
+        const { results, totalCount, totalPages, currentPage } = response.data;
 
-      dispatch(fetchCategoryBlogSuccess({ results, totalCount, totalPages, currentPage }));
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || error.message || "Failed to fetch categories";
-      dispatch(fetchCategoryBlogFailure(errorMsg));
-    }
-  };
+        dispatch(fetchCategoryBlogSuccess({ results, totalCount, totalPages, currentPage }));
+      } catch (error: any) {
+        const errorMsg = error.response?.data?.message || error.message || "Failed to fetch categories";
+        dispatch(fetchCategoryBlogFailure(errorMsg));
+      }
+    };
 
 // ------------------------------
 // 🔹 Add Category Blog
 // ------------------------------
 export const addCategoryBlog =
   (categoryBlog: Partial<CategoryBlog>): ThunkResult<Promise<void>> =>
-  async (dispatch) => {
-    dispatch(fetchCategoryBlogRequest());
-    try {
-      await http.post(`${API_ENDPOINT}/${AdminConfig.routes.categoryBlog}`, categoryBlog);
-      dispatch(fetchCategoryBlog());
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || error.message || "Failed to add category";
-      dispatch(fetchCategoryBlogFailure(errorMsg));
-    }
-  };
+    async (dispatch) => {
+      dispatch(fetchCategoryBlogRequest());
+      try {
+        await http.post(`${API_ENDPOINT}/${AdminConfig.routes.categoryBlog}`, categoryBlog);
+        dispatch(fetchCategoryBlog());
+      } catch (error: any) {
+        const errorMsg = error.response?.data?.message || error.message || "Failed to add category";
+        dispatch(fetchCategoryBlogFailure(errorMsg));
+      }
+    };
 
 // ------------------------------
 // 🔹 Update Category Blog
 // ------------------------------
 export const updateCategoryBlog =
   (id: number, data: Partial<CategoryBlog>): ThunkResult<Promise<void>> =>
-  async (dispatch) => {
-    dispatch(fetchCategoryBlogRequest());
-    try {
-      await http.patch(`${API_ENDPOINT}/${AdminConfig.routes.categoryBlog}/${id}`, data);
-      dispatch(fetchCategoryBlog());
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || error.message || "Failed to update category";
-      dispatch(fetchCategoryBlogFailure(errorMsg));
-    }
-  };
+    async (dispatch) => {
+      dispatch(fetchCategoryBlogRequest());
+      try {
+        await http.patch(`${API_ENDPOINT}/${AdminConfig.routes.categoryBlog}/${id}`, data);
+        dispatch(fetchCategoryBlog());
+      } catch (error: any) {
+        const errorMsg = error.response?.data?.message || error.message || "Failed to update category";
+        dispatch(fetchCategoryBlogFailure(errorMsg));
+      }
+    };
 
 // ------------------------------
 // 🔹 Delete Category Blog
 // ------------------------------
 export const deleteCategoryBlog =
   (id: number): ThunkResult<Promise<void>> =>
-  async (dispatch) => {
-    dispatch(fetchCategoryBlogRequest());
-    try {
-      await http.delete(`${API_ENDPOINT}/${AdminConfig.routes.categoryBlog}/${id}`);
-      dispatch(fetchCategoryBlog());
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || error.message || "Failed to delete category";
-      dispatch(fetchCategoryBlogFailure(errorMsg));
-    }
-  };
+    async (dispatch) => {
+      dispatch(fetchCategoryBlogRequest());
+      try {
+        await http.delete(`${API_ENDPOINT}/${AdminConfig.routes.categoryBlog}/${id}`);
+        dispatch(fetchCategoryBlog());
+      } catch (error: any) {
+        const errorMsg = error.response?.data?.message || error.message || "Failed to delete category";
+        dispatch(fetchCategoryBlogFailure(errorMsg));
+      }
+    };

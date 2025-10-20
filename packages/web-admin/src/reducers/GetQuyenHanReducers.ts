@@ -2,15 +2,31 @@ import {
     FETCH_QUYEN_HAN_REQUEST,
     FETCH_QUYEN_HAN_SUCCESS,
     FETCH_QUYEN_HAN_FAILURE,
-} from "../Actions/GetQuyenHanAction";
+} from "../action/GetQuyenHanAction";
 
-const initialState = {
+// Kiểu cho action
+interface GetQuyenHanAction {
+    type: string;
+    payload?: any;
+}
+
+// Kiểu cho state
+interface GetQuyenHanState {
+    loading: boolean;
+    getQuyenHan: any | null;
+    error: string;
+}
+
+const initialState: GetQuyenHanState = {
     loading: false,
     getQuyenHan: null,
     error: '',
 };
 
-const getQuyenHanReducer = (state = initialState, action) => {
+const getQuyenHanReducer = (
+    state: GetQuyenHanState = initialState, 
+    action: GetQuyenHanAction
+): GetQuyenHanState => {
     switch (action.type) {
         case FETCH_QUYEN_HAN_REQUEST:
             return {

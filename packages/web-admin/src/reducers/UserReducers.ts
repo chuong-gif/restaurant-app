@@ -1,80 +1,78 @@
-import {
-    FETCH_USERS_REQUEST,
-    FETCH_USERS_SUCCESS,
-    FETCH_USERS_FAILURE,
-    SET_CURRENT_PAGE,
-    SET_LIMIT
-} from '../Actions/UsersAction';
+import { fetchUsers, type User } from "../action/UsersAction";
 
-const initialState = {
-    allUsers: [], // Lưu tất cả người dùng
-    user: [],     // Danh sách người dùng trên trang hiện tại
-    currentPage: parseInt(localStorage.getItem('currentPage'), 10) || 1,
-    limit: localStorage.getItem('limit') ? parseInt(localStorage.getItem('limit')) : 10,
-    loading: false,
-    error: '',
-    totalCount: 0,
-    totalPages: 0
+// ------------------------------
+// 🔹 State Interface
+// ------------------------------
+export interface UserState {
+  allUsers: User[];
+  user: User[];
+  currentPage: number;
+  limit: number;
+  totalCount: number;
+  totalPages: number;
+  loading: boolean;
+  error: string | null;
+}
+
+// ------------------------------
+// 🔹 Initial State
+// ------------------------------
+const initialState: UserState = {
+  allUsers: [],
+  user: [],
+  currentPage: parseInt(localStorage.getItem("currentPage") ?? "1", 10),
+  limit: parseInt(localStorage.getItem("limit") ?? "10", 10),
+  totalCount: 0,
+  totalPages: 0,
+  loading: false,
+  error: null,
 };
 
-const userReducer = (state = initialState, action) => {
-    switch (action.type) {
-        case FETCH_USERS_REQUEST:
-            return {
-                ...state,
-                loading: true
-            };
+// ------------------------------
+// 🔹 Action type
+// ------------------------------
+interface Action {
+  type: string;
+  payload?: any;
+}
 
-        case FETCH_USERS_SUCCESS: {
-            const { results = [], totalCount = 0, totalPages = 0, currentPage = 1 } = action.payload || {};
-            localStorage.setItem('currentPage', currentPage);
-            return {
-                ...state,
-                loading: false,
-                allUsers: Array.isArray(results) ? results : [],
-                totalCount,
-                totalPages,
-                currentPage,
-                user: Array.isArray(results) ? results.slice(0, state.limit) : [],
-            };
-        }
+// ------------------------------
+// 🔹 Reducer
+// ------------------------------
+const userReducer = (state: UserState = initialState, action: Action): UserState => {
+  switch (action.type) {
+    case fetchUsers.pending.type:
+      return { ...state, loading: true, error: null };
 
-        case FETCH_USERS_FAILURE:
-            return {
-                ...state,
-                loading: false,
-                error: action.payload
-            };
+    case fetchUsers.fulfilled.type: {
+      const { results = [], totalCount = 0, totalPages = 0, currentPage = 1 } =
+        action.payload || {};
 
-        case SET_CURRENT_PAGE: {
-            const start = (action.payload - 1) * state.limit;
-            const end = start + state.limit;
-            localStorage.setItem('currentPage', action.payload);
-            return {
-                ...state,
-                currentPage: action.payload,
-                user: state.allUsers.slice(start, end)
-            };
-        }
+      localStorage.setItem("currentPage", String(currentPage));
 
-        case SET_LIMIT: {
-            const newLimit = action.payload;
-            const totalPages = Math.ceil(state.allUsers.length / newLimit) || 1;
-            const currentPage = state.currentPage > totalPages ? totalPages : state.currentPage;
-            const start = (currentPage - 1) * newLimit;
-            const end = start + newLimit;
-            localStorage.setItem('limit', newLimit);
-            return {
-                ...state,
-                limit: newLimit,
-                currentPage,
-                user: state.allUsers.slice(start, end)
-            };
-        }
-
-        default:
-            return state;
+      return {
+        ...state,
+        loading: false,
+        allUsers: Array.isArray(results) ? results : [],
+        user: Array.isArray(results) ? results.slice(0, state.limit) : [],
+        totalCount,
+        totalPages,
+        currentPage,
+        error: null,
+      };
     }
+
+    case fetchUsers.rejected.type:
+      return {
+        ...state,
+        loading: false,
+        error: action.payload || "Failed to fetch users",
+        user: [],
+      };
+
+    default:
+      return state;
+  }
 };
 
 export default userReducer;
