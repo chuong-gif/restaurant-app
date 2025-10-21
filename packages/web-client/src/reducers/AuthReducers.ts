@@ -5,7 +5,7 @@ import {
   SHOW_SUCCESS_ALERT,
   SHOW_ERROR_ALERT,
   CHECK_AUTH_STATUS,
-} from "../Actions/AuthActions";
+} from "../action/authaction";
 
 // Định nghĩa kiểu cho state
 interface AuthState {

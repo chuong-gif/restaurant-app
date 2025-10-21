@@ -3,7 +3,7 @@ import {
   FETCH_BLOG_REQUEST,
   FETCH_BLOG_SUCCESS,
   SET_CURRENT_PAGE,
-} from "../Actions/BlogActions";
+} from "../action/BlogActions";
 
 // Định nghĩa kiểu dữ liệu cho Blog (tùy theo cấu trúc thực tế)
 interface Blog {

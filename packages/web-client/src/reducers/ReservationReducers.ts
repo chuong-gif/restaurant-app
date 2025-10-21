@@ -2,7 +2,7 @@ import {
   FETCH_RESERVATION_REQUEST,
   FETCH_RESERVATION_SUCCESS,
   FETCH_RESERVATION_FAILURE,
-} from "../Actions/ReservationActions";
+} from "../action/ReservationActions";
 
 // ------------------------------
 // 🔹 Interfaces

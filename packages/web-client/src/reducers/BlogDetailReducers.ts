@@ -1,8 +1,8 @@
 import {
-  FETCH_BLOG_DETAIL_REQUEST,
-  FETCH_BLOG_DETAIL_SUCCESS,
-  FETCH_BLOG_DETAIL_FAILURE,
-} from "../Actions/BlogDetailActions";
+  FETCH_CATEGORY_BLOG_REQUEST,
+  FETCH_CATEGORY_BLOG_SUCCESS,
+  FETCH_CATEGORY_BLOG_FAILURE,
+} from "../action/BlogDetailActions";
 
 // Định nghĩa kiểu cho BlogDetailState
 interface BlogDetailState {
@@ -28,19 +28,19 @@ const blogDetailReducer = (
   action: BlogDetailAction
 ): BlogDetailState => {
   switch (action.type) {
-    case FETCH_BLOG_DETAIL_REQUEST:
+    case FETCH_CATEGORY_BLOG_REQUEST:
       return {
         ...state,
         loading: true,
         error: null,
       };
-    case FETCH_BLOG_DETAIL_SUCCESS:
+    case FETCH_CATEGORY_BLOG_SUCCESS:
       return {
         ...state,
         loading: false,
         blogDetail: action.payload,
       };
-    case FETCH_BLOG_DETAIL_FAILURE:
+    case FETCH_CATEGORY_BLOG_FAILURE:
       return {
         ...state,
         loading: false,

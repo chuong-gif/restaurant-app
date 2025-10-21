@@ -2,7 +2,7 @@ import {
   FETCH_PROMOTION_FAILURE,
   FETCH_PROMOTION_REQUEST,
   FETCH_PROMOTION_SUCCESS,
-} from "../Actions/PromotionActions";
+} from "../action/PromotionActions";
 
 // ------------------------------
 // 🔹 Interfaces

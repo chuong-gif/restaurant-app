@@ -2,7 +2,7 @@ import {
   FETCH_PRODUCT_DETAIL_FAILURE,
   FETCH_PRODUCT_DETAIL_REQUEST,
   FETCH_PRODUCT_DETAIL_SUCCESS,
-} from "../Actions/ProductDetailActions";
+} from "../action/ProductDetailActions";
 
 // ------------------------------
 // 🔹 Interfaces

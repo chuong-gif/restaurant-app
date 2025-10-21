@@ -2,7 +2,7 @@ import {
   FETCH_PRODUCT_CATEGORY_REQUEST,
   FETCH_PRODUCT_CATEGORY_SUCCESS,
   FETCH_PRODUCT_CATEGORY_FAILURE,
-} from "../Actions/ProductCategoryActions";
+} from "../action/ProductCategoryActions";
 
 // ------------------------------
 // 🔹 Interfaces

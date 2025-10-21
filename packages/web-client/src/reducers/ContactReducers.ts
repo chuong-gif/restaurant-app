@@ -2,7 +2,7 @@ import {
   FETCH_CONTACT_FAILURE,
   FETCH_CONTACT_REQUEST,
   FETCH_CONTACT_SUCCESS,
-} from "../Actions/ContactActions";
+} from "../action/ContactActions";
 
 // Kiểu dữ liệu cho một contact (tùy chỉnh lại theo API thực tế)
 interface Contact {

@@ -34,6 +34,7 @@ export const CHECK_PASSWORD_FAILURE = "CHECK_PASSWORD_FAILURE" as const;
 
 export const SHOW_SUCCESS_ALERT = "SHOW_SUCCESS_ALERT" as const;
 export const SHOW_ERROR_ALERT = "SHOW_ERROR_ALERT" as const;
+export const CHECK_AUTH_STATUS = "CHECK_AUTH_STATUS" as const;
 
 // ===============================
 // 🔹 Kiểu cho Redux Action

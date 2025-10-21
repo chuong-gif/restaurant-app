@@ -5,7 +5,7 @@ import {
   CHECK_PASSWORD_REQUEST,
   CHECK_PASSWORD_SUCCESS,
   CHECK_PASSWORD_FAILURE,
-} from "../Actions/UserActions";
+} from "../action/UserActions";
 
 // ------------------------------
 // 🔹 Interfaces
