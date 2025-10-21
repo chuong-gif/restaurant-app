@@ -2,7 +2,7 @@ import {
   FETCH_MEMBERSHIP_FAILURE,
   FETCH_MEMBERSHIP_REQUEST,
   FETCH_MEMBERSHIP_SUCCESS,
-} from "../Actions/MembershipActions";
+} from "../action/MembershipActions";
 
 // ------------------------------
 // 🔹 Interfaces

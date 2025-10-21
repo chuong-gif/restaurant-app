@@ -3,7 +3,7 @@ import {
   FETCH_COMMENTBLOG_REQUEST,
   FETCH_COMMENTBLOG_SUCCESS,
   SET_CURRENT_PAGE,
-} from "../Actions/CommentBlogActions";
+} from "../action/CommentBlogActions";
 
 // Kiểu dữ liệu cho một comment (tùy chỉnh theo API thực tế)
 interface CommentBlog {

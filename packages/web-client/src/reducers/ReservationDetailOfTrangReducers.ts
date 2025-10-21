@@ -1,8 +1,8 @@
 import {
-  FETCH_RESERVATIONDETAIL_REQUEST,
-  FETCH_RESERVATIONDETAIL_SUCCESS,
-  FETCH_RESERVATIONDETAIL_FAILURE,
-} from "../Actions/ReservationDetailOfTrangActions";
+  FETCH_RESERVATION_DETAIL_REQUEST,
+  FETCH_RESERVATION_DETAIL_SUCCESS,
+  FETCH_RESERVATION_DETAIL_FAILURE,
+} from "../action/ReservationDetailOfTrangActions";
 
 // ------------------------------
 // 🔹 Interfaces
@@ -46,14 +46,14 @@ const ReservationDetailReducer = (
   action: ReservationDetailAction
 ): ReservationDetailState => {
   switch (action.type) {
-    case FETCH_RESERVATIONDETAIL_REQUEST:
+    case FETCH_RESERVATION_DETAIL_REQUEST:
       return {
         ...state,
         loading: true,
         error: "",
       };
 
-    case FETCH_RESERVATIONDETAIL_SUCCESS:
+    case FETCH_RESERVATION_DETAIL_SUCCESS:
       return {
         loading: false,
         reservationDetail: Array.isArray(action.payload)
@@ -62,7 +62,7 @@ const ReservationDetailReducer = (
         error: "",
       };
 
-    case FETCH_RESERVATIONDETAIL_FAILURE:
+    case FETCH_RESERVATION_DETAIL_FAILURE:
       return {
         loading: false,
         reservationDetail: [],

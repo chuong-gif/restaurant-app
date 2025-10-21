@@ -2,7 +2,7 @@ import {
   FETCH_TABLE_REQUEST,
   FETCH_TABLE_SUCCESS,
   FETCH_TABLE_FAILURE,
-} from "../Actions/TableActions";
+} from "../action/TableActions";
 
 // ------------------------------
 // 🔹 Interfaces

@@ -1,15 +1,23 @@
-import { ThunkAction } from "redux-thunk";
+import type { ThunkAction } from "redux-thunk";
 import type { AnyAction } from "redux";
-import { AxiosError, AxiosResponse } from "axios";
-import { API_ENDPOINT } from "../Config/APIs";
-import AdminConfig from "../Config/index";
-import http from "../Utils/Http";
-import { RootState } from "../store"; // 👉 chỉnh đường dẫn cho phù hợp với project của bạn
+import type { AxiosResponse, AxiosError } from "axios";
+import { API_ENDPOINT } from "../configs/APIs";
+import AdminConfig from "../configs/index";
+import http from "../Utils/Http"; // ⚠️ kiểm tra lại đúng tên thư mục
+
+// ------------------------------
+// 🔹 Tạo kiểu AppThunk (tạm thời, nếu chưa có store)
+// ------------------------------
+export type AppThunk<ReturnType = void> = ThunkAction<
+  ReturnType,
+  any,
+  unknown,
+  AnyAction
+>;
 
 // ------------------------------
 // 🔹 Kiểu dữ liệu
 // ------------------------------
-
 export interface CategoryBlog {
   id?: string;
   name: string;
@@ -40,7 +48,6 @@ export interface CategoryBlogState {
 // ------------------------------
 // 🔹 Action Types
 // ------------------------------
-
 export const FETCH_CATEGORY_BLOG_REQUEST = "FETCH_CATEGORY_BLOG_REQUEST" as const;
 export const FETCH_CATEGORY_BLOG_SUCCESS = "FETCH_CATEGORY_BLOG_SUCCESS" as const;
 export const FETCH_CATEGORY_BLOG_FAILURE = "FETCH_CATEGORY_BLOG_FAILURE" as const;
@@ -50,7 +57,6 @@ export const SET_LIMIT = "SET_LIMIT" as const;
 // ------------------------------
 // 🔹 Action Interfaces
 // ------------------------------
-
 export type CategoryBlogAction =
   | { type: typeof FETCH_CATEGORY_BLOG_REQUEST }
   | { type: typeof FETCH_CATEGORY_BLOG_SUCCESS; payload: CategoryBlogListResponse }
@@ -61,7 +67,6 @@ export type CategoryBlogAction =
 // ------------------------------
 // 🔹 Action Creators
 // ------------------------------
-
 export const fetchCategoryBlogRequest = (): CategoryBlogAction => ({
   type: FETCH_CATEGORY_BLOG_REQUEST,
 });
@@ -89,34 +94,18 @@ export const setLimit = (limit: number): CategoryBlogAction => ({
 });
 
 // ------------------------------
-// 🔹 Kiểu Thunk Action
-// ------------------------------
-
-type AppThunk<ReturnType = void> = ThunkAction<
-  ReturnType,
-  RootState,
-  unknown,
-  AnyAction
->;
-
-// ------------------------------
 // 🔹 Thunk Actions
 // ------------------------------
-
-// 📦 Lấy danh sách category blogs
 export const fetchCategoryBlog =
   (name = "", status = "", page = 1): AppThunk =>
   async (dispatch) => {
     dispatch(fetchCategoryBlogRequest());
-
     const limit = parseInt(localStorage.getItem("limit") || "5", 10);
 
     try {
       const url = new URL(`${API_ENDPOINT}/${AdminConfig.routes.categoryBlog}`);
-
       if (name) url.searchParams.append("search", name);
       if (status) url.searchParams.append("searchStatus", status);
-
       url.searchParams.append("page", page.toString());
       url.searchParams.append("limit", limit.toString());
 
@@ -128,70 +117,61 @@ export const fetchCategoryBlog =
       dispatch(fetchCategoryBlogSuccess({ results, totalCount, totalPages, currentPage }));
     } catch (error) {
       const err = error as AxiosError;
-      const errorMsg =
+      const msg =
         (err.response?.data as any)?.message ||
         err.message ||
         "Failed to fetch categories";
-      dispatch(fetchCategoryBlogFailure(errorMsg));
+      dispatch(fetchCategoryBlogFailure(msg));
     }
   };
 
-// 🆕 Thêm category blog
 export const addCategoryBlog =
   (categoryBlog: CategoryBlog): AppThunk =>
   async (dispatch) => {
     dispatch(fetchCategoryBlogRequest());
     try {
-      await http.post(
-        `${API_ENDPOINT}/${AdminConfig.routes.categoryBlog}`,
-        categoryBlog
-      );
-      dispatch(fetchCategoryBlog()); // Làm mới danh sách
+      await http.post(`${API_ENDPOINT}/${AdminConfig.routes.categoryBlog}`, categoryBlog);
+      dispatch(fetchCategoryBlog());
     } catch (error) {
       const err = error as AxiosError;
-      const errorMsg =
+      const msg =
         (err.response?.data as any)?.message ||
         err.message ||
         "Failed to add category";
-      dispatch(fetchCategoryBlogFailure(errorMsg));
+      dispatch(fetchCategoryBlogFailure(msg));
     }
   };
 
-// ✏️ Cập nhật category blog
 export const updateCategoryBlog =
   (id: string, data: Partial<CategoryBlog>): AppThunk =>
   async (dispatch) => {
     dispatch(fetchCategoryBlogRequest());
     try {
-      await http.patch(
-        `${API_ENDPOINT}/${AdminConfig.routes.categoryBlog}/${id}`,
-        data
-      );
-      dispatch(fetchCategoryBlog()); // Làm mới danh sách
+      await http.patch(`${API_ENDPOINT}/${AdminConfig.routes.categoryBlog}/${id}`, data);
+      dispatch(fetchCategoryBlog());
     } catch (error) {
       const err = error as AxiosError;
-      const errorMsg =
+      const msg =
         (err.response?.data as any)?.message ||
         err.message ||
         "Failed to update category";
-      dispatch(fetchCategoryBlogFailure(errorMsg));
+      dispatch(fetchCategoryBlogFailure(msg));
     }
   };
 
-// 🗑️ Xóa category blog
 export const deleteCategoryBlog =
   (id: string): AppThunk =>
   async (dispatch) => {
     dispatch(fetchCategoryBlogRequest());
     try {
       await http.delete(`${API_ENDPOINT}/${AdminConfig.routes.categoryBlog}/${id}`);
-      dispatch(fetchCategoryBlog()); // Làm mới danh sách
+      dispatch(fetchCategoryBlog());
     } catch (error) {
       const err = error as AxiosError;
-      const errorMsg =
+      const msg =
         (err.response?.data as any)?.message ||
         err.message ||
         "Failed to delete category";
-      dispatch(fetchCategoryBlogFailure(errorMsg));
+      dispatch(fetchCategoryBlogFailure(msg));
     }
   };

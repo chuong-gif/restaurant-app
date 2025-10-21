@@ -3,7 +3,7 @@ import {
   FETCH_RESERVATIONS_SUCCESS,
   FETCH_RESERVATIONS_FAILURE,
   SET_CURRENT_PAGE,
-} from "../Actions/MyBookingActions";
+} from "../action/MyBookingActions";
 
 // ------------------------------
 // 🔹 Interfaces
