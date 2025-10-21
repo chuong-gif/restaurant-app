@@ -1,64 +1,116 @@
-import React, { useEffect } from "react";
-import { Table, Button, Space, Typography, Popconfirm, message } from "antd";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchCustomers, deleteCustomer } from "@/store/slices/customerSlice";
+import React, { useEffect, useState } from "react";
+import { Table, Button, Card, Space, Typography } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
+import CustomerForm from "@/pages/Customers/CustomerForm";
+import { getAllCustomers } from "@/api/customer.api";
 import type { Customer } from "@/types/customer";
-import type { RootState } from "@/store";
 
 const { Title } = Typography;
 
-
 const CustomersPage: React.FC = () => {
-    const dispatch = useAppDispatch();
-    // CustomersPage.tsx
-    const { allCustomers: customers, loading } = useAppSelector(
-        (state: RootState) => state.customers
-    );
+    const [customers, setCustomers] = useState<Customer[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
 
-
-
-    useEffect(() => {
-        // gọi với {} nếu thunk yêu cầu param, hoặc fetchCustomers() nếu cho phép undefined
-        dispatch(fetchCustomers({}));
-    }, [dispatch]);
-
-    const handleDelete = async (id: number) => {
+    // 🟢 Lấy danh sách khách hàng
+    const fetchCustomers = async () => {
+        setLoading(true);
         try {
-            await dispatch(deleteCustomer(id)).unwrap();
-            message.success("Xóa khách hàng thành công");
-        } catch {
-            message.error("Xóa thất bại");
+            const data = await getAllCustomers();
+            setCustomers(data);
+        } catch (error) {
+            console.error("Lỗi khi tải danh sách khách hàng:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
+    useEffect(() => {
+        fetchCustomers();
+    }, []);
+
+    // 🟢 Cột hiển thị bảng
     const columns = [
-        { title: "ID", dataIndex: "id", key: "id", width: 80 },
-        { title: "Họ tên", dataIndex: "fullname", key: "fullname" },
-        { title: "Email", dataIndex: "email", key: "email" },
-        { title: "SĐT", dataIndex: "phone", key: "phone" },
-        { title: "Ngày tạo", dataIndex: "createdAt", key: "createdAt", render: (d: string) => new Date(d).toLocaleDateString() },
+        {
+            title: "Tên khách hàng",
+            dataIndex: "name",
+            key: "name",
+        },
+        {
+            title: "Email",
+            dataIndex: "email",
+            key: "email",
+        },
+        {
+            title: "Số điện thoại",
+            dataIndex: "phone",
+            key: "phone",
+        },
+        {
+            title: "Ngày tạo",
+            dataIndex: "createdAt",
+            key: "createdAt",
+            render: (d: string) => new Date(d).toLocaleDateString(),
+        },
         {
             title: "Thao tác",
             key: "action",
             render: (_: any, record: Customer) => (
                 <Space>
-                    <Button type="link">Sửa</Button>
-                    <Popconfirm title="Xóa?" onConfirm={() => handleDelete(record.id)} okText="Xóa" cancelText="Hủy">
-                        <Button danger type="link">Xóa</Button>
-                    </Popconfirm>
+                    <Button
+                        onClick={() => {
+                            setEditingCustomer(record);
+                            setIsFormOpen(true);
+                        }}
+                    >
+                        Sửa
+                    </Button>
                 </Space>
             ),
         },
     ];
 
     return (
-        <div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
+        <Card>
+            {/* 🟢 Thanh tiêu đề + nút Thêm khách hàng */}
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: 16,
+                }}
+            >
                 <Title level={4}>Danh sách khách hàng</Title>
-                <Button type="primary">+ Thêm</Button>
+                <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={() => {
+                        setEditingCustomer(null);
+                        setIsFormOpen(true);
+                    }}
+                >
+                    Thêm khách hàng
+                </Button>
             </div>
-            <Table rowKey="id" columns={columns} dataSource={customers || []} loading={loading} pagination={{ pageSize: 10 }} />
-        </div>
+
+            {/* 🟢 Bảng danh sách khách hàng */}
+            <Table
+                columns={columns}
+                dataSource={customers}
+                rowKey="_id"
+                loading={loading}
+            />
+
+            {/* 🟢 Form thêm/sửa khách hàng */}
+            <CustomerForm
+                open={isFormOpen}
+                onClose={() => setIsFormOpen(false)}
+                editingCustomer={editingCustomer}
+                refreshList={fetchCustomers}
+            />
+        </Card>
     );
 };
 

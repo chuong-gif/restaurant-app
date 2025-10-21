@@ -1,19 +1,32 @@
 import React, { useEffect } from "react";
-import { Modal, Form, Input } from "antd";
-import { useAppDispatch } from "@/store/hooks";
-import { createCustomer } from "@/store/slices/customerSlice";
-import type { Customer } from "@/types/customer";
-
+import { Modal, Form, Input, message } from "antd";
+import { useAppDispatch } from "../../store/hooks";
+import { createCustomer, updateCustomer } from "../../store/slices/customerSlice";
+import type { Customer } from "../../types/customer";
 
 interface CustomerFormProps {
     open: boolean;
     onClose: () => void;
-    editingCustomer?: Customer | null; // nếu có khách hàng thì là sửa
+    editingCustomer?: Customer | null;
+    onCancel?: () => void; // ✅ giờ là tùy chọn, không bắt buộc
+    refreshList?: () => Promise<void>;
 }
 
-const CustomerForm: React.FC<CustomerFormProps> = ({ open, onClose, editingCustomer }) => {
+const CustomerForm: React.FC<CustomerFormProps> = ({
+    open,
+    onClose,
+    editingCustomer,
+    onCancel,
+    refreshList,
+}) => {
     const [form] = Form.useForm();
     const dispatch = useAppDispatch();
+
+    // ✅ helper đóng form (hỗ trợ cả onClose và onCancel)
+    const closeForm = () => {
+        if (onClose) onClose();
+        else if (onCancel) onCancel();
+    };
 
     useEffect(() => {
         if (editingCustomer) {
@@ -26,49 +39,57 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ open, onClose, editingCusto
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
-            await dispatch(createCustomer(values)).unwrap();
-            onClose();
-        } catch (error) {
-            console.error("Lỗi khi lưu khách hàng:", error);
+            if (editingCustomer) {
+                await dispatch(updateCustomer({ id: editingCustomer.id, data: values })).unwrap();
+                message.success("Cập nhật khách hàng thành công");
+            } else {
+                await dispatch(createCustomer(values)).unwrap();
+                message.success("Thêm khách hàng thành công");
+            }
+
+            if (refreshList) await refreshList();
+            form.resetFields();
+            closeForm(); // ✅ đóng modal
+        } catch (error: any) {
+            message.error(error?.message || "Đã xảy ra lỗi");
         }
     };
 
     return (
         <Modal
             open={open}
-            title={editingCustomer ? "Sửa khách hàng" : "Thêm khách hàng"}
-            okText="Lưu"
+            title={editingCustomer ? "Chỉnh sửa khách hàng" : "Thêm khách hàng mới"}
+            okText={editingCustomer ? "Cập nhật" : "Thêm mới"}
             cancelText="Hủy"
-            onCancel={onClose}
+            onCancel={closeForm} // ✅ dùng helper
             onOk={handleSubmit}
-            destroyOnClose
         >
             <Form form={form} layout="vertical">
                 <Form.Item
-                    label="Họ và tên"
-                    name="fullname"
-                    rules={[{ required: true, message: "Vui lòng nhập họ tên" }]}
+                    label="Tên khách hàng"
+                    name="name"
+                    rules={[{ required: true, message: "Vui lòng nhập tên khách hàng" }]}
                 >
-                    <Input placeholder="Nhập họ tên" />
-                </Form.Item>
-
-                <Form.Item
-                    label="Email"
-                    name="email"
-                    rules={[
-                        { required: true, message: "Vui lòng nhập email" },
-                        { type: "email", message: "Email không hợp lệ" },
-                    ]}
-                >
-                    <Input placeholder="example@gmail.com" />
+                    <Input />
                 </Form.Item>
 
                 <Form.Item
                     label="Số điện thoại"
                     name="phone"
-                    rules={[{ required: true, message: "Vui lòng nhập số điện thoại" }]}
+                    rules={[
+                        { required: true, message: "Vui lòng nhập số điện thoại" },
+                        { pattern: /^[0-9]{10,11}$/, message: "Số điện thoại không hợp lệ" },
+                    ]}
                 >
-                    <Input placeholder="Nhập số điện thoại" />
+                    <Input />
+                </Form.Item>
+
+                <Form.Item label="Email" name="email">
+                    <Input type="email" />
+                </Form.Item>
+
+                <Form.Item label="Địa chỉ" name="address">
+                    <Input.TextArea rows={3} />
                 </Form.Item>
             </Form>
         </Modal>
