@@ -3,7 +3,8 @@ import AdminLayout from "../layouts/AdminLayout";
 import Dashboard from "../pages/Dashboard";
 import Customers from "../pages/Customers";
 import Products from "../pages/Products";
-import { Login } from "../pages/Login/Login"; // 👈 Route login
+import Login from "../pages/Login/Login"; // 👉 Route login
+import TableMapPage from "../pages/Reservations/TableMapPage";
 
 export const router = createBrowserRouter([
     {
@@ -20,7 +21,12 @@ export const router = createBrowserRouter([
             { path: "products", element: <Products /> },
         ],
     },
-]);
+    {
+        path: "/admin/tables",
+        element: <TableMapPage />,
+    },
+]); // ✅ thêm dấu ] và )
+
 
 // import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 // import AdminLayout from "../layouts/AdminLayout";
@@ -45,4 +51,3 @@ export const router = createBrowserRouter([
 //         </Router>
 //     );
 // }
-
