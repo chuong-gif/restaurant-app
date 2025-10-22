@@ -35,6 +35,7 @@ import {
     UserOutlined,
     ShoppingOutlined,
     CalendarOutlined,
+    TableOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -45,39 +46,61 @@ export default function Sidebar() {
     const location = useLocation();
 
     const items = [
-        { key: "/admin", icon: <DashboardOutlined />, label: "Dashboard" },
-        { key: "/admin/customers", icon: <UserOutlined />, label: "Customers" },
-        { key: "/admin/products", icon: <ShoppingOutlined />, label: "Products" },
-        { key: "/admin/reservations", icon: <CalendarOutlined />, label: "Reservations" },
+        {
+            key: "/admin",
+            icon: <DashboardOutlined />,
+            label: "Dashboard",
+        },
+        {
+            key: "/admin/customers",
+            icon: <UserOutlined />,
+            label: "Customers",
+        },
+        {
+            key: "/admin/products",
+            icon: <ShoppingOutlined />,
+            label: "Products",
+        },
+        {
+            key: "/admin/reservations",
+            icon: <CalendarOutlined />,
+            label: "Reservations",
+        },
+        // 🟢 Thêm mục Đặt bàn (Tables)
+        {
+            key: "/admin/tables",
+            icon: <TableOutlined />,
+            label: "Đặt bàn",
+        },
     ];
 
     return (
         <Sider
-            theme="light"
-            width={220}
+            collapsible
             style={{
-                height: "100vh",
-                position: "sticky",
-                top: 0,
-                left: 0,
-                overflowY: "auto",
+                background: "#fff",
                 borderRight: "1px solid #f0f0f0",
-                flexShrink: 0,
             }}
         >
-            <div className="p-5 text-xl font-bold text-center border-b border-gray-200">
+            <div
+                style={{
+                    color: "#1890ff",
+                    fontSize: 20,
+                    fontWeight: 600,
+                    textAlign: "center",
+                    padding: "16px 0",
+                    borderBottom: "1px solid #f0f0f0",
+                }}
+            >
                 Admin Panel
             </div>
 
             <Menu
+                theme="light"
                 mode="inline"
                 selectedKeys={[location.pathname]}
                 items={items}
-                onClick={(item) => navigate(item.key)}
-                style={{
-                    height: "100%",
-                    borderRight: 0,
-                }}
+                onClick={({ key }) => navigate(key)}
             />
         </Sider>
     );
