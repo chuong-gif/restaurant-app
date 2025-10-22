@@ -400,8 +400,31 @@ const TableMapPage: React.FC = () => {
                     <p>Không có thông tin khách hàng</p>
                 )}
             </Modal>
+            {/* ✅ Nút quay lại Dashboard */}
+            <Button
+                type="primary"
+                shape="round"
+                size="large"
+                onClick={() => (window.location.href = "/admin")}
+                style={{
+                    position: "fixed",
+                    bottom: 30,
+                    right: 30,
+                    zIndex: 1000,
+                    backgroundColor: "#1677ff",
+                    boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+                    fontWeight: 600,
+                }}
+            >
+                ← Quay lại trang chính
+            </Button>
+
+
         </Card>
     );
 };
 
+
+
 export default TableMapPage;
+
