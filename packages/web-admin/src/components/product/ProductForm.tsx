@@ -1,78 +1,135 @@
-// packages/web-admin/src/components/product/ProductForm.tsx
-import React, { useEffect } from "react";
-import { Modal, Form, Input, Select, InputNumber, message } from "antd";
-import { useAppDispatch } from "@/store/hooks";
-import { createProduct } from "@/store/slices/productSlice";
-import type { Product } from "@/types/product";
+// File: packages/web-admin/src/components/product/ProductForm.tsx
+import React, { useEffect, useState } from "react";
+import { Modal, Form, Input, Select, InputNumber, message, Upload } from "antd";
+import { PlusOutlined, LoadingOutlined } from '@ant-design/icons';
+import { createProduct, updateProduct } from "@/api/productsApi";
+import { getAllCategories } from "@/api/productCategoryApi";
+import { storage } from "@/configs/client/Firebase"; // 👈 Import Firebase storage
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { createMediaFile } from "@/api/mediaApi";
+
+// Định nghĩa kiểu dữ liệu
+interface Category {
+  id: number;
+  ten_danh_muc: string;
+}
 
 interface ProductFormProps {
   open: boolean;
   onClose: () => void;
   onAdded?: () => void;
-  product?: any;
+  product?: any; // Dữ liệu sản phẩm khi ở chế độ sửa
 }
 
 const ProductForm: React.FC<ProductFormProps> = ({ open, onClose, onAdded, product }) => {
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
-
-  const [form] = Form.useForm<Product>();
-  const dispatch = useAppDispatch();
-
+  // 👇 3. Tải danh sách danh mục từ API khi form được mở
   useEffect(() => {
-    if (product) {
-      form.setFieldsValue(product);
+    if (open) {
+      const fetchCategories = async () => {
+        try {
+          const response = await getAllCategories();
+          setCategories(response);
+        } catch (error) {
+          message.error("Không thể tải danh sách danh mục!");
+        }
+      };
+      fetchCategories();
     }
-    else {
+  }, [open]);
+
+  // Tự động điền dữ liệu vào form khi ở chế độ sửa
+  useEffect(() => {
+    if (open && product) {
+      form.setFieldsValue({
+        ...product,
+        danh_muc_id: product.danh_muc_san_pham?.id, // Lấy ID của danh mục
+      });
+    } else {
       form.resetFields();
     }
-  }, [product, form]);
+  }, [product, open, form]);
 
+  // 👇 HÀM XỬ LÝ TẢI ẢNH LÊN FIREBASE
+  const handleImageUpload = async (file: File) => {
+    setUploading(true);
+    try {
+      const filePath = `products/${Date.now()}_${file.name}`;
+      const storageRef = ref(storage, filePath);
+      const snapshot = await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(snapshot.ref);
+
+      // ✅ GỌI API BACKEND ĐỂ LƯU THÔNG TIN FILE
+      const response = await createMediaFile({
+        file_url: url,
+        file_path: filePath,
+        file_type: file.type,
+      });
+
+      // Lấy id của media file từ phản hồi của server
+      const mediaFileId = response.data.id;
+
+      // Gán ID này vào trường hinh_anh_id của form
+      form.setFieldsValue({ hinh_anh_id: mediaFileId });
+      setImageUrl(url);
+      message.success("Tải ảnh lên và lưu thông tin thành công!");
+
+    } catch (error) {
+      message.error("Tải ảnh hoặc lưu thông tin thất bại!");
+      console.error(error);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleOk = async () => {
+    setLoading(true);
     try {
       const values = await form.validateFields();
 
-      // đảm bảo price là number trước khi gửi
-      const payload: Product = {
-        ...values,
-        price: Number(String(values.price).replace(/[^\d]/g, "")) || 0,
-      } as Product;
-
       if (product?.id) {
-        // 🟢 Nếu đang sửa
-        // (Bạn có thể thêm hàm updateProduct trong slice hoặc API riêng)
-        await dispatch(createProduct({ ...payload, id: product.id })).unwrap();
+        // Logic cho Sửa sản phẩm
+        await updateProduct(product.id, values);
         message.success("Cập nhật sản phẩm thành công 🎉");
-      }
-      else {
-        await dispatch(createProduct(payload)).unwrap();
+      } else {
+        // Logic cho Thêm mới sản phẩm
+        await createProduct(values);
         message.success("Thêm sản phẩm thành công 🎉");
       }
 
-      console.log("✅ Product created successfully, calling onAdded");
-      if (onAdded) setTimeout(() => onAdded(), 300);
-      form.resetFields();
-      onClose();
+      console.log("✅ Product operation successful, calling onAdded");
+      onAdded?.(); // Gọi hàm để tải lại danh sách
+      onClose(); // Đóng form
     } catch (err: any) {
-      console.error("Lỗi khi thêm sản phẩm:", err);
-      message.error(err?.message || "Không thể thêm sản phẩm");
+      console.error("Lỗi khi xử lý sản phẩm:", err);
+      message.error(err.message || "Thao tác thất bại");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <Modal
-      title="Thêm sản phẩm"
+      title={product ? "Sửa sản phẩm" : "Thêm sản phẩm"}
       open={open}
       onCancel={onClose}
       onOk={handleOk}
+      confirmLoading={loading}
       okText="Lưu"
       cancelText="Hủy"
       destroyOnClose
+      forceRender
     >
-      <Form layout="vertical" form={form}>
+      <Form layout="vertical" form={form} name="product_form">
+        {/* 👇 4. Sửa lại tên các trường cho khớp với CSDL */}
         <Form.Item
           label="Tên sản phẩm"
-          name="name"
+          name="ten_san_pham"
           rules={[{ required: true, message: "Vui lòng nhập tên sản phẩm" }]}
         >
           <Input placeholder="Nhập tên sản phẩm" />
@@ -80,39 +137,57 @@ const ProductForm: React.FC<ProductFormProps> = ({ open, onClose, onAdded, produ
 
         <Form.Item
           label="Danh mục"
-          name="category"
+          name="danh_muc_id"
           rules={[{ required: true, message: "Vui lòng chọn danh mục" }]}
         >
-          <Select placeholder="Chọn danh mục">
-            <Select.Option value="Đồ uống">Đồ uống</Select.Option>
-            <Select.Option value="Món chính">Món chính</Select.Option>
-            <Select.Option value="Tráng miệng">Tráng miệng</Select.Option>
+          {/* 👇 5. Dùng `danh_muc_id` làm value và `ten_danh_muc` làm tên hiển thị */}
+          <Select placeholder="Chọn danh mục" loading={categories.length === 0}>
+            {categories.map(cat => (
+              <Select.Option key={cat.id} value={cat.id}>
+                {cat.ten_danh_muc}
+              </Select.Option>
+            ))}
           </Select>
         </Form.Item>
 
         <Form.Item
           label="Giá (₫)"
-          name="price"
+          name="gia_ban"
           rules={[{ required: true, message: "Vui lòng nhập giá" }]}
         >
-          {/* chú ý: khai báo generic <number> để value là số */}
-          <InputNumber<number>
-            min={0}
-            style={{ width: "100%" }}
-            formatter={(v) =>
-              `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "₫"
-            }
-            /* parser trả về number — nhưng để tránh lỗi type cứng của AntD trong môi trường TS
-               ta convert về number và dùng `as any` để xóa kiểu gây vướng.
-               Đây là cách an toàn vì trước khi dispatch mình vẫn convert giá về number. */
-            parser={
-              ((v?: string) => {
-                const cleaned = v ? String(v).replace(/[₫,]/g, "") : "0";
-                return Number(cleaned);
-              }) as any
-            }
-            placeholder="Nhập giá sản phẩm"
-          />
+          <InputNumber min={0} style={{ width: "100%" }} placeholder="Nhập giá sản phẩm" />
+        </Form.Item>
+
+        <Form.Item
+          label="Mô tả"
+          name="mo_ta"
+        >
+          <Input.TextArea rows={4} placeholder="Nhập mô tả cho sản phẩm" />
+        </Form.Item>
+        <Form.Item label="Hình ảnh sản phẩm">
+          <Upload
+            name="avatar"
+            listType="picture-card"
+            className="avatar-uploader"
+            showUploadList={false}
+            beforeUpload={(file) => {
+              handleImageUpload(file);
+              return false; // Ngăn Ant Design tự động tải lên
+            }}
+          >
+            {imageUrl ? (
+              <img src={imageUrl} alt="product" style={{ width: '100%' }} />
+            ) : (
+              <div>
+                {uploading ? <LoadingOutlined /> : <PlusOutlined />}
+                <div style={{ marginTop: 8 }}>Tải lên</div>
+              </div>
+            )}
+          </Upload>
+        </Form.Item>
+        {/* Trường ẩn để lưu hinh_anh_id */}
+        <Form.Item name="hinh_anh_id" hidden>
+          <Input />
         </Form.Item>
       </Form>
     </Modal>

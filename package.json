@@ -13,6 +13,9 @@
     "build": "npm run -w packages/server build && npm run -w packages/web-admin build && npm run -w packages/web-client build",
     "lint": "eslint \"packages/**/src/**/*.{ts,tsx,js,jsx}\" --fix"
   },
+  "prisma": {
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+  },
   "devDependencies": {
     "@prisma/client": "^6.17.0",
     "@types/node": "^24.8.1",

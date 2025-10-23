@@ -2,23 +2,26 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { Product } from "../../types/product";
-// import { productAPI } from "../../../api/product.api"; // nếu bạn có API thực thì bật dòng này và gọi API bên dưới
+import { createProduct as createProductApi } from "../../api/productsApi";
 
 // Async thunk: tạo sản phẩm mới
-export const createProduct = createAsyncThunk<
-    Product, // return type
-    Product, // arg type
-    { rejectValue: string }
->("products/createProduct", async (product: Product, { rejectWithValue }) => {
-    try {
-        // Nếu bạn có API, thay đoạn return product bằng:
-        // const response = await productAPI.create(product);
-        // return response.data;
-        return product;
-    } catch (error: any) {
-        return rejectWithValue(error?.response?.data || "Lỗi tạo sản phẩm");
+export const createProduct = createAsyncThunk<Product, Product, { rejectValue: string }>(
+    "products/createProduct",
+    async (product: Product, { rejectWithValue }) => {
+        try {
+            // 👇 2. THAY THẾ LOGIC DEMO BẰNG LOGIC GỌI API THẬT
+            const response = await createProductApi(product);
+
+            // Dữ liệu sản phẩm mới tạo sẽ nằm trong response.data
+            // (vì backend trả về { message, data })
+            return response.data;
+
+        } catch (error: any) {
+            // `error` ở đây đã được axiosInstance xử lý, nó chính là message lỗi
+            return rejectWithValue(error || "Lỗi tạo sản phẩm");
+        }
     }
-});
+);
 
 interface ProductState {
     allProducts: Product[];

@@ -54,3 +54,17 @@ export const handleGetNewestProducts = async (req: Request, res: Response) => {
         res.status(500).json({ message: "Lỗi máy chủ khi lấy sản phẩm", error });
     }
 };
+// ====================== TẠO MỚI SẢN PHẨM ======================
+export const handleCreateProduct = async (req: Request, res: Response) => {
+    console.log("📍 ĐÃ VÀO HANDLE CREATE PRODUCT CONTROLLER! Dữ liệu nhận được:", req.body);
+    try {
+        // Gọi service để tạo sản phẩm với dữ liệu từ body của request
+        const newProduct = await productService.createProduct(req.body);
+
+        // Trả về status 201 (Created) và sản phẩm vừa tạo thành công
+        res.status(201).json({ message: "Tạo sản phẩm thành công", data: newProduct });
+    } catch (error: any) {
+        // Nếu có lỗi (dữ liệu sai, CSDL lỗi), trả về 400
+        res.status(400).json({ message: "Tạo sản phẩm thất bại", error: error.message });
+    }
+};

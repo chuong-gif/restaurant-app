@@ -5,10 +5,10 @@ import * as productCategoryService from '../services/productCategory.service';
 /**
  * 🎮 Controller để lấy tất cả danh mục sản phẩm
  */
-export const handleGetAllCategories = async (req: Request, res: Response) => {
+export const handleGetAllProductCategories = async (req: Request, res: Response) => {
     try {
-        const categories = await productCategoryService.getAllCategories();
-        res.status(200).json(categories); // Trả về danh sách danh mục dạng JSON
+        const categories = await productCategoryService.getAllProductCategories();
+        res.status(200).json({ message: "Lấy danh mục thành công", data: categories });
     } catch (error: any) {
         res.status(500).json({ message: 'Lỗi máy chủ', error: error.message });
     }

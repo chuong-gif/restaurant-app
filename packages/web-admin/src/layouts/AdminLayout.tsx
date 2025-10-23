@@ -1,105 +1,44 @@
-// import { Outlet } from "react-router-dom";
-// import Sidebar from "../components/Sidebar";
-// import Header from "../components/Header";
-
-// export default function AdminLayout() {
-// return (
-//     <div className="flex min-h-screen bg-white text-gray-800">
-//         <Sidebar />
-//         <div className="flex-1 flex flex-col bg-gray-50">
-//             <Header />
-//             <main className="p-6 flex-1 overflow-y-auto">
-//                 <Outlet />
-//             </main>
-//         </div>
-//     </div>
-// );
-
-
-//     return (
-//         <div className="flex min-h-screen bg-gray-900 text-white">
-
-//             {/* Sidebar cố định bên trái */}
-//             <Sidebar />
-
-//             {/* Phần nội dung chính */}
-//             <div className="flex-1 flex flex-col">
-//                 <Header />
-
-//                 {/* Khu vực nội dung */}
-//                 <main className="flex-1 overflow-y-auto p-6">
-//                     <div
-//                         className="
-//               w-full
-//               max-w-[1600px]   /* Giới hạn rộng tối đa ~ full màn hình lớn */
-//               mx-auto           /* Căn giữa theo chiều ngang */
-//               bg-white          /* Nền trắng */
-//               p-8               /* Padding đều */
-//               rounded-xl        /* Bo góc mềm mại */
-//               shadow-md         /* Bóng nhẹ tạo chiều sâu */
-//             "
-//                     >
-//                         <Outlet />
-//                     </div>
-//                 </main>
-//             </div>
-//         </div>
-//     );
-// }
-
-
-
-
+// File: packages/web-admin/src/layouts/AdminLayout.tsx
 
 import { Layout } from "antd";
-import { Outlet } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom"; // 👈 1. Import thêm Navigate
+import { useAppSelector } from "../store/hooks"; // 👈 2. Import hook để đọc state
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 
 const { Content } = Layout;
 
 export default function AdminLayout() {
+    // 👇 3. LẤY TOKEN TỪ REDUX STATE
+    const { token } = useAppSelector((state) => state.auth);
+
+    // 👇 4. LOGIC "NGƯỜI GÁC CỔNG"
+    // Nếu không có token (chưa đăng nhập), chuyển hướng về trang login
+    if (!token) {
+        return <Navigate to="/login" replace />;
+    }
+
+    // Nếu có token, hiển thị giao diện trang quản trị
     return (
         <Layout
             className="h-screen w-screen overflow-hidden"
-            style={{
-                height: "100vh",
-                width: "100vw",
-            }}
+            style={{ height: "100vh", width: "100vw" }}
         >
-            {/* Sidebar cố định bên trái */}
             <Sidebar />
-
-            {/* Khu vực bên phải */}
             <Layout
                 className="flex flex-col flex-1 bg-gray-100 overflow-hidden"
-                style={{
-                    height: "100vh",
-                    width: "100%",
-                }}
+                style={{ height: "100vh", width: "100%" }}
             >
                 <Header />
-
                 <Content
-                    className="
-            flex-1 
-            overflow-y-auto 
-            overflow-x-hidden 
-            p-6 
-            bg-gray-100
-          "
-                    style={{
-                        height: "calc(100vh - 64px)", // trừ phần header
-                        width: "100%",
-                    }}
+                    className="flex-1 overflow-y-auto overflow-x-hidden p-6 bg-gray-100"
+                    style={{ height: "calc(100vh - 64px)" }}
                 >
-                    {/* ❗ Bỏ căn giữa, để nội dung full width */}
                     <div className="w-full h-full bg-white rounded-xl shadow p-6">
-                        <Outlet />
+                        <Outlet /> {/* Outlet sẽ render component con (Dashboard, Products, etc.) */}
                     </div>
                 </Content>
             </Layout>
         </Layout>
     );
 }
-

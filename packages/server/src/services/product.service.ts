@@ -75,5 +75,23 @@ export const getNewestProducts = async (limit: number = 8) => {
         },
     });
 };
-
+/*
+=================================
+➕ SERVICE: TẠO MỚI SẢN PHẨM
+=================================
+*/
+export const createProduct = async (productData: any) => {
+    // Lệnh `create` sẽ thêm một dòng mới vào bảng san_pham
+    const newProduct = await prisma.san_pham.create({
+        data: {
+            ma_san_pham: `HS-${Date.now().toString().slice(-6)}`,
+            ten_san_pham: productData.ten_san_pham,
+            gia_ban: parseInt(productData.gia_ban, 10), // Đảm bảo giá là số
+            mo_ta: productData.mo_ta,
+            danh_muc_id: parseInt(productData.danh_muc_id, 10), // Đảm bảo ID là số
+            hinh_anh_id: productData.hinh_anh_id ? parseInt(productData.hinh_anh_id, 10) : null,
+        }
+    });
+    return newProduct;
+};
 // ✨ Các service khác như create, update, delete... sẽ được bổ sung sau

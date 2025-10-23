@@ -1,78 +1,79 @@
+// File: packages/server/src/routes/index.ts
+
 import { Router } from 'express';
 import { authenticateToken } from '../middlewares/auth.middleware';
 
-// 🧩 ===== IMPORT TẤT CẢ CÁC ROUTER CON =====
+// --- Import TẤT CẢ các router con ---
 
-// 🔐 --- Router xác thực ---
+// Router xác thực
 import authRoutes from './auth.routes';
 import adminAuthRoutes from './adminAuth.routes';
 
-// ⚙️ --- Router quản lý ---
-import productRoutes from './product.routes';
-import productCategoryRoutes from './productCategory.routes';
-import blogCategoryRoutes from './blogCategory.routes';
-import blogRoutes from './blog.routes';
-import blogCommentRoutes from './blogComment.routes';
-import promotionRoutes from './promotion.routes';
-import tableRoutes from './table.routes';
-import reservationRoutes from './reservation.routes';
-import userRoutes from './user.routes';
-import permissionRoutes from './permission.routes';
-import roleRoutes from './role.routes';
-import membershipRoutes from './membership.routes';
-import paymentRoutes from './payment.routes';
-import contactRoutes from './contact.routes';
+// Router cho các chức năng (đã tách biệt)
+import productPublicRoutes from './product.routes';
+import productAdminRoutes from './product.admin.routes';
+import productCategoryAdminRoutes from './productCategory.routes';
+import mediaRoutes from './media.routes';
 import myReservationRoutes from './myReservation.routes';
 
-// 🚀 Tạo đối tượng router gốc
+// Giả sử các file này tồn tại cho public (nếu không có, em có thể comment lại)
+import blogPublicRoutes from './blog.routes';
+import blogCategoryPublicRoutes from './blogCategory.routes';
+import tablePublicRoutes from './table.routes';
+import reservationPublicRoutes from './reservation.routes';
+
 const router = Router();
 
-// 🌍 ===== PUBLIC ROUTES (Dành cho Client / Công khai) =====
-// 👉 Các route này không yêu cầu token đăng nhập
-router.use('/auth', authRoutes);                                            // 🔑 Đăng nhập, đăng ký của khách hàng
-router.use('/public/products', productRoutes);                              // 🛒 Sản phẩm
-router.use('/public/product-categories', productCategoryRoutes);
-router.use('/public/blogs', blogRoutes);                                    // 📰 Bài viết
-router.use('/public/blog-categories', blogCategoryRoutes);                  // 🏷️ Danh mục blog
-router.use('/public/blog-comments', blogCommentRoutes);                     // 💬 Bình luận blog
-router.use('/public/tables', tableRoutes);                                  // 🍽️ Bàn ăn
-router.use('/public/reservations', reservationRoutes);                      // 📅 Đặt bàn
-router.use('/public/promotions', promotionRoutes);                          // 🎟️ Khuyến mãi
-router.use('/public/membership', membershipRoutes);                         // 💳 Thành viên
-router.use('/public/payment', paymentRoutes);                               // 💰 Thanh toán
-router.use('/public/contact', contactRoutes);                               // 📩 Liên hệ
+/* ==========================================================
+🌍 ===== PUBLIC ROUTES (AI CŨNG CÓ THỂ TRUY CẬP) =====
+========================================================== */
 
-// 👤 ===== PRIVATE USER ROUTES (Yêu cầu đăng nhập) =====
-const privateUserRouter = Router();
-privateUserRouter.use(authenticateToken); // Tất cả route trong này đều phải xác thực
-privateUserRouter.use('/reservations', myReservationRoutes); // 👈 4. GẮN ROUTE "MY BOOKINGS"
-// Có thể thêm các route private khác cho user ở đây (vd: /profile, /change-password)
+// --- Route xác thực cho Khách hàng (client) ---
+router.use('/auth', authRoutes);
 
-router.use('/user', privateUserRouter); // Tất cả sẽ có tiền tố /api/v1/user/...
-// 🔒 ===== PRIVATE ROUTES (Dành cho Admin / Nhân viên) =====
-// 👉 Các route này được bảo vệ bởi middleware `authenticateToken`
-const adminRouter = Router();
-
-// 🧱 Middleware bảo vệ: kiểm tra token JWT trước khi vào các route bên trong
-adminRouter.use(authenticateToken);
-
-// ⚙️ --- Các nhóm route chỉ dành cho Admin ---
-adminRouter.use('/products', productRoutes);                                // 🛠️ Quản lý sản phẩm (CRUD sản phẩm)
-adminRouter.use('/blogs', blogRoutes);                                      // 📰 Quản lý bài viết/blog
-adminRouter.use('/blog-categories', blogCategoryRoutes);                    // 🏷️ Quản lý danh mục blog
-adminRouter.use('/blog-comments', blogCommentRoutes);                       // 💬 Quản lý bình luận blog
-adminRouter.use('/promotions', promotionRoutes);                            // 🎟️ Quản lý khuyến mãi và mã giảm giá
-adminRouter.use('/tables', tableRoutes);                                    // 🪑 Quản lý bàn ăn
-adminRouter.use('/reservations', reservationRoutes);                        // 📅 Quản lý đặt bàn (đặt lịch, xác nhận, hủy)
-adminRouter.use('/users', userRoutes);                                      // 👥 Quản lý người dùng (admin, khách hàng, nhân viên)
-adminRouter.use('/permissions', permissionRoutes);                          // 🔐 Quản lý quyền truy cập (permissions)
-adminRouter.use('/roles', roleRoutes);                                      // 🏷️ Quản lý vai trò (roles - gán quyền, xóa, cập nhật)
-
-// 🔑 --- Router xác thực dành riêng cho Admin ---
+// --- Route xác thực cho Admin (phải là public để có thể đăng nhập) ---
 router.use('/admin/auth', adminAuthRoutes);
 
-// 🧭 Gắn nhóm router admin vào prefix /admin (tức là /admin/products, /admin/users, v.v.)
+// --- Các route public lấy dữ liệu cho trang client ---
+const publicRouter = Router();
+publicRouter.use('/products', productPublicRoutes);
+publicRouter.use('/blogs', blogPublicRoutes);
+publicRouter.use('/blog-categories', blogCategoryPublicRoutes);
+publicRouter.use('/tables', tablePublicRoutes);
+publicRouter.use('/reservations', reservationPublicRoutes);
+// ...gắn các route public khác vào đây...
+router.use('/public', publicRouter);
+
+
+/* ==========================================================
+👤 ===== PRIVATE USER ROUTES (YÊU CẦU ĐĂNG NHẬP) =====
+========================================================== */
+const privateUserRouter = Router();
+privateUserRouter.use(authenticateToken); // Bắt buộc xác thực
+privateUserRouter.use('/my-reservations', myReservationRoutes);
+
+router.use('/user', privateUserRouter);
+
+
+/* ==========================================================
+🔒 ===== ADMIN ROUTES (YÊU CẦU ĐĂNG NHẬP) =====
+========================================================== */
+const adminRouter = Router();
+adminRouter.use(authenticateToken); // "Người gác cổng" Bắt buộc xác thực
+
+// Gắn các router quản lý vào đây
+adminRouter.use('/products', productAdminRoutes);
+adminRouter.use('/product-categories', productCategoryAdminRoutes);
+adminRouter.use('/media', mediaRoutes);
+
+// ⚠️ Cảnh báo: Các route dưới đây đang dùng chung file với public.
+// Em sẽ cần tạo các file route admin riêng cho chúng (vd: blog.admin.routes.ts)
+// Thầy tạm thời vô hiệu hóa để tránh xung đột.
+// adminRouter.use('/blogs', blogRoutes); 
+// adminRouter.use('/reservations', reservationRoutes);
+// ...
+
+// Gắn adminRouter vào router chính với tiền tố /admin
 router.use('/admin', adminRouter);
 
-// 📦 Xuất router chính để dùng trong app.ts
 export default router;

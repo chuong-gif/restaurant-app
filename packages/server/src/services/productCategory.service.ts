@@ -2,13 +2,10 @@
 import prisma from '../models';
 
 /**
- * 🏷️ Lấy tất cả danh mục sản phẩm đang hoạt động
+ * 🏷️ Lấy tất cả danh mục sản phẩm (cho admin)
  */
-export const getAllCategories = async () => {
+export const getAllProductCategories = async () => {
     return prisma.danh_muc_san_pham.findMany({
-        where: {
-            trang_thai: true, // Chỉ lấy các danh mục có trạng thái là true (đang hoạt động)
-        },
         orderBy: {
             id: 'asc'
         }

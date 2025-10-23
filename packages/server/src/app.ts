@@ -8,7 +8,11 @@ import apiRoutes from './routes/index';
 const app: Application = express();                             // 🚀 Khởi tạo ứng dụng Express
 
 // 🧩 Middleware cấu hình cho server
-app.use(cors());                                                // 🌍 Cho phép truy cập từ domain khác (Cross-Origin)
+app.use(cors({
+    origin: '*', // Chấp nhận request từ mọi nguồn gốc
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Chấp nhận tất cả các phương thức
+    allowedHeaders: ['Content-Type', 'Authorization'], // Chấp nhận các header cần thiết
+}));                                               // 🌍 Cho phép truy cập từ domain khác (Cross-Origin)
 app.use(express.json());                                        // 📦 Cho phép server đọc dữ liệu JSON trong request body
 app.use(express.urlencoded({ extended: true }));                // 🧾 Hỗ trợ parse dữ liệu form URL-encoded
 

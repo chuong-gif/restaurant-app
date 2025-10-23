@@ -6,8 +6,23 @@ import { PlusOutlined } from "@ant-design/icons";
 // 🟢 thêm: import ProductForm
 import ProductForm from "@/components/product/ProductForm";
 
+interface DanhMuc {
+    id: number;
+    ten_danh_muc: string;
+    // Thêm các thuộc tính khác nếu có
+}
+// Định nghĩa kiểu cho Product
+interface Product {
+    id: number;
+    ten_san_pham: string;
+    gia_ban: number;
+    danh_muc_san_pham: DanhMuc; // Dùng lại interface DanhMuc ở đây
+    // Thêm các thuộc tính khác của sản phẩm...
+}
+
 const Products = () => {
-    const [products, setProducts] = useState<any[]>([]);
+
+    const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(false);
 
     // 🟢 thêm: state điều khiển mở/đóng form
@@ -41,21 +56,22 @@ const Products = () => {
     const columns = [
         {
             title: "Tên sản phẩm",
-            dataIndex: "name",
-            key: "name",
+            dataIndex: "ten_san_pham", // Sửa từ "name"
+            key: "ten_san_pham",
         },
         {
             title: "Danh mục",
-            dataIndex: "category",
-            key: "category",
+            dataIndex: "danh_muc_san_pham",
+            key: "danh_muc_san_pham",
+            // 👇 BƯỚC 2: THÊM KIỂU DỮ LIỆU CHO THAM SỐ `danh_muc`
+            render: (danh_muc: DanhMuc) => danh_muc?.ten_danh_muc || 'Chưa phân loại',
         },
         {
             title: "Giá (₫)",
-            dataIndex: "price",
-            key: "price",
+            dataIndex: "gia_ban", // Sửa từ "price"
+            key: "gia_ban",
             render: (value: number) => value.toLocaleString("vi-VN"),
         },
-
         {
             title: "Thao tác",
             key: "action",
@@ -65,7 +81,6 @@ const Products = () => {
                 </Button>
             ),
         },
-
     ];
 
     // // 🟢 Hàm xử lý xóa sản phẩm
