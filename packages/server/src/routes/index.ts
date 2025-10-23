@@ -9,6 +9,7 @@ import adminAuthRoutes from './adminAuth.routes';
 
 // ⚙️ --- Router quản lý ---
 import productRoutes from './product.routes';
+import productCategoryRoutes from './productCategory.routes';
 import blogCategoryRoutes from './blogCategory.routes';
 import blogRoutes from './blog.routes';
 import blogCommentRoutes from './blogComment.routes';
@@ -21,6 +22,7 @@ import roleRoutes from './role.routes';
 import membershipRoutes from './membership.routes';
 import paymentRoutes from './payment.routes';
 import contactRoutes from './contact.routes';
+import myReservationRoutes from './myReservation.routes';
 
 // 🚀 Tạo đối tượng router gốc
 const router = Router();
@@ -29,6 +31,7 @@ const router = Router();
 // 👉 Các route này không yêu cầu token đăng nhập
 router.use('/auth', authRoutes);                                            // 🔑 Đăng nhập, đăng ký của khách hàng
 router.use('/public/products', productRoutes);                              // 🛒 Sản phẩm
+router.use('/public/product-categories', productCategoryRoutes);
 router.use('/public/blogs', blogRoutes);                                    // 📰 Bài viết
 router.use('/public/blog-categories', blogCategoryRoutes);                  // 🏷️ Danh mục blog
 router.use('/public/blog-comments', blogCommentRoutes);                     // 💬 Bình luận blog
@@ -39,6 +42,13 @@ router.use('/public/membership', membershipRoutes);                         // �
 router.use('/public/payment', paymentRoutes);                               // 💰 Thanh toán
 router.use('/public/contact', contactRoutes);                               // 📩 Liên hệ
 
+// 👤 ===== PRIVATE USER ROUTES (Yêu cầu đăng nhập) =====
+const privateUserRouter = Router();
+privateUserRouter.use(authenticateToken); // Tất cả route trong này đều phải xác thực
+privateUserRouter.use('/reservations', myReservationRoutes); // 👈 4. GẮN ROUTE "MY BOOKINGS"
+// Có thể thêm các route private khác cho user ở đây (vd: /profile, /change-password)
+
+router.use('/user', privateUserRouter); // Tất cả sẽ có tiền tố /api/v1/user/...
 // 🔒 ===== PRIVATE ROUTES (Dành cho Admin / Nhân viên) =====
 // 👉 Các route này được bảo vệ bởi middleware `authenticateToken`
 const adminRouter = Router();

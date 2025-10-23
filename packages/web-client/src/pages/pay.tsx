@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { API_ENDPOINT } from '../configs/APIs';
 
 // Định nghĩa kiểu dữ liệu
 interface CustomerInfo {
@@ -86,7 +87,7 @@ const Pay: React.FC = () => {
             };
 
             // **LƯU Ý**: Đây là API cuối cùng để tạo đơn
-            await axios.post('http://localhost:8080/api/bookings/create-full', bookingData, {
+            await axios.post(`${API_ENDPOINT}/api/v1/public/reservations/create-full`, bookingData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 

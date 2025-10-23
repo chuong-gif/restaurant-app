@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Spinner from '../components/Spinner';
 import { User, Calendar } from 'lucide-react';
+import axios from 'axios';
+import { API_ENDPOINT } from '../configs/APIs';
 
 // --- Định nghĩa các kiểu dữ liệu ---
 interface Post {
@@ -13,13 +15,22 @@ interface Post {
   createdAt: string;
   slug: string;
 }
-
+// 👇 1. ĐỊNH NGHĨA KIỂU DỮ LIỆU CHO COMMENT
+interface Comment {
+  id: number;
+  content: string;
+  user: {
+    fullname: string;
+    // Thêm các trường khác của user nếu cần
+  };
+  // Thêm các trường khác của comment nếu có
+}
 
 const DetailBlog: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const [post, setPost] = useState<Post | null>(null);
   const [relatedPosts, setRelatedPosts] = useState<Post[]>([]);
-  // const [comments, setComments] = useState<Comment[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,24 +38,24 @@ const DetailBlog: React.FC = () => {
       setLoading(true);
       try {
         // **LƯU Ý**: Bạn cần có các API endpoint này trên backend
-        // const postRes = await axios.get(`http://localhost:8080/api/blogs/slug/${slug}`);
-        // setPost(postRes.data);
-        
-        // if (postRes.data) {
-        //   const relatedRes = await axios.get(`http://localhost:8080/api/blogs/related/${postRes.data.id}`);
-        //   setRelatedPosts(relatedRes.data);
+        const postRes = await axios.get(`${API_ENDPOINT}/api/v1/public/blogs/slug/${slug}`);
+        setPost(postRes.data);
 
-        //   const commentsRes = await axios.get(`http://localhost:8080/api/blogs/${postRes.data.id}/comments`);
-        //   setComments(commentsRes.data);
-        // }
+        if (postRes.data) {
+          const relatedRes = await axios.get(`${API_ENDPOINT}/api/v1/public/blogs/related/${postRes.data.id}`);
+          setRelatedPosts(relatedRes.data);
+
+          const commentsRes = await axios.get(`${API_ENDPOINT}/api/v1/public/blogs/${postRes.data.id}/comments`);
+          setComments(commentsRes.data);
+        }
 
         // --- Dữ liệu giả để test giao diện ---
         setPost({ id: 1, title: 'Bí quyết nấu phở bò Hà Nội chuẩn vị', slug: 'bi-quyet-nau-pho', poster: '/src/assets/images/menu-1.jpg', content: '<p>Nội dung chi tiết của bài viết...</p>', author: 'Bếp trưởng Nguyễn Văn A', createdAt: new Date().toISOString() });
         setRelatedPosts([
-            { id: 2, title: 'Cách làm nem rán giòn rụm', slug: 'cach-lam-nem-ran', poster: '/src/assets/images/menu-2.jpg', content: '', author: '', createdAt: '' },
-            { id: 3, title: 'Top 5 món tráng miệng dễ làm', slug: 'top-5-mon-trang-mieng', poster: '/src/assets/images/menu-3.jpg', content: '', author: '', createdAt: '' }
+          { id: 2, title: 'Cách làm nem rán giòn rụm', slug: 'cach-lam-nem-ran', poster: '/src/assets/images/menu-2.jpg', content: '', author: '', createdAt: '' },
+          { id: 3, title: 'Top 5 món tráng miệng dễ làm', slug: 'top-5-mon-trang-mieng', poster: '/src/assets/images/menu-3.jpg', content: '', author: '', createdAt: '' }
         ]);
-        // setComments([ { id: 1, user: { fullname: 'Trần Văn B' }, content: 'Bài viết rất hay và hữu ích!' } ]);
+        setComments([{ id: 1, user: { fullname: 'Trần Văn B' }, content: 'Bài viết rất hay và hữu ích!' }]);
         // --- Kết thúc dữ liệu giả ---
 
       } catch (error) {
@@ -64,8 +75,8 @@ const DetailBlog: React.FC = () => {
       <div className="py-24 bg-gray-800 text-center" style={{ backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${post.poster})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
         <h1 className="text-5xl font-bold mb-4 container mx-auto">{post.title}</h1>
         <div className="flex justify-center items-center gap-4 text-gray-300">
-            <span className="flex items-center gap-2"><User size={16}/> {post.author}</span>
-            <span className="flex items-center gap-2"><Calendar size={16}/> {new Date(post.createdAt).toLocaleDateString('vi-VN')}</span>
+          <span className="flex items-center gap-2"><User size={16} /> {post.author}</span>
+          <span className="flex items-center gap-2"><Calendar size={16} /> {new Date(post.createdAt).toLocaleDateString('vi-VN')}</span>
         </div>
       </div>
 

@@ -199,3 +199,44 @@ export const updateReservationStatus = async (id: number, status: number) => {
     }
     return updatedReservation;
 };
+/**
+ * 🙋 Lấy danh sách đặt bàn của một người dùng cụ thể
+ */
+export const getBookingsByUserId = async (userId: number) => {
+    return prisma.dat_ban.findMany({
+        where: {
+            khach_hang_id: userId // ❗️ Chỉ tìm các đơn của user này
+        },
+        include: {
+            ban_an: { select: { so_ban: true } },
+        },
+        orderBy: {
+            ngay_dat_ban: 'desc' // Sắp xếp theo ngày gần nhất
+        }
+    });
+};
+
+/**
+ * 📄 Lấy chi tiết một đơn đặt bàn, đảm bảo đúng là của người dùng đó
+ */
+export const getBookingDetailForUser = async (reservationId: number, userId: number) => {
+    const reservation = await prisma.dat_ban.findFirst({
+        where: {
+            id: reservationId,
+            khach_hang_id: userId // ❗️ Điều kiện bảo mật: phải đúng là của user này
+        },
+        include: {
+            chi_tiet_dat_ban: {
+                include: {
+                    san_pham: { select: { ten_san_pham: true, hinh_anh_id: true } }
+                }
+            },
+            ban_an: true
+        }
+    });
+
+    if (!reservation) {
+        throw new Error('Không tìm thấy đơn đặt bàn hoặc bạn không có quyền truy cập.');
+    }
+    return reservation;
+};

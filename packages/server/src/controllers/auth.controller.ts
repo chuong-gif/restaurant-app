@@ -32,6 +32,24 @@ export const handleRegisterController = async (req: Request, res: Response) => {
         res.status(400).json({ message: error.message });
     }
 };
+// Controller xử lý đăng nhập cho khách hàng
+export const handleLoginController = async (req: Request, res: Response) => {
+    const { email, password } = req.body;
+    try {
+        // Gọi hàm loginUser trong service để xử lý logic
+        const result = await authService.loginUser(email, password);
+
+        // Trả về thông tin user và accessToken nếu thành công
+        res.status(200).json({
+            message: 'Đăng nhập thành công',
+            user: result.user,
+            accessToken: result.token
+        });
+    } catch (error: any) {
+        // Nếu sai thông tin, trả về lỗi 401 (Unauthorized)
+        res.status(401).json({ message: error.message });
+    }
+};
 
 // Controller xử lý đăng nhập cho admin
 export const handleAdminLoginController = async (req: Request, res: Response) => {

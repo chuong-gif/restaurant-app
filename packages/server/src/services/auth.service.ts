@@ -83,6 +83,34 @@ export const registerUser = async (userData: any) => {
 
     return newUser;
 };
+// 🔐 Đăng nhập cho Khách hàng (phân biệt với admin)
+export const loginUser = async (email: string, password: string) => {
+    // Tìm người dùng là Khách Hàng có email trùng khớp
+    const user = await prisma.nguoi_dung.findFirst({
+        where: {
+            email,
+            loai_nguoi_dung: UserType.Kh_ch_H_ng, // Chỉ tìm người dùng loại "Khách Hàng"
+        },
+    });
+
+    // Nếu không tìm thấy user -> báo lỗi
+    if (!user) {
+        throw new Error('Email hoặc mật khẩu không đúng');
+    }
+
+    // So sánh mật khẩu người dùng nhập với mật khẩu đã mã hóa trong DB
+    const isMatch = await bcrypt.compare(password, user.mat_khau);
+    if (!isMatch) {
+        throw new Error('Email hoặc mật khẩu không đúng');
+    }
+
+    // Nếu đúng, tạo token
+    const token = generateToken(user);
+    // Loại bỏ mật khẩu khỏi dữ liệu trả về để bảo mật
+    const { mat_khau, ...userWithoutPassword } = user;
+
+    return { user: userWithoutPassword, token };
+};
 
 // --- 🧑‍💼 Dịch vụ cho Admin / Nhân viên ---
 

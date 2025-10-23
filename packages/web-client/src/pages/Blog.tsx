@@ -3,6 +3,7 @@ import axios from 'axios';
 import Spinner from '../components/Spinner';
 import BlogCard from '../components/blog/BlogCard'; // Import khuôn mẫu
 import type { PostSummary } from '../components/blog/BlogCard';
+import { API_ENDPOINT } from '../configs/APIs';
 
 const Blog: React.FC = () => {
     const [posts, setPosts] = useState<PostSummary[]>([]);
@@ -14,7 +15,7 @@ const Blog: React.FC = () => {
             try {
                 setLoading(true);
                 // **LƯU Ý**: Đảm bảo API endpoint này là đúng
-                const response = await axios.get('http://localhost:8080/api/blogs');
+                const response = await axios.post(`${API_ENDPOINT}/api/v1/auth/register`);
                 setPosts(response.data);
             } catch (err) {
                 setError('Không thể tải danh sách bài viết.');

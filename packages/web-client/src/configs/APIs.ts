@@ -33,7 +33,7 @@ export interface ApiData {
 // (phải được khai báo trong file `.env` như: REACT_APP_API_ENDPOINT=http://localhost:6969/api)
 //export const API_ENDPOINT: str ing =
 // Use window to read the injected env var in the browser (avoids needing Node type defs)
-export const API_ENDPOINT = (window as any).REACT_APP_API_ENDPOINT || "http://localhost:3070/api";
+export const API_ENDPOINT = (window as any).REACT_APP_API_ENDPOINT || "http://localhost:3307";
 
 // ===============================
 // 🔹 Danh sách endpoint API cụ thể

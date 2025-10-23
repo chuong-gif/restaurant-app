@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import Spinner from '../components/Spinner';
+import { API_ENDPOINT } from '../configs/APIs';
 
 interface BookingDetail {
     id: number;
@@ -24,7 +25,7 @@ const MyBookingDetail: React.FC = () => {
         const fetchBookingDetail = async () => {
             try {
                 const token = localStorage.getItem('accessToken');
-                const response = await axios.get(`http://localhost:8080/api/bookings/${id}`, {
+                const response = await axios.get(`${API_ENDPOINT}/api/v1/reservations/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setBooking(response.data);

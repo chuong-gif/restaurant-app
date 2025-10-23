@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Spinner from '../components/Spinner';
+import { API_ENDPOINT } from '../configs/APIs';
 
 interface Product {
     id: number;
@@ -36,7 +37,7 @@ const Order: React.FC = () => {
         // Tải danh sách món ăn
         const fetchProducts = async () => {
             try {
-                const response = await axios.get('http://localhost:8080/api/products');
+                const response = await axios.get(`${API_ENDPOINT}/api/v1/public/products`);
                 setProducts(response.data);
             } catch (error) {
                 console.error("Failed to fetch products", error);
@@ -91,7 +92,7 @@ const Order: React.FC = () => {
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {products.map(product => (
                         <div key={product.id} className="bg-gray-800 rounded-lg p-4 flex gap-4">
-                            <img src={`http://localhost:8080${product.image}`} alt={product.name} className="w-24 h-24 object-cover rounded-md" />
+                            <img src={`${API_ENDPOINT}${product.image}`} alt={product.name} className="w-24 h-24 object-cover rounded-md" />
                             <div className="flex-1">
                                 <h3 className="font-bold">{product.name}</h3>
                                 <p className="text-yellow-500">{formatPrice(product.price)}</p>

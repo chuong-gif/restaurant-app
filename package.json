@@ -25,6 +25,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@esbuild/win32-x64": "^0.25.11",
     "@prisma/client": "^6.17.0",
     "@reduxjs/toolkit": "^2.9.1",
     "@types/redux": "^3.6.31",

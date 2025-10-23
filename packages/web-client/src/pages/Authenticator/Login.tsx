@@ -4,6 +4,7 @@ import type { SubmitHandler } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
+import { API_ENDPOINT } from '../../configs/APIs';
 
 // Định nghĩa kiểu dữ liệu cho form đăng nhập
 interface LoginFormInputs {
@@ -23,7 +24,7 @@ const Login: React.FC = () => {
         setServerError('');
         try {
             // Thay thế URL API đăng nhập của bạn ở đây
-            const response = await axios.post('http://localhost:8080/api/auth/login', data);
+            const response = await axios.post(`${API_ENDPOINT}/api/v1/auth/login`, data);
 
             // Lưu thông tin user và token vào localStorage
             localStorage.setItem('user', JSON.stringify(response.data.user));

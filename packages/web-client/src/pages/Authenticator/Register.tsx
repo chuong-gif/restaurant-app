@@ -4,6 +4,7 @@ import type { SubmitHandler } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
+import { API_ENDPOINT } from '../../configs/APIs';
 
 // Định nghĩa kiểu dữ liệu cho form đăng ký
 interface RegisterFormInputs {
@@ -29,7 +30,7 @@ const Register: React.FC = () => {
         setServerError('');
         try {
             // Thay thế URL API đăng ký của bạn ở đây
-            const response = await axios.post('http://localhost:8080/api/auth/register', {
+            const response = await axios.post(`${API_ENDPOINT}/api/v1/auth/register`, {
                 fullname: data.fullname,
                 email: data.email,
                 tel: data.tel,

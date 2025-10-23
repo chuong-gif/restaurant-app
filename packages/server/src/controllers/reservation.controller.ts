@@ -85,3 +85,26 @@ export const handleUpdateStatus = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Lỗi máy chủ', error: error.message });
     }
 };
+// ====================== LẤY LỊCH SỬ ĐẶT BÀN CỦA TÔI ======================
+export const handleGetMyBookings = async (req: Request, res: Response) => {
+    try {
+        // Lấy userId từ token đã được xác thực bởi middleware
+        const userId = (req as any).user.id;
+        const bookings = await reservationService.getBookingsByUserId(userId);
+        res.status(200).json(bookings);
+    } catch (error: any) {
+        res.status(500).json({ message: 'Lỗi máy chủ', error: error.message });
+    }
+};
+
+// ====================== LẤY CHI TIẾT ĐẶT BÀN CỦA TÔI ======================
+export const handleGetMyBookingDetail = async (req: Request, res: Response) => {
+    try {
+        const userId = (req as any).user.id;
+        const reservationId = parseInt(req.params.id);
+        const bookingDetail = await reservationService.getBookingDetailForUser(reservationId, userId);
+        res.status(200).json(bookingDetail);
+    } catch (error: any) {
+        res.status(404).json({ message: error.message });
+    }
+};

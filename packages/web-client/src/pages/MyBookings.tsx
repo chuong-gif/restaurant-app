@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Calendar, Users, CheckCircle, XCircle, Clock, CreditCard, Trash2, Eye } from 'lucide-react';
 import Spinner from '../components/Spinner';
+import { API_ENDPOINT } from '../configs/APIs';
 
 // Định nghĩa kiểu dữ liệu cho một lần đặt bàn
 interface Booking {
@@ -52,7 +53,7 @@ const MyBookings: React.FC = () => {
             if (!userString || !token) throw new Error('Bạn cần đăng nhập để xem lịch sử.');
 
             const user = JSON.parse(userString);
-            const response = await axios.get(`http://localhost:8080/api/bookings/user/${user.id}`, {
+            const response = await axios.get(`${API_ENDPOINT}/api/v1/reservations/user/${user.id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
 

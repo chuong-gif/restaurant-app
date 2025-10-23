@@ -3,6 +3,7 @@ import axios from 'axios';
 import ProductCard from '../components/menu/ProductCard';
 import Pagination from '../components/menu/Pagination';
 import Spinner from '../components/Spinner';
+import { API_ENDPOINT } from '../configs/APIs';
 
 // Định nghĩa kiểu dữ liệu
 interface Product {
@@ -28,8 +29,8 @@ const Menu: React.FC = () => {
             try {
                 // Thay thế URL API của bạn ở đây
                 const [productsRes, categoriesRes] = await Promise.all([
-                    axios.get('http://localhost:8080/api/products'),
-                    axios.get('http://localhost:8080/api/categories'),
+                    axios.get(`${API_ENDPOINT}/api/v1/public/products`),
+                    axios.get(`${API_ENDPOINT}/api/v1/public/product-categories`), // Giả sử đây là API danh mục của em
                 ]);
                 setProducts(productsRes.data);
                 setCategories(categoriesRes.data);

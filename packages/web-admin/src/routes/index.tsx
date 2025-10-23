@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import AdminLayout from "../layouts/AdminLayout";
 import Dashboard from "../pages/Dashboard";
 import Customers from "../pages/Customers";
@@ -8,6 +8,10 @@ import TableMapPage from "../pages/Reservations/TableMapPage";
 
 export const router = createBrowserRouter([
     {
+        path: "/", // 👈 THÊM ROUTE NÀY VÀO
+        element: <Navigate to="/login" replace />, // Tự động chuyển đến trang login
+    },
+    {
         path: "/login",
         element: <Login />,
     },
@@ -15,7 +19,7 @@ export const router = createBrowserRouter([
         path: "/admin",
         element: <AdminLayout />,
         children: [
-            { path: "", element: <Dashboard /> },
+            // { path: "", element: <Dashboard /> },
             { path: "dashboard", element: <Dashboard /> },
             { path: "customers", element: <Customers /> },
             { path: "products", element: <Products /> },

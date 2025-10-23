@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import Spinner from '../components/Spinner';
 import RelatedProducts from '../components/products/RelatedProducts';
+import { API_ENDPOINT } from '../configs/APIs';
 
 interface Product {
     id: number;
@@ -28,13 +29,13 @@ const DetailProduct: React.FC = () => {
             setLoading(true);
             setProduct(null);
             try {
-                const productRes = await axios.get(`http://localhost:8080/api/products/slug/${slug}`);
+                const productRes = await axios.get(`${API_ENDPOINT}/api/v1/public/products/slug/${slug}`);
 
                 if (productRes.data && Array.isArray(productRes.data) && productRes.data.length > 0) {
                     const fetchedProduct: Product = productRes.data[0];
                     setProduct(fetchedProduct);
 
-                    const relatedRes = await axios.get(`http://localhost:8080/api/products/related/${fetchedProduct.id}?categoryId=${fetchedProduct.category_id}`);
+                    const relatedRes = await axios.get(`${API_ENDPOINT}/api/v1/public/products/related/${fetchedProduct.id}?categoryId=${fetchedProduct.category_id}`);
                     setRelatedProducts(relatedRes.data);
                 } else {
                     setProduct(null);
