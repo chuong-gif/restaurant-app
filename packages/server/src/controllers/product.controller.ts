@@ -1,70 +1,102 @@
 // packages/server/src/controllers/product.controller.ts
 import { Request, Response } from 'express';
-// Import các hàm xử lý logic sản phẩm từ tầng service
 import * as productService from '../services/product.service';
 
-// ====================== LẤY TẤT CẢ SẢN PHẨM (kể cả ngưng hoạt động) ======================
+// ====================== LẤY DANH SÁCH SẢN PHẨM (ĐÃ SỬA) ======================
 export const handleGetProducts = async (req: Request, res: Response) => {
     try {
         // Lấy các tham số phân trang và tìm kiếm từ query string
-        const page = parseInt(req.query.page as string) || 1;         // Trang hiện tại
-        const pageSize = parseInt(req.query.pageSize as string) || 10; // Số sản phẩm mỗi trang
-        const searchName = (req.query.searchName as string) || '';     // Từ khóa tìm kiếm tên sản phẩm
+        const page = parseInt(req.query.page as string) || 1;
+        const pageSize = parseInt(req.query.pageSize as string) || 10;
+        const searchName = (req.query.searchName as string) || '';
 
-        // Gọi service để truy xuất sản phẩm (bao gồm cả ngưng hoạt động)
-        const result = await productService.getProducts(searchName, page, pageSize);
+        // === BỔ SUNG THAM SỐ LỌC ===
+        const categoryId = req.query.danh_muc_id ? parseInt(req.query.danh_muc_id as string) : undefined;
 
-        // Trả kết quả thành công về client
+        // Mặc định là undefined. Nếu có gửi 'true'/'false' thì chuyển sang boolean
+        const statusQuery = req.query.trang_thai as string;
+        const trang_thai = statusQuery === 'true' ? true : (statusQuery === 'false' ? false : undefined);
+
+        // Gọi service với đầy đủ tham số
+        const result = await productService.getProducts(searchName, page, pageSize, categoryId, trang_thai);
+
         res.status(200).json({ message: "Lấy danh sách sản phẩm thành công", ...result });
-    } catch (error) {
-        // Nếu có lỗi hệ thống thì trả về mã 500
-        res.status(500).json({ message: "Lỗi máy chủ khi lấy sản phẩm", error });
+    } catch (error: any) {
+        res.status(500).json({ message: "Lỗi máy chủ khi lấy sản phẩm", error: error.message });
     }
 };
 
-// ====================== LẤY SẢN PHẨM ĐANG HOẠT ĐỘNG ======================
+// ====================== LẤY SẢN PHẨM THEO ID ======================
+export const handleGetProductById = async (req: Request, res: Response) => {
+    try {
+        const id = parseInt(req.params.id, 10);
+        const product = await productService.getProductById(id);
+        res.status(200).json({ message: "Lấy sản phẩm thành công", data: product });
+    } catch (error: any) {
+        if (error.message === 'Sản phẩm không tồn tại') {
+            res.status(404).json({ message: error.message });
+        } else {
+            res.status(500).json({ message: "Lỗi máy chủ", error: error.message });
+        }
+    }
+};
+
+// ====================== LẤY SẢN PHẨM ĐANG HOẠT ĐỘNG (CHO CLIENT) ======================
 export const handleGetActiveProducts = async (req: Request, res: Response) => {
     try {
-        // Lấy tham số phân trang & tìm kiếm
         const page = parseInt(req.query.page as string) || 1;
         const pageSize = parseInt(req.query.limit as string) || 10;
         const searchName = (req.query.searchName as string) || '';
 
-        // Gọi service với tham số status = 1 (chỉ lấy sản phẩm đang hoạt động)
-        const result = await productService.getProducts(searchName, page, pageSize, 1);
+        // Gọi service với trang_thai = true
+        const result = await productService.getProducts(searchName, page, pageSize, undefined, true);
 
-        // Trả dữ liệu thành công về cho client
         res.status(200).json({ message: "Lấy danh sách sản phẩm đang hoạt động thành công", ...result });
-    } catch (error) {
-        // Xử lý lỗi máy chủ
-        res.status(500).json({ message: "Lỗi máy chủ khi lấy sản phẩm", error });
+    } catch (error: any) {
+        res.status(500).json({ message: "Lỗi máy chủ khi lấy sản phẩm", error: error.message });
     }
 };
 
 // ====================== LẤY SẢN PHẨM MỚI NHẤT ======================
 export const handleGetNewestProducts = async (req: Request, res: Response) => {
     try {
-        // Gọi service để lấy danh sách sản phẩm mới nhất
         const products = await productService.getNewestProducts();
-
-        // Trả dữ liệu về client
         res.status(200).json({ message: "Lấy sản phẩm mới nhất thành công", data: products });
-    } catch (error) {
-        // Bắt và trả lỗi nếu có sự cố trong quá trình xử lý
-        res.status(500).json({ message: "Lỗi máy chủ khi lấy sản phẩm", error });
+    } catch (error: any) {
+        res.status(500).json({ message: "Lỗi máy chủ khi lấy sản phẩm", error: error.message });
     }
 };
-// ====================== TẠO MỚI SẢN PHẨM ======================
-export const handleCreateProduct = async (req: Request, res: Response) => {
-    console.log("📍 ĐÃ VÀO HANDLE CREATE PRODUCT CONTROLLER! Dữ liệu nhận được:", req.body);
-    try {
-        // Gọi service để tạo sản phẩm với dữ liệu từ body của request
-        const newProduct = await productService.createProduct(req.body);
 
-        // Trả về status 201 (Created) và sản phẩm vừa tạo thành công
+// ====================== TẠO MỚI SẢN PHẨM (ĐÃ SỬA) ======================
+export const handleCreateProduct = async (req: Request, res: Response) => {
+    try {
+        // Truyền thẳng req.body (đã có đủ trường) vào service
+        const newProduct = await productService.createProduct(req.body);
         res.status(201).json({ message: "Tạo sản phẩm thành công", data: newProduct });
     } catch (error: any) {
-        // Nếu có lỗi (dữ liệu sai, CSDL lỗi), trả về 400
         res.status(400).json({ message: "Tạo sản phẩm thất bại", error: error.message });
+    }
+};
+
+// ====================== CẬP NHẬT SẢN PHẨM (ĐÃ SỬA) ======================
+export const handleUpdateProduct = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        // Truyền thẳng req.body (đã có đủ trường) vào service
+        const updatedProduct = await productService.updateProduct(parseInt(id), req.body);
+        res.status(200).json({ message: "Cập nhật sản phẩm thành công", data: updatedProduct });
+    } catch (error: any) {
+        res.status(400).json({ message: "Cập nhật sản phẩm thất bại", error: error.message });
+    }
+};
+
+// ====================== XÓA (MỀM) SẢN PHẨM ======================
+export const handleDeleteProduct = async (req: Request, res: Response) => {
+    try {
+        const id = parseInt(req.params.id, 10);
+        const deleted = await productService.deleteProduct(id);
+        res.status(200).json({ message: 'Xóa sản phẩm (ngưng hoạt động) thành công', data: deleted });
+    } catch (error: any) {
+        res.status(400).json({ message: 'Xóa sản phẩm thất bại', error: error.message });
     }
 };

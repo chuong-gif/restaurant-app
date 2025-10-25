@@ -13,6 +13,11 @@ import adminAuthRoutes from './adminAuth.routes';
 import productPublicRoutes from './product.routes';
 import productAdminRoutes from './product.admin.routes';
 import productCategoryAdminRoutes from './productCategory.routes';
+
+// === 1. THÊM DÒNG IMPORT NÀY ===
+import { handleGetPublicCategories } from '../controllers/productCategory.controller';
+// ===================================
+
 import mediaRoutes from './media.routes';
 import myReservationRoutes from './myReservation.routes';
 
@@ -37,6 +42,11 @@ router.use('/admin/auth', adminAuthRoutes);
 // --- Các route public lấy dữ liệu cho trang client ---
 const publicRouter = Router();
 publicRouter.use('/products', productPublicRoutes);
+
+// === 2. THÊM DÒNG ROUTE NÀY VÀO ĐÂY ===
+publicRouter.get('/product-categories', handleGetPublicCategories);
+// =====================================
+
 publicRouter.use('/blogs', blogPublicRoutes);
 publicRouter.use('/blog-categories', blogCategoryPublicRoutes);
 publicRouter.use('/tables', tablePublicRoutes);

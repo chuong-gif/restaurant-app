@@ -1,10 +1,24 @@
-// File: packages/server/src/routes/productCategory.routes.ts
+// packages/server/src/routes/productCategory.admin.routes.ts
 import { Router } from 'express';
-import { handleGetAllProductCategories } from '../controllers/productCategory.controller';
+import {
+    handleGetAdminCategories, // Đổi tên hàm
+    handleCreateCategory,
+    handleUpdateCategory,
+    handleDeleteCategory
+} from '../controllers/productCategory.controller';
 
 const router = Router();
 
-// Định nghĩa route GET '/' để lấy tất cả danh mục
-router.get('/', handleGetAllProductCategories);
+// Endpoint được sửa: GET /api/v1/admin/product-categories (Hỗ trợ lọc)
+router.get('/', handleGetAdminCategories);
+
+// Endpoint mới: POST /api/v1/admin/product-categories
+router.post('/', handleCreateCategory);
+
+// Endpoint mới: PUT /api/v1/admin/product-categories/:id
+router.put('/:id', handleUpdateCategory);
+
+// Endpoint mới: DELETE /api/v1/admin/product-categories/:id
+router.delete('/:id', handleDeleteCategory);
 
 export default router;
