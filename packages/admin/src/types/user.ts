@@ -65,3 +65,26 @@ export interface RoleListResponse {
     totalPages: number;
     currentPage: number;
 }
+// === THÊM CÁC INTERFACE MỚI CHO QUYỀN ===
+
+// Dựa trên bảng `quyen` và response từ permission.service.ts
+export interface Permission {
+    id: number;
+    ten_nhom_quyen: string | null; // Tên nhóm (có thể null)
+    ten_chuc_nang: string;       // Tên quyền cụ thể (vd: Thêm, Sửa)
+    ma_quyen: string;             // Mã định danh quyền (vd: add_product)
+}
+
+// Kiểu dữ liệu trả về từ API getAllPermissions (đã gom nhóm)
+export interface GroupedPermissionsResponse {
+    message: string;
+    data: {
+        [groupName: string]: Permission[]; // Key là tên nhóm, value là mảng quyền
+    };
+}
+
+// Kiểu dữ liệu trả về từ API getRoleById (bao gồm permission IDs)
+export interface RoleDetailResponse extends Role { // Kế thừa từ Role
+    vai_tro_quyen: Array<{ quyen_id: number }>; // Mảng các object chứa permission ID
+}
+// =========================================

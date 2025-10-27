@@ -22,6 +22,10 @@ import ReservationListPage from './pages/reservations/ReservationListPage';
 import ReservationDetailPage from './pages/reservations/ReservationDetailPage';
 import ReservationTrashPage from './pages/reservations/ReservationTrashPage';
 
+// --- IMPORT CÁC TRANG ROLE/PERMISSION ---
+import RoleListPage from './pages/roles/RoleListPage';
+import AssignPermissionPage from './pages/roles/AssignPermissionPage';
+
 function App() {
   return (
     <AntdApp>
@@ -53,6 +57,11 @@ function App() {
               <Route path="/reservations/:id" element={<ReservationDetailPage />} />
               <Route path="/reservations/trash" element={<ReservationTrashPage />} />
               {/* ============================= */}
+
+              {/* === THÊM ROUTES ROLE/PERMISSION === */}
+              <Route path="/roles" element={<RoleListPage />} />
+              <Route path="/roles/permissions" element={<AssignPermissionPage />} />
+              {/* ================================ */}
 
             </Route>
           </Route>
