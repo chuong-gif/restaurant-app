@@ -54,8 +54,7 @@ const menuItems: MenuItem[] = [
     },
     {
         key: 'booking', icon: <CalendarOutlined />, label: 'Quản Lý Đặt Bàn', children: [
-            // Thêm key và path cho bàn ăn sau này
-            { key: 'tables', icon: <AppstoreOutlined />, label: 'Quản lý bàn ăn', path: '/tables' },
+            { key: 'tables', icon: <AppstoreOutlined />, label: 'Quản lý bàn ăn', path: '/tables' }, // <-- Sửa/Thêm dòng này
             { key: 'reservations', icon: <SolutionOutlined />, label: 'Quản lý đặt bàn', path: '/reservations' },
             { key: 'reservations-trash', icon: <DeleteOutlined />, label: 'Đơn đã hủy', path: '/reservations/trash' },
         ]

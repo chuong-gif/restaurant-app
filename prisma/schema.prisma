@@ -31,10 +31,11 @@ model ban_an {
   id                                           Int          @id @default(autoincrement())
   so_ban                                       Int          @unique(map: "so_ban")
   suc_chua                                     Int
-  trang_thai                                   Int          @default(1) // SỬA TỪ Boolean THÀNH Int
+  trang_thai                                   Boolean      @default(true)
   anh_ban_id                                   Int?
   video_ban_id                                 Int?
   mo_ta_vi_tri                                 String?      @db.Text
+  tang                                         Int          @default(1)
   created_at                                   DateTime?    @default(now()) @db.Timestamp(0)
   updated_at                                   DateTime     @default(now()) @db.Timestamp(0)
   media_files_ban_an_anh_ban_idTomedia_files   media_files? @relation("ban_an_anh_ban_idTomedia_files", fields: [anh_ban_id], references: [id], map: "fk_banan_anh")
@@ -98,7 +99,7 @@ model dat_ban {
   id                     Int                      @id @default(autoincrement())
   ma_dat_ban             String?                  @db.VarChar(50)
   khach_hang_id          Int?
-  so_lan_doi             Int                      @default(1) // SỬA TỪ Boolean THÀNH Int
+  so_lan_doi             Boolean                  @default(true)
   ban_an_id              Int?
   khuyen_mai_id          Int?
   ho_ten_khach           String                   @db.VarChar(255)
@@ -109,7 +110,7 @@ model dat_ban {
   ghi_chu                String?                  @db.Text
   tong_tien              Int?
   tien_dat_coc           Int                      @default(0)
-  trang_thai             Int                      @default(1) // SỬA TỪ Boolean THÀNH Int
+  trang_thai             Boolean                  @default(true)
   momo_order_id          String?                  @db.VarChar(255)
   created_at             DateTime                 @default(now()) @db.Timestamp(0)
   updated_at             DateTime                 @default(now()) @db.Timestamp(0)
@@ -221,23 +222,25 @@ model quyen {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model san_pham {
-  id             Int      @id @default(autoincrement())
-  ma_san_pham    String
-  ten_san_pham   String
-  gia_ban        Int
-  gia_khuyen_mai Int      @default(0)
-  hinh_anh_id    Int?
-  mo_ta          String?
-  trang_thai     Boolean  @default(true)
-  danh_muc_id    Int
-  created_at     DateTime @default(now())
-  updated_at     DateTime @updatedAt
+  id                Int                @id @default(autoincrement())
+  ma_san_pham       String             @unique(map: "ma_san_pham") @db.VarChar(10)
+  ten_san_pham      String             @db.VarChar(255)
+  gia_ban           Int
+  gia_khuyen_mai    Int                @default(0)
+  hinh_anh_id       Int?
+  mo_ta             String?            @db.Text
+  trang_thai        Boolean            @default(true)
+  danh_muc_id       Int
+  created_at        DateTime           @default(now()) @db.Timestamp(0)
+  updated_at        DateTime           @default(now()) @updatedAt @db.Timestamp(0)
+  chi_tiet_dat_ban  chi_tiet_dat_ban[]
+  danh_muc_san_pham danh_muc_san_pham  @relation(fields: [danh_muc_id], references: [id], map: "fk_sanpham_danhmuc")
+  media_files       media_files?       @relation(fields: [hinh_anh_id], references: [id], map: "fk_sanpham_media")
+  thay_doi_mon_an   thay_doi_mon_an[]
 
-  // Quan hệ
-  danh_muc_san_pham danh_muc_san_pham @relation(fields: [danh_muc_id], references: [id])
-  media_files       media_files?       @relation(fields: [hinh_anh_id], references: [id])
+  @@index([danh_muc_id], map: "fk_sanpham_danhmuc")
+  @@index([hinh_anh_id], map: "fk_sanpham_media")
 }
-
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model thay_doi_mon_an {

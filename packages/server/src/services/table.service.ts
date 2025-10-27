@@ -1,125 +1,173 @@
+// packages/server/src/services/table.service.ts
 import prisma from '../models';
-import { Prisma } from '@prisma/client';
+import { Prisma, ban_an as Table } from '@prisma/client';
 
 /**
- * 📋 Lấy danh sách bàn (trang quản trị)
- * @param search - 🔍 Tìm theo số bàn
- * @param capacity - ⚙️ Lọc theo sức chứa
- * @param page - 📄 Trang hiện tại
- * @param pageSize - 📦 Số lượng mục trên mỗi trang
+ * 🪑 Lấy danh sách bàn ăn (Admin - có lọc, phân trang, join ảnh/video)
  */
-export const getTablesAdmin = async (search: string, capacity: number | undefined, page: number, pageSize: number) => {
-    // 🧩 Tạo điều kiện lọc (where)
+export const getTablesAdmin = async (filters: {
+    page: number;
+    pageSize: number;
+    searchSoBan?: number; // Lọc theo số bàn
+    searchSucChua?: number; // Lọc theo sức chứa
+    searchTang?: number; // Lọc theo tầng (MỚI)
+}) => {
+    const { page, pageSize, searchSoBan, searchSucChua, searchTang } = filters;
+
     const where: Prisma.ban_anWhereInput = {};
-
-    // 🔎 Nếu người dùng nhập số bàn -> lọc theo số bàn
-    if (search) {
-        where.so_ban = parseInt(search);
+    if (searchSoBan !== undefined && !isNaN(searchSoBan)) {
+        where.so_ban = searchSoBan;
     }
-
-    // 🪑 Nếu người dùng chọn sức chứa -> lọc theo sức chứa
-    if (capacity) {
-        where.suc_chua = capacity;
+    if (searchSucChua !== undefined && !isNaN(searchSucChua)) {
+        where.suc_chua = searchSucChua;
     }
+    // === THÊM LỌC THEO TẦNG ===
+    if (searchTang !== undefined && !isNaN(searchTang)) {
+        where.tang = searchTang;
+    }
+    // ========================
 
-    // ⚡ Gọi transaction để thực hiện 2 truy vấn song song: lấy danh sách và tổng số
     const [tables, total] = await prisma.$transaction([
         prisma.ban_an.findMany({
-            where,                      // ⚙️ Áp dụng điều kiện lọc
-            orderBy: { id: 'desc' },    // ⬇️ Sắp xếp theo ID giảm dần
-            skip: (page - 1) * pageSize, // ⏭️ Bỏ qua các bản ghi trang trước
-            take: pageSize,              // 📦 Giới hạn số bản ghi trên trang
+            where,
+            include: { // === INCLUDE MEDIA FILES ===
+                media_files_ban_an_anh_ban_idTomedia_files: { // Relation ảnh
+                    select: { id: true, file_url: true }
+                },
+                media_files_ban_an_video_ban_idTomedia_files: { // Relation video
+                    select: { id: true, file_url: true }
+                }
+            },
+            // ==========================
+            orderBy: { so_ban: 'asc' }, // Sắp xếp theo số bàn
+            skip: (page - 1) * pageSize,
+            take: pageSize,
         }),
-        prisma.ban_an.count({ where }),  // 🔢 Đếm tổng số bản ghi
+        prisma.ban_an.count({ where }),
     ]);
 
-    // 📤 Trả về dữ liệu cùng thông tin phân trang
     return { data: tables, total, totalPages: Math.ceil(total / pageSize), currentPage: page };
 };
 
 /**
- * 🔍 Lọc danh sách bàn có sẵn theo ngày (cho khách hàng)
- * @param date - 📅 Ngày muốn kiểm tra
- * @param capacity - ⚙️ Sức chứa mong muốn (tùy chọn)
+ * ✨ Tạo bàn ăn mới (Thêm tang, anh_ban_id, video_ban_id)
  */
-export const findAvailableTablesByDate = async (date: Date, capacity?: number) => {
-    // 🪑 1. Lấy toàn bộ bàn (có thể lọc theo sức chứa)
-    const allTables = await prisma.ban_an.findMany({
-        where: {
-            suc_chua: capacity, // ⚙️ Nếu có cung cấp sức chứa, lọc theo nó
-        },
-    });
-
-    // 🕓 2. Xác định thời gian bắt đầu và kết thúc của ngày đó
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
-
-    // 📑 Lấy danh sách bàn đã được đặt trong ngày đó
-    const reservedTables = await prisma.dat_ban.findMany({
-        where: {
-            ngay_dat_ban: { gte: startOfDay, lte: endOfDay }, // 📅 Giới hạn trong ngày
-            trang_thai: { in: [1, 2, 3, 4] }, // 🚫 Các trạng thái chiếm bàn
-        },
-        select: { ban_an_id: true },
-    });
-
-    // 🧱 Chuyển thành tập hợp (Set) ID các bàn đã được đặt
-    const reservedTableIds = new Set(
-        reservedTables.map(r => r.ban_an_id).filter(id => id !== null)
-    );
-
-    // ✅ 3. Kết hợp để gán trạng thái trống / đã đặt cho từng bàn
-    const tableStatus = allTables.map(table => ({
-        ...table,
-        trang_thai: !reservedTableIds.has(table.id), // true = trống, false = đã đặt
-    }));
-
-    // 📤 Trả về danh sách bàn cùng trạng thái
-    return tableStatus;
-};
-
-/**
- * ➕ Tạo bàn mới
- * ⚠️ SỬA LỖI: status là number (Int) thay vì boolean
- */
-export const createTable = async (data: { number: number, capacity: number, status: number }) => {
-    return prisma.ban_an.create({
-        data: {
-            so_ban: data.number,   // 🏷️ Số bàn
-            suc_chua: data.capacity, // 👥 Sức chứa
-            trang_thai: data.status, // ⚙️ Trạng thái (0 = có khách, 1 = trống)
-        },
-    });
-};
-
-/**
- * 🛠️ Cập nhật thông tin bàn
- */
-export const updateTable = async (id: number, data: any) => {
-    return prisma.ban_an.update({
-        where: { id }, // 🔑 Xác định bàn cần sửa
-        data: {
-            so_ban: data.number,     // 🏷️ Cập nhật số bàn
-            suc_chua: data.capacity, // 👥 Cập nhật sức chứa
-            trang_thai: data.status, // ⚙️ Cập nhật trạng thái
-        },
-    });
-};
-
-/**
- * ❌ Xóa bàn ăn
- */
-export const deleteTable = async (id: number) => {
-    // 🕵️‍♂️ Kiểm tra xem bàn có đang được đặt không
-    const hasReservations = await prisma.dat_ban.count({ where: { ban_an_id: id } });
-
-    if (hasReservations > 0) {
-        // 🚫 Nếu bàn có đặt -> không được xóa
-        throw new Error('Không thể xóa bàn đang có lượt đặt.');
+export const createTable = async (data: any): Promise<Table> => {
+    // Kiểm tra trùng số bàn
+    const existingTable = await prisma.ban_an.findUnique({ where: { so_ban: parseInt(data.so_ban, 10) } });
+    if (existingTable) {
+        throw new Error(`Số bàn ${data.so_ban} đã tồn tại.`);
     }
 
-    // 🗑️ Nếu không có đặt -> xóa bàn
-    return prisma.ban_an.delete({ where: { id } });
+    return prisma.ban_an.create({
+        data: {
+            so_ban: parseInt(data.so_ban, 10),
+            suc_chua: parseInt(data.suc_chua, 10),
+            trang_thai: data.trang_thai === undefined ? true : Boolean(data.trang_thai),
+            mo_ta_vi_tri: data.mo_ta_vi_tri,
+            // === THÊM CÁC TRƯỜNG MỚI ===
+            tang: data.tang ? parseInt(data.tang, 10) : undefined,
+            anh_ban_id: data.anh_ban_id ? parseInt(data.anh_ban_id, 10) : undefined,
+            video_ban_id: data.video_ban_id ? parseInt(data.video_ban_id, 10) : undefined,
+            // =========================
+        },
+    });
+};
+
+/**
+ * 🛠️ Cập nhật thông tin bàn ăn (Thêm tang, anh_ban_id, video_ban_id)
+ */
+export const updateTable = async (id: number, data: any): Promise<Table> => {
+    const existing = await prisma.ban_an.findUnique({ where: { id } });
+    if (!existing) {
+        throw new Error('Bàn ăn không tồn tại.');
+    }
+
+    // Kiểm tra trùng số bàn (nếu số bàn thay đổi)
+    if (data.so_ban && parseInt(data.so_ban, 10) !== existing.so_ban) {
+        const conflictingTable = await prisma.ban_an.findUnique({ where: { so_ban: parseInt(data.so_ban, 10) } });
+        if (conflictingTable) {
+            throw new Error(`Số bàn ${data.so_ban} đã tồn tại.`);
+        }
+    }
+
+    const dataToUpdate: any = {};
+    if (data.so_ban !== undefined) dataToUpdate.so_ban = parseInt(data.so_ban, 10);
+    if (data.suc_chua !== undefined) dataToUpdate.suc_chua = parseInt(data.suc_chua, 10);
+    if (data.trang_thai !== undefined) dataToUpdate.trang_thai = Boolean(data.trang_thai);
+    if (data.mo_ta_vi_tri !== undefined) dataToUpdate.mo_ta_vi_tri = data.mo_ta_vi_tri;
+    // === THÊM CÁC TRƯỜNG MỚI ===
+    if (data.tang !== undefined) dataToUpdate.tang = data.tang ? parseInt(data.tang, 10) : undefined;
+    if (data.anh_ban_id !== undefined) dataToUpdate.anh_ban_id = data.anh_ban_id ? parseInt(data.anh_ban_id, 10) : undefined;
+    if (data.video_ban_id !== undefined) dataToUpdate.video_ban_id = data.video_ban_id ? parseInt(data.video_ban_id, 10) : undefined;
+    // =========================
+
+    return prisma.ban_an.update({
+        where: { id },
+        data: dataToUpdate,
+    });
+};
+
+/**
+ * ❌ Xóa bàn ăn (kèm kiểm tra ràng buộc)
+ */
+export const deleteTable = async (id: number): Promise<void> => {
+    // Kiểm tra bàn có trong đơn đặt bàn nào chưa hoàn thành/hủy không
+    const activeReservation = await prisma.dat_ban.findFirst({
+        where: {
+            ban_an_id: id,
+            trang_thai: true // only active reservations
+        }
+    });
+    if (activeReservation) {
+        throw new Error('Không thể xóa bàn đang có trong đơn đặt bàn chưa hoàn thành hoặc chưa hủy.');
+    }
+
+    // Xóa các liên kết đặt bàn đã hoàn thành/hủy (nếu cần, hoặc để NULL)
+    // await prisma.dat_ban.updateMany({ where: { ban_an_id: id }, data: { ban_an_id: null }});
+
+    await prisma.ban_an.delete({ where: { id } });
+};
+
+/**
+ * ✅ Lấy danh sách bàn trống theo ngày và sức chứa (Cho Client)
+ */
+export const getAvailableTablesByDate = async (date: Date, partySize: number): Promise<Table[]> => {
+    let requiredCapacity: number[];
+    if (partySize <= 2) requiredCapacity = [2, 4, 6, 8];
+    else if (partySize <= 4) requiredCapacity = [4, 6, 8];
+    else if (partySize <= 6) requiredCapacity = [6, 8];
+    else requiredCapacity = [8];
+
+    // Chỉ lấy bàn đang trống (trang_thai = 1) và đúng sức chứa
+    const potentialTables = await prisma.ban_an.findMany({
+        where: {
+            suc_chua: { in: requiredCapacity },
+            trang_thai: true
+        },
+        include: { // Include ảnh/video
+            media_files_ban_an_anh_ban_idTomedia_files: { select: { file_url: true } },
+            media_files_ban_an_video_ban_idTomedia_files: { select: { file_url: true } }
+        },
+        orderBy: { so_ban: 'asc' },
+    });
+    const potentialTableIds = potentialTables.map(t => t.id);
+
+    const startTime = new Date(date.getTime() - 2 * 60 * 60 * 1000);
+    const endTime = new Date(date.getTime() + 2 * 60 * 60 * 1000);
+
+    const reservedTables = await prisma.dat_ban.findMany({
+        where: {
+            ban_an_id: { in: potentialTableIds },
+            ngay_dat_ban: { gte: startTime, lte: endTime },
+            trang_thai: true // only active reservations
+        },
+        select: { ban_an_id: true }
+    });
+    const reservedTableIds = new Set(reservedTables.map(r => r.ban_an_id).filter(id => id !== null));
+
+    // Lọc ra các bàn không nằm trong danh sách đã đặt
+    const availableTables = potentialTables.filter(table => !reservedTableIds.has(table.id));
+
+    return availableTables;
 };

@@ -19,10 +19,11 @@ import roleAdminRoutes from './role.routes'; // Đổi tên cho rõ ràng
 import reservationPublicRoutes from './reservation.public.routes'; // File mới
 import reservationAdminRoutes from './reservation.admin.routes';   // File mới
 // =============================
+import permissionAdminRoutes from './permission.routes'; // Router cho quản lý quyền
 
 import blogPublicRoutes from './blog.routes'; // Giả sử tồn tại
 import blogCategoryPublicRoutes from './blogCategory.routes'; // Giả sử tồn tại
-import tablePublicRoutes from './table.routes'; // Giả sử tồn tại
+import tableRoutes from './table.routes';
 
 
 const router = Router();
@@ -38,7 +39,6 @@ publicRouter.use('/products', productPublicRoutes);
 publicRouter.get('/product-categories', handleGetPublicCategories);
 publicRouter.use('/blogs', blogPublicRoutes);
 publicRouter.use('/blog-categories', blogCategoryPublicRoutes);
-publicRouter.use('/tables', tablePublicRoutes);
 publicRouter.use('/reservations', reservationPublicRoutes); // <-- Sử dụng file public mới
 router.use('/public', publicRouter);
 
@@ -65,8 +65,9 @@ adminRouter.use('/media', mediaRoutes);
 adminRouter.use('/users', userAdminRoutes);
 adminRouter.use('/roles', roleAdminRoutes);
 adminRouter.use('/reservations', reservationAdminRoutes); // <-- Sử dụng file admin mới
-
+adminRouter.use('/permissions', permissionAdminRoutes);
 // Gắn adminRouter vào router chính
 router.use('/admin', adminRouter);
+router.use(tableRoutes);
 
 export default router;

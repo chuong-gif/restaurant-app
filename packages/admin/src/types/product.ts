@@ -47,10 +47,18 @@ export interface Table {
     id: number;
     so_ban: number;
     suc_chua: number;
-    trang_thai: number; // 0 = bận, 1 = trống (theo service)
+    trang_thai: number; // 0 = bận, 1 = trống
     anh_ban_id?: number | null;
     video_ban_id?: number | null;
     mo_ta_vi_tri?: string | null;
+    tang?: number | null; // <-- THÊM TẦNG
+    created_at?: string;
+    updated_at?: string;
+
+    // === THÊM QUAN HỆ MEDIA ===
+    media_files_ban_an_anh_ban_idTomedia_files?: { id: number; file_url: string } | null; // Ảnh
+    media_files_ban_an_video_ban_idTomedia_files?: { id: number; file_url: string } | null; // Video
+    // ==========================
 }
 
 // Dựa trên bảng `khuyen_mai` (chỉ lấy các trường cần thiết)
@@ -73,4 +81,11 @@ export interface ReservationDetailItem {
         ten_san_pham: string;
         media_files?: { file_url: string } | null;
     } | null;
+}
+export interface TableListResponse {
+    message: string;
+    data: Table[];
+    total: number;
+    totalPages: number;
+    currentPage: number;
 }

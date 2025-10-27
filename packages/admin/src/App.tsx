@@ -26,6 +26,9 @@ import ReservationTrashPage from './pages/reservations/ReservationTrashPage';
 import RoleListPage from './pages/roles/RoleListPage';
 import AssignPermissionPage from './pages/roles/AssignPermissionPage';
 
+// --- IMPORT TRANG TABLE ---
+import TableListPage from './pages/tables/TableListPage';
+
 function App() {
   return (
     <AntdApp>
@@ -62,6 +65,10 @@ function App() {
               <Route path="/roles" element={<RoleListPage />} />
               <Route path="/roles/permissions" element={<AssignPermissionPage />} />
               {/* ================================ */}
+
+              {/* === THÊM ROUTE TABLE === */}
+              <Route path="/tables" element={<TableListPage />} />
+              {/* ======================= */}
 
             </Route>
           </Route>

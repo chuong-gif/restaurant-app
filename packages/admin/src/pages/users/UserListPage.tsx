@@ -164,7 +164,7 @@ const UserListPage: React.FC = () => {
                         loading={isLoadingRoles}
                         disabled={filters.searchUserType === UserType.KHACH_HANG} // Disable nếu đang xem KH
                     >
-                        {roles?.map((role) => (
+                        {Array.isArray(roles) && roles.map((role) => ( // Chỉ map khi roles là mảng
                             <Option key={role.id} value={role.id}>{role.ten_vai_tro}</Option>
                         ))}
                     </Select>

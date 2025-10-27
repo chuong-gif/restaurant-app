@@ -1,93 +1,103 @@
+// packages/server/src/controllers/table.controller.ts
 import { Request, Response } from 'express';
-import * as tableService from '../services/table.service'; // Import các hàm xử lý logic bàn ăn từ service
-import { Prisma } from '@prisma/client'; // Import Prisma để xử lý lỗi đặc thù từ database
+import * as tableService from '../services/table.service';
 
-// 📘 [ADMIN] Lấy danh sách tất cả bàn ăn (có phân trang, tìm kiếm, lọc theo sức chứa)
+/**
+ * 🎮 Lấy danh sách bàn ăn (Admin - có lọc)
+ */
 export const handleGetTablesAdmin = async (req: Request, res: Response) => {
     try {
-        // Lấy giá trị tìm kiếm tên bàn nếu có, mặc định rỗng
-        const search = (req.query.search as string) || '';
-        // Lọc theo sức chứa (nếu có truyền vào query)
-        const capacity = req.query.searchCapacity ? parseInt(req.query.searchCapacity as string) : undefined;
-        // Lấy trang hiện tại (page) và số lượng mỗi trang (limit)
-        const page = parseInt(req.query.page as string) || 1;
-        const pageSize = parseInt(req.query.limit as string) || 10;
-
-        // Gọi service để truy vấn danh sách bàn theo điều kiện
-        const result = await tableService.getTablesAdmin(search, capacity, page, pageSize);
-
-        // Trả kết quả thành công cho client
-        res.status(200).json({ message: 'Lấy danh sách bàn thành công', ...result });
+        const filters = {
+            page: parseInt(req.query.page as string) || 1,
+            pageSize: parseInt(req.query.limit as string) || 10,
+            searchSoBan: req.query.so_ban ? parseInt(req.query.so_ban as string) : undefined,
+            searchSucChua: req.query.suc_chua ? parseInt(req.query.suc_chua as string) : undefined,
+            // === THÊM LỌC TẦNG ===
+            searchTang: req.query.tang ? parseInt(req.query.tang as string) : undefined,
+            // ====================
+        };
+        const result = await tableService.getTablesAdmin(filters);
+        res.status(200).json({ message: 'Lấy danh sách bàn ăn thành công', ...result });
     } catch (error: any) {
-        // Bắt lỗi tổng quát (lỗi hệ thống, DB, v.v.)
         res.status(500).json({ message: 'Lỗi máy chủ', error: error.message });
     }
 };
 
-// 📘 Lọc bàn trống theo ngày (để người dùng hoặc admin xem bàn còn trống)
-export const handleFilterByDate = async (req: Request, res: Response) => {
-    try {
-        // Lấy ngày cần kiểm tra (nếu không có thì lấy ngày hiện tại)
-        const date = req.query.date ? new Date(req.query.date as string) : new Date();
-        // Lọc thêm theo sức chứa (nếu có)
-        const capacity = req.query.searchCapacity ? parseInt(req.query.searchCapacity as string) : undefined;
-
-        // Gọi service để lấy danh sách bàn trống theo ngày và sức chứa
-        const availableTables = await tableService.findAvailableTablesByDate(date, capacity);
-
-        // Trả kết quả danh sách bàn trống
-        res.status(200).json({ message: 'Lấy danh sách bàn trống theo ngày thành công', results: availableTables });
-    } catch (error: any) {
-        // Bắt lỗi máy chủ hoặc lỗi xử lý logic
-        res.status(500).json({ message: 'Lỗi máy chủ', error: error.message });
-    }
-};
-
-// 📘 Tạo mới một bàn ăn trong hệ thống
+/**
+ * 🎮 Tạo bàn ăn mới
+ */
 export const handleCreateTable = async (req: Request, res: Response) => {
     try {
-        // Gửi dữ liệu sang service để tạo bàn mới
-        const newTable = await tableService.createTable(req.body);
-
-        // Phản hồi khi tạo thành công
-        res.status(201).json({ message: 'Tạo bàn thành công', data: newTable });
-    } catch (error: any) {
-        // Nếu lỗi trùng số bàn (Prisma lỗi P2002 - unique constraint)
-        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-            return res.status(409).json({ message: 'Số bàn đã tồn tại.' });
+        // Kiểm tra dữ liệu cơ bản
+        const { so_ban, suc_chua } = req.body;
+        if (!so_ban || !suc_chua) {
+            return res.status(400).json({ message: 'Số bàn và sức chứa là bắt buộc.' });
         }
-        // Lỗi khác (máy chủ, dữ liệu sai, v.v.)
-        res.status(500).json({ message: 'Lỗi máy chủ', error: error.message });
+        const newTable = await tableService.createTable(req.body);
+        res.status(201).json({ message: 'Tạo bàn ăn thành công', data: newTable });
+    } catch (error: any) {
+        res.status(400).json({ message: error.message || 'Tạo bàn ăn thất bại.' });
     }
 };
 
-// 📘 Cập nhật thông tin bàn (ví dụ: số bàn, sức chứa, trạng thái)
+/**
+ * 🎮 Cập nhật thông tin bàn ăn
+ */
 export const handleUpdateTable = async (req: Request, res: Response) => {
     try {
-        const id = parseInt(req.params.id); // Lấy ID bàn từ URL
-        // Gọi service để cập nhật dữ liệu bàn
-        const updatedTable = await tableService.updateTable(id, req.body);
-
-        // Phản hồi thành công
-        res.status(200).json({ message: 'Cập nhật bàn thành công', data: updatedTable });
-    } catch (error: any) {
-        // Nếu trùng số bàn (unique constraint)
-        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-            return res.status(409).json({ message: 'Số bàn đã tồn tại.' });
+        const id = parseInt(req.params.id);
+        // Kiểm tra body không rỗng
+        if (Object.keys(req.body).length === 0) {
+            return res.status(400).json({ message: 'Không có dữ liệu cập nhật.' });
         }
-        // Lỗi khác
-        res.status(500).json({ message: 'Lỗi máy chủ', error: error.message });
+        const updatedTable = await tableService.updateTable(id, req.body);
+        res.status(200).json({ message: 'Cập nhật bàn ăn thành công', data: updatedTable });
+    } catch (error: any) {
+        if (error.message === 'Bàn ăn không tồn tại.') {
+            res.status(404).json({ message: error.message });
+        } else {
+            res.status(400).json({ message: error.message || 'Cập nhật bàn ăn thất bại.' });
+        }
     }
 };
 
-// 📘 Xóa bàn ăn theo ID
+/**
+ * 🎮 Xóa bàn ăn
+ */
 export const handleDeleteTable = async (req: Request, res: Response) => {
     try {
-        const id = parseInt(req.params.id); // Lấy ID bàn từ params
-        await tableService.deleteTable(id); // Gọi service để xóa bàn
-        res.status(200).json({ message: 'Xóa bàn thành công' }); // Phản hồi kết quả
+        const id = parseInt(req.params.id);
+        await tableService.deleteTable(id);
+        res.status(200).json({ message: 'Xóa bàn ăn thành công.' });
     } catch (error: any) {
-        // Nếu có lỗi (ví dụ: bàn không tồn tại)
-        res.status(400).json({ message: error.message });
+        if (error.message === 'Bàn ăn không tồn tại.') {
+            res.status(404).json({ message: error.message });
+        } else {
+            // Bao gồm cả lỗi không thể xóa do ràng buộc
+            res.status(400).json({ message: error.message || 'Xóa bàn ăn thất bại.' });
+        }
+    }
+};
+
+/**
+ * 🎮 Lấy danh sách bàn trống theo ngày và sức chứa (Cho Client)
+ */
+export const handleGetAvailableTablesByDate = async (req: Request, res: Response) => {
+    try {
+        const dateString = req.query.date as string;
+        const partySize = parseInt(req.query.partySize as string);
+
+        if (!dateString || isNaN(partySize) || partySize <= 0) {
+            return res.status(400).json({ message: 'Ngày đặt và số lượng khách hợp lệ là bắt buộc.' });
+        }
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+            return res.status(400).json({ message: 'Ngày đặt không hợp lệ.' });
+        }
+
+        const availableTables = await tableService.getAvailableTablesByDate(date, partySize);
+        res.status(200).json({ message: 'Lấy danh sách bàn trống thành công', data: availableTables });
+    } catch (error: any) {
+        res.status(400).json({ message: error.message || 'Lỗi khi tìm bàn trống.' });
     }
 };
