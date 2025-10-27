@@ -3,87 +3,70 @@
 import { Router } from 'express';
 import { authenticateToken } from '../middlewares/auth.middleware';
 
-// --- Import TẤT CẢ các router con ---
-
-// Router xác thực
+// --- Import Routers ---
 import authRoutes from './auth.routes';
 import adminAuthRoutes from './adminAuth.routes';
-
-// Router cho các chức năng (đã tách biệt)
 import productPublicRoutes from './product.routes';
 import productAdminRoutes from './product.admin.routes';
 import productCategoryAdminRoutes from './productCategory.routes';
-
-// === 1. THÊM DÒNG IMPORT NÀY ===
 import { handleGetPublicCategories } from '../controllers/productCategory.controller';
-// ===================================
-
 import mediaRoutes from './media.routes';
 import myReservationRoutes from './myReservation.routes';
+import userAdminRoutes from './user.routes'; // Đổi tên cho rõ ràng
+import roleAdminRoutes from './role.routes'; // Đổi tên cho rõ ràng
 
-// Giả sử các file này tồn tại cho public (nếu không có, em có thể comment lại)
-import blogPublicRoutes from './blog.routes';
-import blogCategoryPublicRoutes from './blogCategory.routes';
-import tablePublicRoutes from './table.routes';
-import reservationPublicRoutes from './reservation.routes';
+// === SỬA IMPORT RESERVATION ===
+import reservationPublicRoutes from './reservation.public.routes'; // File mới
+import reservationAdminRoutes from './reservation.admin.routes';   // File mới
+// =============================
+
+import blogPublicRoutes from './blog.routes'; // Giả sử tồn tại
+import blogCategoryPublicRoutes from './blogCategory.routes'; // Giả sử tồn tại
+import tablePublicRoutes from './table.routes'; // Giả sử tồn tại
+
 
 const router = Router();
 
 /* ==========================================================
-🌍 ===== PUBLIC ROUTES (AI CŨNG CÓ THỂ TRUY CẬP) =====
+🌍 ===== PUBLIC ROUTES =====
 ========================================================== */
-
-// --- Route xác thực cho Khách hàng (client) ---
 router.use('/auth', authRoutes);
+router.use('/admin/auth', adminAuthRoutes); // Đăng nhập admin
 
-// --- Route xác thực cho Admin (phải là public để có thể đăng nhập) ---
-router.use('/admin/auth', adminAuthRoutes);
-
-// --- Các route public lấy dữ liệu cho trang client ---
 const publicRouter = Router();
 publicRouter.use('/products', productPublicRoutes);
-
-// === 2. THÊM DÒNG ROUTE NÀY VÀO ĐÂY ===
 publicRouter.get('/product-categories', handleGetPublicCategories);
-// =====================================
-
 publicRouter.use('/blogs', blogPublicRoutes);
 publicRouter.use('/blog-categories', blogCategoryPublicRoutes);
 publicRouter.use('/tables', tablePublicRoutes);
-publicRouter.use('/reservations', reservationPublicRoutes);
-// ...gắn các route public khác vào đây...
+publicRouter.use('/reservations', reservationPublicRoutes); // <-- Sử dụng file public mới
 router.use('/public', publicRouter);
 
-
 /* ==========================================================
-👤 ===== PRIVATE USER ROUTES (YÊU CẦU ĐĂNG NHẬP) =====
+👤 ===== PRIVATE USER ROUTES =====
 ========================================================== */
 const privateUserRouter = Router();
-privateUserRouter.use(authenticateToken); // Bắt buộc xác thực
-privateUserRouter.use('/my-reservations', myReservationRoutes);
-
+privateUserRouter.use(authenticateToken);
+privateUserRouter.use('/my-reservations', myReservationRoutes); // Route lấy lịch sử đặt bàn của user
+// Thêm route lấy chi tiết đặt bàn của user (nếu cần)
+// privateUserRouter.get('/reservations/:id', handleGetMyBookingDetail); // Cần import controller
 router.use('/user', privateUserRouter);
 
-
 /* ==========================================================
-🔒 ===== ADMIN ROUTES (YÊU CẦU ĐĂNG NHẬP) =====
+🔒 ===== ADMIN ROUTES =====
 ========================================================== */
 const adminRouter = Router();
-adminRouter.use(authenticateToken); // "Người gác cổng" Bắt buộc xác thực
+adminRouter.use(authenticateToken); // Middleware xác thực cho tất cả admin routes
 
-// Gắn các router quản lý vào đây
+// Gắn các router quản lý
 adminRouter.use('/products', productAdminRoutes);
 adminRouter.use('/product-categories', productCategoryAdminRoutes);
 adminRouter.use('/media', mediaRoutes);
+adminRouter.use('/users', userAdminRoutes);
+adminRouter.use('/roles', roleAdminRoutes);
+adminRouter.use('/reservations', reservationAdminRoutes); // <-- Sử dụng file admin mới
 
-// ⚠️ Cảnh báo: Các route dưới đây đang dùng chung file với public.
-// Em sẽ cần tạo các file route admin riêng cho chúng (vd: blog.admin.routes.ts)
-// Thầy tạm thời vô hiệu hóa để tránh xung đột.
-// adminRouter.use('/blogs', blogRoutes); 
-// adminRouter.use('/reservations', reservationRoutes);
-// ...
-
-// Gắn adminRouter vào router chính với tiền tố /admin
+// Gắn adminRouter vào router chính
 router.use('/admin', adminRouter);
 
 export default router;

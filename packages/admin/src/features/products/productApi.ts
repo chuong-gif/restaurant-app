@@ -2,7 +2,6 @@
 import { baseApi } from '../../services/baseApi';
 import { Product, ProductListResponse } from '../../types/product';
 
-// Định nghĩa kiểu cho các tham số query
 interface GetProductsParams {
     page: number;
     pageSize: number;
@@ -11,24 +10,20 @@ interface GetProductsParams {
     trang_thai?: boolean;
 }
 
-// Kiểu dữ liệu cho response lấy 1 SP
 interface ProductResponse {
     message: string;
     data: Product;
 }
 
-// Kiểu dữ liệu cho form (thêm/sửa)
-// Lấy các trường từ Product, bỏ đi các trường tự động
 type ProductFormInput = Omit<Product, 'id' | 'ma_san_pham' | 'created_at' | 'updated_at' | 'media_files' | 'danh_muc_san_pham'>;
 
 
 export const productApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
-        // 1. Query lấy danh sách sản phẩm (có lọc và phân trang)
         getProducts: builder.query<ProductListResponse, GetProductsParams>({
             query: (params) => ({
                 url: '/admin/products',
-                params: params, // Gửi các tham số lên query string
+                params: params,
             }),
             providesTags: (result) =>
                 result
@@ -39,14 +34,12 @@ export const productApi = baseApi.injectEndpoints({
                     : [{ type: 'Product', id: 'LIST' }],
         }),
 
-        // 2. Query lấy 1 sản phẩm theo ID
         getProductById: builder.query<Product, number>({
-            query: (id) => `/admin/products/${id}`,
+            query: (id) => `/admin/products/${id}`, // API này giờ đã hoạt động
             transformResponse: (response: ProductResponse) => response.data,
             providesTags: (result, error, id) => [{ type: 'Product', id }],
         }),
 
-        // 3. Mutation tạo mới sản phẩm
         createProduct: builder.mutation<Product, ProductFormInput>({
             query: (newProduct) => ({
                 url: '/admin/products',
@@ -56,7 +49,6 @@ export const productApi = baseApi.injectEndpoints({
             invalidatesTags: [{ type: 'Product', id: 'LIST' }],
         }),
 
-        // 4. Mutation cập nhật sản phẩm
         updateProduct: builder.mutation<Product, { id: number; data: Partial<ProductFormInput> }>({
             query: ({ id, data }) => ({
                 url: `/admin/products/${id}`,
@@ -69,7 +61,6 @@ export const productApi = baseApi.injectEndpoints({
             ],
         }),
 
-        // 5. Mutation xóa (mềm) sản phẩm
         deleteProduct: builder.mutation<{ message: string }, number>({
             query: (id) => ({
                 url: `/admin/products/${id}`,
@@ -77,6 +68,17 @@ export const productApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: [{ type: 'Product', id: 'LIST' }],
         }),
+
+        // === THÊM MUTATION XÓA VĨNH VIỄN (SỬA LỖI 2) ===
+        permanentlyDeleteProduct: builder.mutation<{ message: string }, number>({
+            query: (id) => ({
+                url: `/admin/products/permanent/${id}`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: [{ type: 'Product', id: 'LIST' }],
+        }),
+        // ============================================
+
     }),
 });
 
@@ -86,4 +88,5 @@ export const {
     useCreateProductMutation,
     useUpdateProductMutation,
     useDeleteProductMutation,
+    usePermanentlyDeleteProductMutation // <-- Export hook mới
 } = productApi;

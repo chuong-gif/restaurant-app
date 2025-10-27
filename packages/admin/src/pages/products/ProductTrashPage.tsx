@@ -10,11 +10,13 @@ import {
     Row,
     Col,
     Avatar,
-    App // <-- THÊM DÒNG NÀY
+    App
 } from 'antd';
 import {
     UndoOutlined,
-    ArrowLeftOutlined
+    ArrowLeftOutlined,
+    WarningOutlined,
+    DeleteOutlined, // <-- Import icon mới
 } from '@ant-design/icons';
 import {
     useNavigate
@@ -25,13 +27,12 @@ import {
 } from 'react-redux';
 import {
     useGetProductsQuery,
-    useUpdateProductMutation
+    useUpdateProductMutation,
+    usePermanentlyDeleteProductMutation // <-- Import hook mới
 } from '../../features/products/productApi';
-// === SỬA DÒNG DƯỚI ===
 import {
-    useGetPublicProductCategoriesQuery // <-- Sửa tên hook
+    useGetPublicProductCategoriesQuery
 } from '../../features/products/categoryApi';
-// ====================
 import {
     setProductFilters,
     setProductPage
@@ -56,7 +57,7 @@ const {
 const ProductTrashPage = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const { message, modal } = App.useApp(); // <-- THÊM DÒNG NÀY: Lấy context
+    const { message, modal } = App.useApp();
 
     const filters = useSelector((state: RootState) => state.productFilters);
     const [searchTerm, setSearchTerm] = useState(filters.searchName);
@@ -69,19 +70,23 @@ const ProductTrashPage = () => {
     } = useGetProductsQuery({
         ...filters,
         searchName: debouncedSearchTerm,
-        trang_thai: false, // Chỉ lấy sản phẩm đã xóa (ngưng hoạt động)
+        trang_thai: false,
     });
 
-    // === SỬA DÒNG DƯỚI ===
     const {
-        data: categories, // Hook này giờ trả về mảng, code sẽ chạy đúng
+        data: categories,
         isLoading: isLoadingCategories
-    } = useGetPublicProductCategoriesQuery(); // <-- Sửa tên hook
-    // ====================
+    } = useGetPublicProductCategoriesQuery();
 
     const [updateProduct, {
         isLoading: isRestoring
     }] = useUpdateProductMutation();
+
+    // === THÊM HOOK XÓA VĨNH VIỄN (SỬA LỖI 2) ===
+    const [permanentlyDelete, {
+        isLoading: isHardDeleting
+    }] = usePermanentlyDeleteProductMutation();
+    // =======================================
 
     const handleSearch = useCallback((value: string) => {
         setSearchTerm(value);
@@ -97,15 +102,14 @@ const ProductTrashPage = () => {
     }, [dispatch]);
 
     const handleRestore = useCallback((id: number) => {
-        // === SỬA LẠI HÀM NÀY ĐỂ DÙNG `modal` ===
-        modal.confirm({ // <-- Sửa từ Modal.confirm
+        modal.confirm({
             title: 'Xác nhận khôi phục',
             content: 'Bạn có chắc muốn khôi phục sản phẩm này?',
             okText: 'Khôi phục',
             cancelText: 'Hủy',
             onOk: async () => {
                 try {
-                    // Gọi updateProduct với trang_thai = true
+                    // Hàm này giờ đã hoạt động (Sửa lỗi 1)
                     await updateProduct({ id, data: { trang_thai: true } }).unwrap();
                     message.success('Khôi phục sản phẩm thành công.');
                 } catch (error) {
@@ -113,8 +117,28 @@ const ProductTrashPage = () => {
                 }
             },
         });
-        // ===================================
-    }, [updateProduct, message, modal]); // Thêm message, modal
+    }, [updateProduct, message, modal]);
+
+    // === THÊM HÀM XÓA VĨNH VIỄN (SỬA LỖI 2) ===
+    const handlePermanentDelete = useCallback((id: number) => {
+        modal.confirm({
+            title: 'XÁC NHẬN XÓA VĨNH VIỄN',
+            icon: <WarningOutlined style={{ color: 'red' }} />,
+            content: 'Hành động này không thể hoàn tác! Bạn có chắc muốn XÓA VĨNH VIỄN sản phẩm này?',
+            okText: 'Xóa vĩnh viễn',
+            okType: 'danger',
+            cancelText: 'Hủy',
+            onOk: async () => {
+                try {
+                    await permanentlyDelete(id).unwrap();
+                    message.success('Xóa vĩnh viễn sản phẩm thành công.');
+                } catch (error: any) {
+                    message.error(error.data?.message || 'Xóa vĩnh viễn thất bại.');
+                }
+            },
+        });
+    }, [permanentlyDelete, message, modal]);
+    // =========================================
 
     const columns = useMemo(() => [
         {
@@ -158,10 +182,20 @@ const ProductTrashPage = () => {
                     >
                         Khôi phục
                     </Button>
+                    {/* === THÊM NÚT XÓA VĨNH VIỄN (SỬA LỖI 2) === */}
+                    <Button
+                        type="primary"
+                        danger
+                        icon={<DeleteOutlined />}
+                        onClick={() => handlePermanentDelete(record.id)}
+                    >
+                        Xóa vĩnh viễn
+                    </Button>
+                    {/* ========================================= */}
                 </Space>
             ),
         },
-    ], [handleRestore]);
+    ], [handleRestore, handlePermanentDelete]); // Thêm dependency
 
     return (
         <div>
@@ -193,7 +227,6 @@ const ProductTrashPage = () => {
                         allowClear
                         loading={isLoadingCategories}
                     >
-                        {/* Code này giờ sẽ chạy đúng */}
                         {categories?.map((cat) => (
                             <Option key={cat.id} value={cat.id}>{cat.ten_danh_muc}</Option>
                         ))}
@@ -205,14 +238,16 @@ const ProductTrashPage = () => {
                 columns={columns}
                 dataSource={productsData?.data || []}
                 rowKey="id"
-                loading={isLoading || isFetching || isRestoring}
+                loading={isLoading || isFetching || isRestoring || isHardDeleting} // Thêm isHardDeleting
                 pagination={{
                     current: productsData?.currentPage || 1,
                     pageSize: filters.pageSize || 10,
                     total: productsData?.total || 0,
                     onChange: handlePageChange,
-                    showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} sản phẩm`,
+                    showTotal: (total, range) =>
+                        `${range[0]}-${range[1]} của ${total} sản phẩm`,
                 }}
+
             />
         </div>
     );

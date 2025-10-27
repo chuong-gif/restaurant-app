@@ -42,3 +42,35 @@ export interface ProductListResponse {
     totalPages: number;
     currentPage: number;
 }
+// Dựa trên bảng `ban_an`
+export interface Table {
+    id: number;
+    so_ban: number;
+    suc_chua: number;
+    trang_thai: number; // 0 = bận, 1 = trống (theo service)
+    anh_ban_id?: number | null;
+    video_ban_id?: number | null;
+    mo_ta_vi_tri?: string | null;
+}
+
+// Dựa trên bảng `khuyen_mai` (chỉ lấy các trường cần thiết)
+export interface Promotion {
+    id: number;
+    ma_khuyen_mai: string;
+    giam_gia: number;
+    loai_giam_gia: boolean; // 0: %, 1: Tiền mặt
+}
+
+// Dựa trên bảng `chi_tiet_dat_ban` và include từ service
+export interface ReservationDetailItem {
+    id: number;
+    dat_ban_id: number;
+    san_pham_id: number;
+    so_luong: number;
+    gia_tai_thoi_diem: number;
+    san_pham?: { // Dữ liệu join từ getAdminReservationById
+        id: number;
+        ten_san_pham: string;
+        media_files?: { file_url: string } | null;
+    } | null;
+}

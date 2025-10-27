@@ -1,6 +1,6 @@
 // packages/admin/src/App.tsx
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { App as AntdApp } from 'antd'; // <-- THÊM DÒNG NÀY
+import { App as AntdApp } from 'antd';
 import AdminLayout from './layouts/AdminLayout';
 import AuthLayout from './layouts/AuthLayout';
 import Login from './pages/Login';
@@ -12,9 +12,18 @@ import ProductForm from './pages/products/ProductForm';
 import ProductTrashPage from './pages/products/ProductTrashPage';
 import CategoryListPage from './pages/categories/CategoryListPage';
 
+// --- IMPORT CÁC TRANG USER ---
+import UserListPage from './pages/users/UserListPage';
+import UserFormPage from './pages/users/UserFormPage';
+import UserTrashPage from './pages/users/UserTrashPage';
+
+// --- IMPORT CÁC TRANG RESERVATION ---
+import ReservationListPage from './pages/reservations/ReservationListPage';
+import ReservationDetailPage from './pages/reservations/ReservationDetailPage';
+import ReservationTrashPage from './pages/reservations/ReservationTrashPage';
+
 function App() {
   return (
-    // BỌC MỌI THỨ BÊN TRONG <AntdApp> ĐỂ CÓ CONTEXT
     <AntdApp>
       <BrowserRouter>
         <Routes>
@@ -31,6 +40,20 @@ function App() {
 
               {/* Danh mục */}
               <Route path="/categories" element={<CategoryListPage />} />
+
+              {/* === THÊM ROUTES USER === */}
+              <Route path="/users" element={<UserListPage />} />
+              <Route path="/users/new" element={<UserFormPage />} />
+              <Route path="/users/edit/:id" element={<UserFormPage />} />
+              <Route path="/users/trash" element={<UserTrashPage />} />
+              {/* ======================== */}
+
+              {/* === THÊM ROUTES RESERVATION === */}
+              <Route path="/reservations" element={<ReservationListPage />} />
+              <Route path="/reservations/:id" element={<ReservationDetailPage />} />
+              <Route path="/reservations/trash" element={<ReservationTrashPage />} />
+              {/* ============================= */}
+
             </Route>
           </Route>
 
@@ -42,7 +65,7 @@ function App() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </BrowserRouter>
-    </AntdApp> // <-- ĐÓNG THẺ
+    </AntdApp>
   );
 }
 
