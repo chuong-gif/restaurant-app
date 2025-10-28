@@ -19,15 +19,19 @@ export const baseApi = createApi({
     }),
     // Các "tag" dùng để tự động fetch lại dữ liệu khi có sự thay đổi (CUD)
     tagTypes: [
-        'User',
-        'Product',
-        'Category',
-        'Reservation',
-        'Blog',
-        'Role',
-        'Permission',
-        'Table', // 👈 THÊM DÒNG NÀY
+        "User",
+        "Product",
+        "Category",
+        "Reservation",
+        "Blog",
+        "Role",
+        "Permission",
+        "Table",
+        "Promotion",
+        "BlogCategory",
+        "BlogPost"
     ],
+
 
     endpoints: () => ({}), // Các endpoints cụ thể sẽ được "inject" vào từ các file api khác
 });

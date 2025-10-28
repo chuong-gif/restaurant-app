@@ -1,95 +1,122 @@
 import { Request, Response } from 'express';
-// Import toàn bộ các hàm xử lý logic blog từ tầng service
 import * as blogService from '../services/blog.service';
+import { AuthenticatedRequest } from '../middlewares/auth.middleware';
 
-// Controller: Lấy danh sách bài viết, có hỗ trợ tìm kiếm và phân trang
-export const handleGetBlogs = async (req: Request, res: Response) => {
+/**
+
+* 🎮 Lấy danh sách bài viết (Admin) — có lọc, tìm kiếm, phân trang
+  */
+export const handleGetBlogsAdmin = async (req: Request, res: Response) => {
     try {
-        // Lấy từ khóa tìm kiếm từ query (?searchName=...), nếu không có thì là chuỗi rỗng
-        const search = (req.query.searchName as string) || '';
-        // Lấy số trang hiện tại (mặc định 1)
-        const page = parseInt(req.query.page as string) || 1;
-        // Lấy số bài viết mỗi trang (mặc định 10)
-        const pageSize = parseInt(req.query.limit as string) || 10;
-        // Gọi hàm service để lấy danh sách bài viết theo các tham số trên
-        const result = await blogService.getBlogs(search, page, pageSize);
-        // Trả kết quả JSON gồm message + dữ liệu từ service
-        res.status(200).json({ message: 'Lấy danh sách bài viết thành công', ...result });
+        const filters = {
+            page: parseInt(req.query.page as string) || 1,
+            limit: parseInt(req.query.limit as string) || 10,
+            search: (req.query.search as string) || undefined,
+            categoryId: req.query.categoryId ? parseInt(req.query.categoryId as string) : undefined,
+        };
+
+        // ✅ Gọi hàm getBlogsAdmin mới trong blog.service.ts
+        const result = await blogService.getBlogsAdmin(filters);
+
+        res.status(200).json({
+            message: 'Lấy danh sách bài viết thành công',
+            ...result,
+        });
     } catch (error: any) {
-        // Nếu có lỗi trong quá trình xử lý, trả về mã lỗi 500
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ message: 'Lỗi máy chủ', error: error.message });
     }
 };
 
-// Controller: Lấy chi tiết 1 bài viết theo ID
+/**
+
+* 🎮 Lấy chi tiết bài viết theo ID
+  */
 export const handleGetBlogById = async (req: Request, res: Response) => {
     try {
-        // Lấy ID bài viết từ params (URL: /blogs/:id)
         const id = parseInt(req.params.id);
-        // Gọi service để lấy thông tin bài viết theo ID
         const blog = await blogService.getBlogById(id);
-        // Trả về dữ liệu bài viết
-        res.status(200).json(blog);
+        res.status(200).json({ message: 'Lấy chi tiết bài viết thành công', data: blog });
     } catch (error: any) {
-        // Nếu không tìm thấy hoặc lỗi, trả về mã 404
-        res.status(404).json({ message: error.message });
+        if (error.message.includes('không tồn tại')) {
+            res.status(404).json({ message: error.message });
+        } else {
+            res.status(500).json({ message: 'Lỗi máy chủ', error: error.message });
+        }
     }
 };
 
-// Controller: Lấy chi tiết bài viết theo slug (đường dẫn thân thiện)
+/**
+
+* 🎮 Lấy chi tiết bài viết theo Slug
+  */
 export const handleGetBlogBySlug = async (req: Request, res: Response) => {
     try {
-        // Lấy slug từ URL (ví dụ: /blogs/ten-bai-viet)
         const slug = req.params.slug;
-        // Gọi service để lấy bài viết theo slug
         const blog = await blogService.getBlogBySlug(slug);
-        // Trả về thông tin bài viết kèm thông báo
-        res.status(200).json({ message: 'Lấy thông tin bài viết thành công', data: blog });
+        res.status(200).json({ message: 'Lấy chi tiết bài viết thành công', data: blog });
     } catch (error: any) {
-        // Nếu slug không tồn tại hoặc lỗi, trả về mã 404
-        res.status(404).json({ message: error.message });
+        if (error.message.includes('không tồn tại')) {
+            res.status(404).json({ message: error.message });
+        } else {
+            res.status(500).json({ message: 'Lỗi máy chủ', error: error.message });
+        }
     }
 };
 
-// Controller: Tạo mới một bài viết
-export const handleCreateBlog = async (req: Request, res: Response) => {
+/**
+
+* 🎮 Tạo bài viết mới — có liên kết tới người dùng đăng bài
+  */
+export const handleCreateBlog = async (req: AuthenticatedRequest, res: Response) => {
     try {
-        // Gọi service tạo bài viết mới với dữ liệu từ body (title, content, v.v.)
-        const newBlog = await blogService.createBlog(req.body);
-        // Trả về mã 201 (Created) và dữ liệu bài viết vừa tạo
+        const userId = (req.user as any)?.id; // ✅ Lấy id từ JWT
+        if (!userId) {
+            return res.status(403).json({ message: 'Không tìm thấy thông tin người dùng xác thực.' });
+        }
+
+        const newBlog = await blogService.createBlog({
+            ...req.body,
+            nguoi_dung_id: userId, // ✅ Gắn ID người đăng bài
+        });
+
         res.status(201).json({ message: 'Tạo bài viết thành công', data: newBlog });
     } catch (error: any) {
-        // Nếu có lỗi khi tạo (vd: dữ liệu thiếu), trả về mã lỗi 500
-        res.status(500).json({ message: error.message });
+        res.status(400).json({ message: error.message || 'Tạo bài viết thất bại.' });
     }
 };
 
-// Controller: Cập nhật bài viết theo ID
+/**
+
+* 🎮 Cập nhật bài viết
+  */
 export const handleUpdateBlog = async (req: Request, res: Response) => {
     try {
-        // Lấy ID bài viết cần cập nhật
         const id = parseInt(req.params.id);
-        // Gọi service để cập nhật bài viết với dữ liệu mới trong body
         const updatedBlog = await blogService.updateBlog(id, req.body);
-        // Trả về bài viết sau khi cập nhật
         res.status(200).json({ message: 'Cập nhật bài viết thành công', data: updatedBlog });
     } catch (error: any) {
-        // Nếu lỗi (vd: không tìm thấy ID), trả về mã lỗi 500
-        res.status(500).json({ message: error.message });
+        if (error.message.includes('không tồn tại')) {
+            res.status(404).json({ message: error.message });
+        } else {
+            res.status(400).json({ message: error.message || 'Cập nhật bài viết thất bại.' });
+        }
     }
 };
 
-// Controller: Xóa bài viết theo ID
+/**
+
+* 🎮 Xóa bài viết
+  */
 export const handleDeleteBlog = async (req: Request, res: Response) => {
     try {
-        // Lấy ID bài viết cần xóa
         const id = parseInt(req.params.id);
-        // Gọi service xóa bài viết theo ID
         await blogService.deleteBlog(id);
-        // Trả về thông báo thành công
-        res.status(200).json({ message: 'Xóa bài viết thành công' });
+        res.status(200).json({ message: 'Xóa bài viết thành công.' });
     } catch (error: any) {
-        // Nếu lỗi trong quá trình xóa, trả về mã lỗi 500
-        res.status(500).json({ message: error.message });
+        if (error.message.includes('không tồn tại')) {
+            res.status(404).json({ message: error.message });
+        } else {
+            res.status(400).json({ message: error.message || 'Xóa bài viết thất bại.' });
+        }
     }
 };

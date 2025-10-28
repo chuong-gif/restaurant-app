@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import {
-    handleGetBlogs,
+    handleGetBlogsAdmin,
     handleCreateBlog,
     handleGetBlogById,
     handleGetBlogBySlug,
@@ -11,11 +11,11 @@ import {
 const router = Router();
 
 // Routes for admin panel
-router.get('/', handleGetBlogs);
+router.get('/', handleGetBlogsAdmin);
 router.post('/', handleCreateBlog);
 router.get('/:id', handleGetBlogById);
-router.put('/:id', handleUpdateBlog); // Dùng PUT cho cập nhật toàn bộ
-router.patch('/:id', handleUpdateBlog); // Dùng PATCH cho cập nhật từng phần
+router.put('/:id', handleUpdateBlog);
+router.patch('/:id', handleUpdateBlog);
 router.delete('/:id', handleDeleteBlog);
 
 // Public route for client website

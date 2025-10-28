@@ -33,14 +33,13 @@ const menuItems: MenuItem[] = [
     },
     {
         key: 'blog', icon: <ReadOutlined />, label: 'Quản Lý Bài Viết', children: [
-            // Thêm các key và path cho blog sau này
-            { key: 'blog-categories', icon: <AppstoreOutlined />, label: 'Danh mục bài viết', path: '/blog-categories' },
-            { key: 'blog-posts', icon: <FileTextOutlined />, label: 'Bài viết', path: '/blog-posts' },
+            { key: 'blog-categories', icon: <AppstoreOutlined />, label: 'Danh mục bài viết', path: '/blog-categories' }, // <-- Sửa/Thêm path
+            { key: 'blog-posts', icon: <FileTextOutlined />, label: 'Bài viết', path: '/blogs' }, // <-- Sửa/Thêm path
         ]
     },
     {
         key: 'other', icon: <SettingOutlined />, label: 'Quản lý Khác', children: [
-            { key: 'promotions', icon: <GiftOutlined />, label: 'Khuyến mãi', path: '/promotions' },
+            { key: 'promotions', icon: <GiftOutlined />, label: 'Khuyến mãi', path: '/promotions' }, // <-- Đã thêm/sửa
         ]
     },
     {
@@ -148,7 +147,7 @@ const AdminLayout = () => {
         <div className="flex h-screen bg-gray-100">
             {/* Sidebar */}
             <aside className="w-64 bg-gray-800 text-white flex flex-col overflow-y-auto">
-                <div className="p-4 text-xl font-bold border-b border-gray-700">Huong Sen Admin</div>
+                <div className="p-4 text-xl font-bold border-b border-gray-700">Trang Quản Lý</div>
                 <nav className="flex-1 px-2 py-4">
                     <ul className="space-y-1">
                         {renderMenuItems(menuItems)}

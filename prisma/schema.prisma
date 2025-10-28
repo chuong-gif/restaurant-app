@@ -7,23 +7,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model bai_viet {
-  id               Int              @id @default(autoincrement())
+  id               Int      @id @default(autoincrement())
   anh_bia_id       Int?
-  tieu_de          String           @db.VarChar(255)
-  noi_dung         String           @db.Text
-  tac_gia          String           @db.VarChar(255)
+  tieu_de          String   @db.VarChar(255)
+  noi_dung         String   @db.Text
+  // === SỬA DÒNG NÀY ===
+  // tac_gia          String   @db.VarChar(255) // Bỏ dòng này
+  nguoi_dung_id    Int? // <-- THÊM DÒNG NÀY: ID tác giả
+  // =====================
   danh_muc_blog_id Int?
-  slug             String           @db.VarChar(255)
-  created_at       DateTime         @default(now()) @db.Timestamp(0)
-  updated_at       DateTime         @default(now()) @db.Timestamp(0)
-  danh_muc_blog    danh_muc_blog?   @relation(fields: [danh_muc_blog_id], references: [id], onDelete: Restrict, map: "fk_baiviet_danhmuc")
-  media_files      media_files?     @relation(fields: [anh_bia_id], references: [id], map: "fk_baiviet_media")
-  binh_luan_blog   binh_luan_blog[]
+  slug             String   @unique @db.VarChar(255) // Thêm @unique cho slug
+  created_at       DateTime @default(now()) @db.Timestamp(0)
+  updated_at       DateTime @default(now()) @updatedAt @db.Timestamp(0) // Sửa: Thêm @updatedAt
+
+  // === THÊM CÁC QUAN HỆ ===
+  danh_muc_blog danh_muc_blog? @relation(fields: [danh_muc_blog_id], references: [id], onDelete: SetNull, map: "fk_baiviet_danhmucblog") // Sửa: Thêm onDelete
+  media_files   media_files?   @relation("bai_viet_anh_bia_idTomedia_files", fields: [anh_bia_id], references: [id], onDelete: SetNull, map: "fk_baiviet_media")
+  nguoi_dung    nguoi_dung?    @relation(fields: [nguoi_dung_id], references: [id], onDelete: SetNull) // <-- THÊM QUAN HỆ TÁC GIẢ
+  // =======================
+
+  binh_luan_blog binh_luan_blog[]
 
   @@index([danh_muc_blog_id], map: "fk_baiviet_danhmuc")
   @@index([anh_bia_id], map: "fk_baiviet_media")
+  @@index([nguoi_dung_id]) // <-- THÊM INDEX TÁC GIẢ
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -159,7 +167,7 @@ model media_files {
   storage_service                         String?      @default("firebase") @db.VarChar(50)
   created_at                              DateTime     @default(now()) @db.Timestamp(0)
   updated_at                              DateTime     @default(now()) @db.Timestamp(0)
-  bai_viet                                bai_viet[]
+  bai_viet                                bai_viet[]   @relation("bai_viet_anh_bia_idTomedia_files")
   ban_an_ban_an_anh_ban_idTomedia_files   ban_an[]     @relation("ban_an_anh_ban_idTomedia_files")
   ban_an_ban_an_video_ban_idTomedia_files ban_an[]     @relation("ban_an_video_ban_idTomedia_files")
   nguoi_dung                              nguoi_dung[]
@@ -188,6 +196,7 @@ model nguoi_dung {
   vai_tro                vai_tro?                   @relation(fields: [vai_tro_id], references: [id], onDelete: Restrict, map: "fk_nguoidung_vaitro")
   phuong_thuc_thanh_toan phuong_thuc_thanh_toan[]
   the_thanh_vien         the_thanh_vien?
+  bai_viet               bai_viet[]
 
   @@index([anh_dai_dien_id], map: "fk_nguoidung_media")
   @@index([vai_tro_id], map: "fk_nguoidung_vaitro")

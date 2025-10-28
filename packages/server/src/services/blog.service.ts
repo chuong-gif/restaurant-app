@@ -1,92 +1,182 @@
-import prisma from '../models';
-import { Prisma } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
+import slugify from "slugify";
 
-// ✅ Utility để tạo "slug" (chuỗi URL thân thiện) từ tiêu đề bài viết
-const createSlug = (title: string) => {
-    return title
-        .toLowerCase() // chuyển toàn bộ thành chữ thường
-        .normalize("NFD") // tách dấu khỏi ký tự tiếng Việt
-        .replace(/[\u0300-\u036f]/g, "") // xóa toàn bộ dấu
-        .replace(/[^a-z0-9\s-]/g, "") // loại bỏ ký tự đặc biệt (chỉ giữ a-z, 0-9, khoảng trắng, gạch nối)
-        .trim() // loại bỏ khoảng trắng ở đầu/cuối
-        .replace(/\s+/g, "-") // thay khoảng trắng giữa các từ bằng "-"
-        .replace(/-+/g, "-"); // gộp nhiều dấu "-" liên tiếp thành một
-};
+const prisma = new PrismaClient();
 
-// ✅ Lấy danh sách bài viết có phân trang + tìm kiếm theo tiêu đề/tác giả
-export const getBlogs = async (search: string, page: number, pageSize: number) => {
-    // Bộ lọc tìm kiếm trong tiêu đề hoặc tác giả
-    const where: Prisma.bai_vietWhereInput = {
-        OR: [{ tieu_de: { contains: search } }, { tac_gia: { contains: search } }],
-    };
+/**
 
-    // Thực hiện đồng thời 2 truy vấn: lấy danh sách và đếm tổng số
-    const [blogs, total] = await prisma.$transaction([
-        prisma.bai_viet.findMany({
-            where,
-            orderBy: { id: 'desc' }, // sắp xếp giảm dần theo ID
-            skip: (page - 1) * pageSize, // bỏ qua số lượng bài của các trang trước
-            take: pageSize, // giới hạn số bài trên mỗi trang
-            include: { danh_muc_blog: true } // lấy thêm thông tin danh mục
-        }),
-        prisma.bai_viet.count({ where }), // đếm tổng số bài phù hợp
-    ]);
-
-    // Trả về dữ liệu + tổng số trang + trang hiện tại
-    return { data: blogs, total, totalPages: Math.ceil(total / pageSize), currentPage: page };
-};
-
-// ✅ Lấy chi tiết bài viết theo ID
-export const getBlogById = async (id: number) => {
-    const blog = await prisma.bai_viet.findUnique({ where: { id } });
-    if (!blog) throw new Error('Bài viết không tồn tại.'); // nếu không tìm thấy
-    return blog;
-};
-
-// ✅ Lấy bài viết theo slug (đường dẫn thân thiện)
-export const getBlogBySlug = async (slug: string) => {
-    const blog = await prisma.bai_viet.findFirst({
-        where: { slug },
-        include: { danh_muc_blog: true } // lấy thêm thông tin danh mục
+* Lấy danh sách bài viết
+  */
+export async function getAllBlogs() {
+    return prisma.bai_viet.findMany({
+        include: {
+            danh_muc_blog: true,
+            media_files: true,
+            nguoi_dung: true,
+        },
+        orderBy: { created_at: "desc" },
     });
-    if (!blog) throw new Error('Bài viết không tồn tại.');
-    return blog;
-};
+}
 
-// ✅ Tạo mới bài viết
-export const createBlog = async (data: any) => {
-    const slug = createSlug(data.title); // tạo slug từ tiêu đề
-    return prisma.bai_viet.create({
-        data: {
-            tieu_de: data.title,
-            noi_dung: data.content,
-            tac_gia: data.author,
-            danh_muc_blog_id: data.blog_category_id,
-            slug: slug,
-            // anh_bia_id: data.poster, // (ghi chú) cần xử lý thêm phần media nếu có
+/**
+
+* Lấy bài viết theo ID
+  */
+export async function getBlogById(id: number) {
+    return prisma.bai_viet.findUnique({
+        where: { id },
+        include: {
+            danh_muc_blog: true,
+            media_files: true,
+            nguoi_dung: true,
         },
     });
-};
+}
 
-// ✅ Cập nhật bài viết
-export const updateBlog = async (id: number, data: any) => {
-    const updateData: any = { ...data }; // sao chép dữ liệu cần cập nhật
-    if (data.title) {
-        updateData.slug = createSlug(data.title); // cập nhật lại slug nếu đổi tiêu đề
-    }
-    return prisma.bai_viet.update({
-        where: { id }, // tìm theo ID
-        data: {
-            tieu_de: updateData.title,
-            noi_dung: updateData.content,
-            tac_gia: updateData.author,
-            danh_muc_blog_id: updateData.blog_category_id,
-            slug: updateData.slug,
-        }
+/**
+
+* Lấy bài viết theo slug
+  */
+export async function getBlogBySlug(slug: string) {
+    return prisma.bai_viet.findUnique({
+        where: { slug },
+        include: {
+            danh_muc_blog: true,
+            media_files: true,
+            nguoi_dung: true,
+        },
     });
-};
+}
 
-// ✅ Xóa bài viết theo ID
-export const deleteBlog = async (id: number) => {
-    return prisma.bai_viet.delete({ where: { id } });
-};
+/**
+
+* Tạo mới bài viết
+  */
+export async function createBlog(data: {
+    tieu_de: string;
+    noi_dung: string;
+    danh_muc_blog_id?: number;
+    anh_bia_id?: number;
+    nguoi_dung_id?: number;
+}) {
+    const slug = slugify(data.tieu_de, { lower: true, strict: true });
+
+    return prisma.bai_viet.create({
+        data: {
+            tieu_de: data.tieu_de,
+            noi_dung: data.noi_dung,
+            slug,
+            danh_muc_blog: data.danh_muc_blog_id
+                ? { connect: { id: data.danh_muc_blog_id } }
+                : undefined,
+            media_files: data.anh_bia_id
+                ? { connect: { id: data.anh_bia_id } }
+                : undefined,
+            nguoi_dung: data.nguoi_dung_id
+                ? { connect: { id: data.nguoi_dung_id } }
+                : undefined,
+        },
+        include: {
+            danh_muc_blog: true,
+            media_files: true,
+            nguoi_dung: true,
+        },
+    });
+}
+
+/**
+
+* Cập nhật bài viết
+  */
+export async function updateBlog(
+    id: number,
+    data: {
+        tieu_de?: string;
+        noi_dung?: string;
+        danh_muc_blog_id?: number | null;
+        anh_bia_id?: number | null;
+        nguoi_dung_id?: number | null;
+    }
+) {
+    const updateData: any = {};
+
+    if (data.tieu_de) {
+        updateData.tieu_de = data.tieu_de;
+        updateData.slug = slugify(data.tieu_de, { lower: true, strict: true });
+    }
+
+    if (data.noi_dung) updateData.noi_dung = data.noi_dung;
+
+    // Cập nhật quan hệ danh mục
+    if (data.danh_muc_blog_id !== undefined) {
+        updateData.danh_muc_blog = data.danh_muc_blog_id
+            ? { connect: { id: data.danh_muc_blog_id } }
+            : { disconnect: true };
+    }
+
+    // Cập nhật ảnh bìa
+    if (data.anh_bia_id !== undefined) {
+        updateData.media_files = data.anh_bia_id
+            ? { connect: { id: data.anh_bia_id } }
+            : { disconnect: true };
+    }
+
+    // Cập nhật tác giả
+    if (data.nguoi_dung_id !== undefined) {
+        updateData.nguoi_dung = data.nguoi_dung_id
+            ? { connect: { id: data.nguoi_dung_id } }
+            : { disconnect: true };
+    }
+
+    return prisma.bai_viet.update({
+        where: { id },
+        data: updateData,
+        include: {
+            danh_muc_blog: true,
+            media_files: true,
+            nguoi_dung: true,
+        },
+    });
+}
+
+/**
+
+* Xóa bài viết
+  */
+export async function deleteBlog(id: number) {
+    return prisma.bai_viet.delete({
+        where: { id },
+    });
+}
+
+export async function getBlogsAdmin(filters: {
+    page: number;
+    limit: number;
+    search?: string;
+    categoryId?: number;
+}) {
+    const where: any = {};
+    if (filters.search) {
+        where.OR = [
+            { tieu_de: { contains: filters.search, mode: "insensitive" } },
+            { noi_dung: { contains: filters.search, mode: "insensitive" } },
+        ];
+    }
+    if (filters.categoryId) where.danh_muc_blog_id = filters.categoryId;
+
+    const total = await prisma.bai_viet.count({ where });
+
+    const blogs = await prisma.bai_viet.findMany({
+        where,
+        include: {
+            danh_muc_blog: true,
+            media_files: true,
+            nguoi_dung: true,
+        },
+        orderBy: { created_at: "desc" },
+        skip: (filters.page - 1) * filters.limit,
+        take: filters.limit,
+    });
+
+    return { total, blogs };
+}

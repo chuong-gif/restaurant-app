@@ -29,6 +29,14 @@ import AssignPermissionPage from './pages/roles/AssignPermissionPage';
 // --- IMPORT TRANG TABLE ---
 import TableListPage from './pages/tables/TableListPage';
 
+// --- IMPORT TRANG PROMOTION ---
+import PromotionListPage from './pages/promotions/PromotionListPage';
+
+// --- IMPORT CÁC TRANG BLOG ---
+import BlogCategoryListPage from './pages/blogCategories/BlogCategoryListPage';
+import BlogListPage from './pages/blogs/BlogListPage';
+import BlogFormPage from './pages/blogs/BlogFormPage';
+
 function App() {
   return (
     <AntdApp>
@@ -68,6 +76,18 @@ function App() {
 
               {/* === THÊM ROUTE TABLE === */}
               <Route path="/tables" element={<TableListPage />} />
+              {/* ======================= */}
+
+              {/* === THÊM ROUTE PROMOTION === */}
+              <Route path="/promotions" element={<PromotionListPage />} />
+              {/* ========================== */}
+
+              {/* === THÊM ROUTES BLOG === */}
+              <Route path="/blog-categories" element={<BlogCategoryListPage />} />
+              <Route path="/blogs" element={<BlogListPage />} />
+              <Route path="/blogs/new" element={<BlogFormPage />} />
+              <Route path="/blogs/edit/:id" element={<BlogFormPage />} />
+              {/* Có thể thêm route xem comments sau: /blog-comments/:blogId */}
               {/* ======================= */}
 
             </Route>
