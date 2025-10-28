@@ -99,7 +99,7 @@ model dat_ban {
   id                     Int                      @id @default(autoincrement())
   ma_dat_ban             String?                  @db.VarChar(50)
   khach_hang_id          Int?
-  so_lan_doi             Boolean                  @default(true)
+  so_lan_doi             Int                      @default(0)
   ban_an_id              Int?
   khuyen_mai_id          Int?
   ho_ten_khach           String                   @db.VarChar(255)
@@ -110,7 +110,7 @@ model dat_ban {
   ghi_chu                String?                  @db.Text
   tong_tien              Int?
   tien_dat_coc           Int                      @default(0)
-  trang_thai             Boolean                  @default(true)
+  trang_thai             Int                      @default(1)
   momo_order_id          String?                  @db.VarChar(255)
   created_at             DateTime                 @default(now()) @db.Timestamp(0)
   updated_at             DateTime                 @default(now()) @db.Timestamp(0)

@@ -26,6 +26,19 @@ interface ChangeDishesBody {
     }>;
 }
 
+type AdminReservationFormInput = {
+    fullname: string;
+    tel: string;
+    email?: string;
+    reservation_date: string; // ISO String
+    party_size: number;
+    note?: string;
+    products?: Array<{ product_id: number; quantity: number }>;
+    ban_an_id?: number; // Admin có thể chọn bàn
+    status?: number;    // Admin có thể set status ban đầu
+    // reservation_code không cần gửi, backend tự sinh
+};
+
 
 export const reservationApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
@@ -86,7 +99,16 @@ export const reservationApi = baseApi.injectEndpoints({
             invalidatesTags: (result, error, id) => [{ type: 'Reservation', id }, { type: 'Reservation', id: 'LIST' }],
         }),
 
-        // Không cần mutation tạo đặt bàn ở admin (thường chỉ tạo từ client)
+        // === THÊM MUTATION MỚI CHO ADMIN TẠO ===
+        createAdminReservation: builder.mutation<Reservation, AdminReservationFormInput>({
+            query: (newReservationData) => ({
+                url: '/admin/reservations', // Gọi API admin mới
+                method: 'POST',
+                body: newReservationData,
+            }),
+            invalidatesTags: [{ type: 'Reservation', id: 'LIST' }], // Cập nhật lại danh sách
+        }),
+        // ======================================
 
     }),
 });
@@ -98,4 +120,5 @@ export const {
     useChangeReservationDishesMutation,
     useSoftDeleteReservationMutation, // Xóa mềm (Hủy)
     usePermanentlyDeleteReservationMutation, // Xóa cứng
+    useCreateAdminReservationMutation,
 } = reservationApi;

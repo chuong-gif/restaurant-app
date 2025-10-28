@@ -14,9 +14,14 @@ import ChangeStatusSelect, { statusMap } from '../../components/reservations/Cha
 import { formatDateTime } from '../../utils/FormatDateTime'; // Giả sử có hàm này
 import { formatCurrency } from '../../utils/FormatCurrency'; // Giả sử có hàm này
 
+import { Modal } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
+import ReservationAddForm from '../../components/reservations/ReservationAddForm';
+
 
 const { Search } = Input;
 const { Option } = Select;
+
 
 const ReservationListPage: React.FC = () => {
     const navigate = useNavigate();
@@ -33,6 +38,9 @@ const ReservationListPage: React.FC = () => {
     const [debouncedName] = useDebounce(nameSearch, 500);
     const [debouncedPhone] = useDebounce(phoneSearch, 500);
     const [debouncedCode] = useDebounce(codeSearch, 500);
+
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isCreating, setIsCreating] = useState(false); // để loading nút tạo
 
 
     // --- RTK Query ---
@@ -147,13 +155,24 @@ const ReservationListPage: React.FC = () => {
                         ))}
                     </Select>
                 </Col>
-                {/* === THÊM NÚT THÙNG RÁC === */}
-                <Col xs={24} className="flex justify-end mt-2">
-                    <Button type="default" icon={<RestOutlined />} onClick={() => navigate('/reservations/trash')}>
+                <Col xs={24} className="flex justify-end mt-2 gap-2">
+                    <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        onClick={() => setIsAddModalOpen(true)}
+                    >
+                        Thêm Đặt Bàn
+                    </Button>
+
+                    <Button
+                        type="default"
+                        icon={<RestOutlined />}
+                        onClick={() => navigate('/reservations/trash')}
+                    >
                         Đơn đã hủy
                     </Button>
                 </Col>
-                {/* ======================== */}
+
             </Row>
 
             <Table
@@ -171,8 +190,40 @@ const ReservationListPage: React.FC = () => {
                 scroll={{ x: 1300 }} // Đảm bảo cuộn ngang nếu cần
             />
 
-            {/* Thêm Modal Thay đổi món ăn ở đây nếu cần */}
-            {/* <ChangeDishesModal ... /> */}
+            {/* === MODAL TẠO ĐẶT BÀN MỚI === */}
+            <Modal
+                title="Tạo Đặt Bàn Mới (Admin/NV)"
+                open={isAddModalOpen}
+                onCancel={() => setIsAddModalOpen(false)}
+                footer={null} // Footer do form xử lý
+                width={1000}
+                destroyOnClose
+            >
+                <ReservationAddForm
+                    onSuccess={() => {
+                        setIsAddModalOpen(false);
+                        // Tự động refresh danh sách nếu cần
+                    }}
+                    onCancel={() => setIsAddModalOpen(false)}
+                />
+
+
+                <div className="flex justify-end mt-4">
+                    <Button onClick={() => setIsAddModalOpen(false)} style={{ marginRight: 8 }}>
+                        Hủy
+                    </Button>
+                    <Button
+                        type="primary"
+                        htmlType="submit"
+                        form="reservation-add-form" // ✅ ID form bên trong
+                        loading={isCreating}
+                    >
+                        Tạo Đặt Bàn
+                    </Button>
+                </div>
+            </Modal>
+            {/* =========================== */}
+
         </div>
     );
 };

@@ -151,3 +151,20 @@ export const handleGetMyBookingDetail = async (req: Request, res: Response) => {
         res.status(404).json({ message: error.message });
     }
 };
+
+/**
+ * 🎮 Admin tạo mới đặt bàn
+ */
+export const handleAdminCreateReservation = async (req: Request, res: Response) => {
+    try {
+        // Gọi service mới
+        const newReservation = await reservationService.createAdminReservation(req.body);
+        res.status(201).json({
+            message: 'Admin tạo đặt bàn thành công',
+            data: { id: newReservation.id, tableId: newReservation.ban_an_id }
+        });
+    } catch (error: any) {
+        res.status(400).json({ message: error.message || 'Tạo đặt bàn thất bại.' });
+    }
+};
+// =====================================
