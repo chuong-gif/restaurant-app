@@ -303,6 +303,6 @@ model vai_tro_quyen {
 }
 
 enum nguoi_dung_loai_nguoi_dung {
-  Kh_ch_H_ng @map("Khách Hàng")
-  Nh_n_Vi_n  @map("Nhân Viên")
+  Khach_Hang @map("Khách Hàng")
+  Nhan_Vien  @map("Nhân Viên")
 }

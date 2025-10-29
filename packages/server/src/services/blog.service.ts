@@ -1,21 +1,53 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 import slugify from "slugify";
 
 const prisma = new PrismaClient();
 
 /**
+ * 📚 Lấy danh sách bài viết (Admin - Sửa lỗi: Bỏ mode: "insensitive", Sửa format return)
+ */
+export async function getBlogsAdmin(filters: {
+    page: number;
+    limit: number;
+    search?: string;
+    categoryId?: number;
+}) {
+    const { page, limit, search, categoryId } = filters; // Đảm bảo limit được nhận
 
-* Lấy danh sách bài viết
-  */
-export async function getAllBlogs() {
-    return prisma.bai_viet.findMany({
-        include: {
-            danh_muc_blog: true,
-            media_files: true,
-            nguoi_dung: true,
-        },
-        orderBy: { created_at: "desc" },
-    });
+    // Sửa: Bỏ 'any', dùng type của Prisma
+    const where: Prisma.bai_vietWhereInput = {};
+
+    if (search) {
+        where.OR = [
+            // Sửa: Bỏ 'mode: "insensitive"'
+            { tieu_de: { contains: search } },
+            { noi_dung: { contains: search } },
+        ];
+    }
+    if (categoryId) where.danh_muc_blog_id = categoryId;
+
+    const [blogs, total] = await prisma.$transaction([
+        prisma.bai_viet.findMany({
+            where,
+            include: {
+                danh_muc_blog: { select: { ten_danh_muc: true } },
+                nguoi_dung: { select: { ho_ten: true } }, // Join đúng theo schema đã sửa
+                media_files: { select: { file_url: true } }
+            },
+            orderBy: { created_at: "desc" },
+            skip: (page - 1) * limit,
+            take: limit,
+        }),
+        prisma.bai_viet.count({ where })
+    ]);
+
+    // Sửa: Trả về đúng format mà frontend (blogApi.ts) mong đợi
+    return {
+        data: blogs, // Đổi 'blogs' -> 'data'
+        total,
+        totalPages: Math.ceil(total / limit),
+        currentPage: page
+    };
 }
 
 /**
@@ -149,34 +181,3 @@ export async function deleteBlog(id: number) {
     });
 }
 
-export async function getBlogsAdmin(filters: {
-    page: number;
-    limit: number;
-    search?: string;
-    categoryId?: number;
-}) {
-    const where: any = {};
-    if (filters.search) {
-        where.OR = [
-            { tieu_de: { contains: filters.search, mode: "insensitive" } },
-            { noi_dung: { contains: filters.search, mode: "insensitive" } },
-        ];
-    }
-    if (filters.categoryId) where.danh_muc_blog_id = filters.categoryId;
-
-    const total = await prisma.bai_viet.count({ where });
-
-    const blogs = await prisma.bai_viet.findMany({
-        where,
-        include: {
-            danh_muc_blog: true,
-            media_files: true,
-            nguoi_dung: true,
-        },
-        orderBy: { created_at: "desc" },
-        skip: (filters.page - 1) * filters.limit,
-        take: filters.limit,
-    });
-
-    return { total, blogs };
-}

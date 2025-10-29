@@ -5,49 +5,45 @@ import bcrypt from 'bcrypt';
 
 const saltRounds = 10; // 🔐 Số vòng mã hóa mật khẩu
 
-// 👥 LẤY DANH SÁCH NGƯỜI DÙNG (Có phân trang, tìm kiếm, lọc)
+/**
+ * 👥 LẤY DANH SÁCH NGƯỜI DÙNG
+ */
 export const getUsers = async (filters: {
     page: number;
     pageSize: number;
     search: string;
-    trang_thai?: boolean; // Sửa: Dùng boolean cho trạng thái
+    trang_thai?: boolean; // Sửa: Dùng boolean
     roleId?: number;
-    userType?: UserType;
+    userType?: UserType; // Prisma Enum
 }) => {
     const { page, pageSize, search, trang_thai, roleId, userType } = filters;
 
-    // Sửa: Điều kiện where dùng boolean trang_thai
     const where: Prisma.nguoi_dungWhereInput = {
-        OR: [ // Tìm kiếm theo tên hoặc email
+        OR: [
             { ho_ten: { contains: search } },
             { email: { contains: search } }
         ],
-        trang_thai: trang_thai, // Sử dụng trực tiếp boolean
+        trang_thai: trang_thai, // Dùng boolean
         vai_tro_id: roleId,
-        loai_nguoi_dung: userType,
+        loai_nguoi_dung: userType, // Dùng Enum
     };
 
     const [users, total] = await prisma.$transaction([
         prisma.nguoi_dung.findMany({
             where,
-            select: { // 🧩 Chỉ lấy các trường cần thiết, không bao giờ lấy mật khẩu
+            select: {
                 id: true,
                 ho_ten: true,
-                // tai_khoan: true, // Thường không cần trường này
                 email: true,
                 dien_thoai: true,
                 dia_chi: true,
                 trang_thai: true,
                 loai_nguoi_dung: true,
                 vai_tro_id: true,
-                anh_dai_dien_id: true, // Lấy ID ảnh
+                anh_dai_dien_id: true,
                 created_at: true,
-                vai_tro: { // Join vai trò để lấy tên
-                    select: { ten_vai_tro: true }
-                },
-                media_files: { // Join ảnh đại diện để lấy URL
-                    select: { file_url: true },
-                },
+                vai_tro: { select: { ten_vai_tro: true } },
+                media_files: { select: { file_url: true } },
             },
             orderBy: { id: 'desc' },
             skip: (page - 1) * pageSize,
@@ -86,54 +82,68 @@ export const getUserById = async (id: number) => {
     return user;
 };
 
-// ✨ TẠO NGƯỜI DÙNG MỚI (Sửa: Xử lý Avatar & Password)
+/**
+ * ✨ TẠO NGƯỜI DÙNG MỚI (Sửa: Xử lý Enum, Avatar, Password)
+ */
 export const createUser = async (data: any) => {
-    const { password, anh_dai_dien_id, ...userData } = data;
+    // Tách các trường đặc biệt
+    const { password, anh_dai_dien_id, loai_nguoi_dung, ...userData } = data;
 
-    // ⚠️ Kiểm tra email trùng
+    // === SỬA LỖI 1: Chuyển đổi String sang Enum ===
+    let prismaUserType: UserType;
+    if (loai_nguoi_dung === 'Khách Hàng') {
+        prismaUserType = UserType.Khach_Hang;
+    } else if (loai_nguoi_dung === 'Nhân Viên') {
+        prismaUserType = UserType.Nhan_Vien;
+    } else {
+        throw new Error('Loại người dùng không hợp lệ.');
+    }
+    // ======================================
+
+    // Kiểm tra email trùng
     const existingUser = await prisma.nguoi_dung.findUnique({ where: { email: userData.email } });
     if (existingUser) throw new Error('📧 Email đã tồn tại.');
 
-    // --- Sửa: Xử lý mật khẩu ---
+    // Xử lý mật khẩu
     let hashedPassword = '';
-    // Bắt buộc mật khẩu nếu là Nhân Viên
-    if (userData.loai_nguoi_dung === UserType.Nh_n_Vi_n) {
-        if (!password || password.length < 6) { // Thêm validation cơ bản
+    if (prismaUserType === UserType.Nhan_Vien) {
+        if (!password || password.length < 6) {
             throw new Error('Mật khẩu cho nhân viên là bắt buộc và tối thiểu 6 ký tự.');
         }
         hashedPassword = await bcrypt.hash(password, saltRounds);
-    } else if (password) { // Khách hàng có thể có hoặc không có mật khẩu
+    } else if (password) {
         hashedPassword = await bcrypt.hash(password, saltRounds);
     }
-    // -------------------------
+
+    // --- Sửa: Dùng UncheckedCreateInput để gán ID trực tiếp ---
+    const createData: Prisma.nguoi_dungUncheckedCreateInput = {
+        ...userData,
+        loai_nguoi_dung: prismaUserType, // Gán Enum đã chuyển đổi
+        mat_khau: hashedPassword,
+        anh_dai_dien_id: anh_dai_dien_id ? parseInt(anh_dai_dien_id, 10) : undefined, // Gán ID (number | undefined)
+    };
+    // -----------------------------------------------------
 
     return prisma.nguoi_dung.create({
-        data: {
-            ...userData,
-            mat_khau: hashedPassword,
-            // --- Sửa: Xử lý avatar ---
-            anh_dai_dien_id: anh_dai_dien_id ? parseInt(anh_dai_dien_id, 10) : null,
-            // ---------------------
-        },
-        // Chỉ trả về các trường an toàn
-        select: { id: true, email: true, ho_ten: true }
+        data: createData,
+        select: { id: true, email: true, ho_ten: true } // Chỉ trả về các trường an toàn
     });
-};
+}
 
-// 🔄 CẬP NHẬT THÔNG TIN NGƯỜI DÙNG (Sửa: Xử lý Avatar & Loại bỏ Password)
+/**
+ * 🔄 CẬP NHẬT THÔNG TIN NGƯỜI DÙNG (Sửa: Xử lý Avatar, Bỏ Password)
+ */
 export const updateUser = async (id: number, data: any) => {
-    // --- Sửa: Loại bỏ password khỏi data ---
-    const { password, anh_dai_dien_id, ...updates } = data;
-    // ------------------------------------
+    // Tách các trường đặc biệt (KHÔNG cho cập nhật mật khẩu/loại ở đây)
+    const { password, loai_nguoi_dung, anh_dai_dien_id, ...updates } = data;
 
-    // --- Sửa: Xử lý avatar ---
-    if (anh_dai_dien_id !== undefined) {
-        updates.anh_dai_dien_id = anh_dai_dien_id ? parseInt(anh_dai_dien_id, 10) : null;
+    const existing = await prisma.nguoi_dung.findUnique({ where: { id } });
+    if (!existing) {
+        throw new Error('❌ Người dùng không tồn tại.');
     }
-    // ---------------------
 
     // Kiểm tra email trùng (nếu email được cập nhật)
-    if (updates.email) {
+    if (updates.email && updates.email !== existing.email) {
         const existingEmail = await prisma.nguoi_dung.findFirst({
             where: { email: updates.email, id: { not: id } }
         });
@@ -142,45 +152,53 @@ export const updateUser = async (id: number, data: any) => {
         }
     }
 
+    const dataToUpdate: Prisma.nguoi_dungUpdateInput = {
+        ...updates, // Gán các trường thông thường (ho_ten, dien_thoai, dia_chi, trang_thai, vai_tro_id...)
+    };
+
+    // === SỬA LỖI 2: Xử lý ảnh (anh_dai_dien_id) ===
+    if (anh_dai_dien_id !== undefined) {
+        if (anh_dai_dien_id === null) {
+            dataToUpdate.media_files = { disconnect: true };
+        } else {
+            dataToUpdate.media_files = { connect: { id: parseInt(anh_dai_dien_id, 10) } };
+        }
+    }
+    // ======================================
 
     return prisma.nguoi_dung.update({
         where: { id },
-        data: updates,
-        select: { id: true, email: true, ho_ten: true } // Chỉ trả về các trường an toàn
+        data: dataToUpdate,
+        select: { id: true, email: true, ho_ten: true }
     });
 };
 
-// 🗑️ XÓA MỀM NGƯỜI DÙNG (Sửa: Chuyển sang Soft Delete)
+/**
+ * 🗑️ XÓA MỀM NGƯỜI DÙNG (Theo thống nhất)
+ */
 export const deleteUser = async (id: number) => {
     const user = await prisma.nguoi_dung.findUnique({ where: { id } });
     if (!user) {
         throw new Error('❌ Người dùng không tồn tại.');
     }
-
-    // --- Sửa: Cập nhật trạng thái thay vì xóa ---
+    // Sửa: Cập nhật trạng thái thay vì xóa
     return prisma.nguoi_dung.update({
         where: { id },
-        data: { trang_thai: false }, // Đặt trạng thái thành false
+        data: { trang_thai: false },
     });
-    // ----------------------------------------
 };
-
 // === THÊM MỚI HÀM NÀY ===
-// 🗑️🔥 XÓA VĨNH VIỄN NGƯỜI DÙNG (Dùng cho Thùng rác)
+/**
+ * 🗑️🔥 XÓA VĨNH VIỄN NGƯỜI DÙNG
+ */
 export const permanentlyDeleteUser = async (id: number) => {
     const user = await prisma.nguoi_dung.findUnique({ where: { id } });
     if (!user) {
         throw new Error('❌ Người dùng không tồn tại.');
     }
-
-    // Kiểm tra lại ràng buộc trước khi xóa vĩnh viễn (nếu cần)
-    // Ví dụ: Không cho xóa nếu user có liên kết quan trọng khác
+    // Có thể thêm kiểm tra ràng buộc (vd: đặt bàn) ở đây nếu cần
     // const reservationCount = await prisma.dat_ban.count({ where: { khach_hang_id: id } });
-    // if (reservationCount > 0) {
-    //     throw new Error('🚫 Không thể xóa vĩnh viễn người dùng này vì họ đã có lịch sử đặt bàn.');
-    // }
-
-    // Logic xóa ảnh trên Firebase nên được thêm ở đây nếu cần
+    // if (reservationCount > 0) { ... }
 
     return prisma.nguoi_dung.delete({ where: { id } });
 };

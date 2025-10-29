@@ -12,6 +12,14 @@ interface GetPromotionsParams {
 // Kiểu dữ liệu cho form (thêm/sửa) - Bỏ các trường tự động
 type PromotionFormInput = Omit<Promotion, 'id' | 'created_at' | 'updated_at'>;
 
+type PromotionUpdateBody = {
+    code_name?: string;
+    discount?: number;
+    quantity?: number;
+    type?: boolean; // false = %, true = Tiền mặt
+    valid_from?: string; // ISO String
+    valid_to?: string; // ISO String
+};
 
 export const promotionApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
@@ -34,21 +42,21 @@ export const promotionApi = baseApi.injectEndpoints({
         }),
 
         // 3. Mutation tạo mới khuyến mãi
-        createPromotion: builder.mutation<Promotion, PromotionFormInput>({
-            query: (newPromotion) => ({
+        createPromotion: builder.mutation<Promotion, PromotionUpdateBody>({ // <-- Sửa Input type
+            query: (newPromotionData) => ({ // <-- Đổi tên biến
                 url: '/admin/promotions',
                 method: 'POST',
-                body: newPromotion,
+                body: newPromotionData, // <-- Gửi body khớp backend
             }),
             invalidatesTags: [{ type: 'Promotion', id: 'LIST' }],
         }),
 
         // 4. Mutation cập nhật khuyến mãi
-        updatePromotion: builder.mutation<Promotion, { id: number; data: Partial<PromotionFormInput> }>({
+        updatePromotion: builder.mutation<Promotion, { id: number; data: Partial<PromotionUpdateBody> }>({ // <-- Sửa data type
             query: ({ id, data }) => ({
                 url: `/admin/promotions/${id}`,
-                method: 'PATCH', // Backend dùng PATCH
-                body: data,
+                method: 'PATCH',
+                body: data, // <-- Gửi body khớp backend
             }),
             invalidatesTags: (result, error, { id }) => [{ type: 'Promotion', id }, { type: 'Promotion', id: 'LIST' }],
         }),

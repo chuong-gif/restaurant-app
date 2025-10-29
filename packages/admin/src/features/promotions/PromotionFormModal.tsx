@@ -79,12 +79,12 @@ const PromotionFormModal: React.FC<PromotionFormModalProps> = ({ open, onClose, 
         }
 
         const submitData = {
-            ma_khuyen_mai: data.ma_khuyen_mai,
-            giam_gia: data.giam_gia,
-            loai_giam_gia: data.loai_giam_gia,
-            so_luong: data.so_luong,
-            ngay_hieu_luc: ngay_hieu_luc.toISOString(), // Chuyển sang ISO string
-            ngay_ket_thuc: ngay_ket_thuc.toISOString(),
+            code_name: data.ma_khuyen_mai,    // Sửa: ma_khuyen_mai -> code_name
+            discount: data.giam_gia,        // Sửa: giam_gia -> discount
+            quantity: data.so_luong,        // Sửa: so_luong -> quantity
+            type: data.loai_giam_gia,       // Sửa: loai_giam_gia -> type
+            valid_from: ngay_hieu_luc.toISOString(), // Sửa: ngay_hieu_luc -> valid_from
+            valid_to: ngay_ket_thuc.toISOString(),   // Sửa: ngay_ket_thuc -> valid_to
         };
 
         try {
@@ -92,7 +92,7 @@ const PromotionFormModal: React.FC<PromotionFormModalProps> = ({ open, onClose, 
                 await updatePromotion({ id: promotion!.id, data: submitData }).unwrap();
                 message.success('Cập nhật khuyến mãi thành công!');
             } else {
-                await createPromotion(submitData).unwrap();
+                await createPromotion(submitData as any).unwrap(); // as any để khớp type nhanh
                 message.success('Tạo mới khuyến mãi thành công!');
             }
             onClose(); // Đóng modal

@@ -153,7 +153,7 @@ const UserTrashPage: React.FC = () => {
                         loading={isLoadingRoles}
                         disabled={filters.searchUserType === UserType.KHACH_HANG}
                     >
-                        {roles?.map((role) => (
+                        {roles?.data?.map((role) => (
                             <Option key={role.id} value={role.id}>{role.ten_vai_tro}</Option>
                         ))}
                     </Select>

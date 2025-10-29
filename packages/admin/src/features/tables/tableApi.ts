@@ -29,7 +29,7 @@ export const tableApi = baseApi.injectEndpoints({
         }),
 
         // 2. Mutation tạo mới bàn ăn
-        createTable: builder.mutation<Table, TableFormInput>({
+        createTable: builder.mutation<Table, TableFormInput>({ // <-- Sửa input type
             query: (newTable) => ({
                 url: '/admin/tables',
                 method: 'POST',
@@ -39,10 +39,10 @@ export const tableApi = baseApi.injectEndpoints({
         }),
 
         // 3. Mutation cập nhật bàn ăn
-        updateTable: builder.mutation<Table, { id: number; data: Partial<TableFormInput> }>({
+        updateTable: builder.mutation<Table, { id: number; data: Partial<TableFormInput> }>({ // <-- Sửa input type
             query: ({ id, data }) => ({
                 url: `/admin/tables/${id}`,
-                method: 'PATCH', // Backend dùng PATCH
+                method: 'PATCH',
                 body: data,
             }),
             invalidatesTags: (result, error, { id }) => [{ type: 'Table', id }, { type: 'Table', id: 'LIST' }],

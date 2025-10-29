@@ -34,7 +34,7 @@ export const handleSocialLogin = async (email: string, fullname: string, avatarU
                 ho_ten: fullname,
                 email: email,
                 mat_khau: '', // Mật khẩu trống vì tài khoản đăng nhập qua mạng xã hội
-                loai_nguoi_dung: UserType.Kh_ch_H_ng, // Mặc định là khách hàng
+                loai_nguoi_dung: UserType.Khach_Hang, // Mặc định là khách hàng
                 // Có thể thêm logic lưu avatar vào media_files nếu cần
             },
         });
@@ -65,7 +65,7 @@ export const registerUser = async (userData: any) => {
             dien_thoai: userData.tel,
             dia_chi: userData.address,
             mat_khau: hashedPassword,
-            loai_nguoi_dung: UserType.Kh_ch_H_ng, // Gán loại người dùng là khách hàng
+            loai_nguoi_dung: UserType.Khach_Hang, // Gán loại người dùng là khách hàng
         },
     });
 
@@ -89,7 +89,7 @@ export const loginUser = async (email: string, password: string) => {
     const user = await prisma.nguoi_dung.findFirst({
         where: {
             email,
-            loai_nguoi_dung: UserType.Kh_ch_H_ng, // Chỉ tìm người dùng loại "Khách Hàng"
+            loai_nguoi_dung: UserType.Khach_Hang, // Chỉ tìm người dùng loại "Khách Hàng"
         },
     });
 
@@ -120,7 +120,7 @@ export const loginAdmin = async (email: string, password: string) => {
     const admin = await prisma.nguoi_dung.findFirst({
         where: {
             email,
-            loai_nguoi_dung: UserType.Nh_n_Vi_n, // Chỉ tìm người dùng loại nhân viên
+            loai_nguoi_dung: UserType.Nhan_Vien, // Chỉ tìm người dùng loại nhân viên
         },
     });
 

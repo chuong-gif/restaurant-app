@@ -45,20 +45,17 @@ export interface ProductListResponse {
 // Dựa trên bảng `ban_an`
 export interface Table {
     id: number;
-    so_ban: number;
-    suc_chua: number;
-    trang_thai: number; // 0 = bận, 1 = trống
+    so_ban: number; // Bắt buộc là number
+    suc_chua: number; // Bắt buộc là number
+    trang_thai: boolean; // <-- Đảm bảo là boolean
     anh_ban_id?: number | null;
     video_ban_id?: number | null;
     mo_ta_vi_tri?: string | null;
-    tang?: number | null; // <-- THÊM TẦNG
+    tang?: number | null;
     created_at?: string;
     updated_at?: string;
-
-    // === THÊM QUAN HỆ MEDIA ===
-    media_files_ban_an_anh_ban_idTomedia_files?: { id: number; file_url: string } | null; // Ảnh
-    media_files_ban_an_video_ban_idTomedia_files?: { id: number; file_url: string } | null; // Video
-    // ==========================
+    media_files_ban_an_anh_ban_idTomedia_files?: { id: number; file_url: string } | null;
+    media_files_ban_an_video_ban_idTomedia_files?: { id: number; file_url: string } | null;
 }
 
 // Dựa trên bảng `khuyen_mai` (chỉ lấy các trường cần thiết)

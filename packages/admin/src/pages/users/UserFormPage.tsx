@@ -214,7 +214,7 @@ const UserFormPage: React.FC = () => {
                                 <Controller name="vai_tro_id" control={control} rules={{ required: 'Vai trò là bắt buộc cho Nhân viên' }}
                                     render={({ field }) => (
                                         <Select {...field} placeholder="Chọn vai trò" loading={isLoadingRoles}>
-                                            {roles?.map(role => (
+                                            {roles?.data?.map((role) => (
                                                 <Option key={role.id} value={role.id}>{role.ten_vai_tro}</Option>
                                             ))}
                                         </Select>
