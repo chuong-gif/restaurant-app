@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useProvinces, useDistricts, useWards } from '@/lib/location';
 import {
     Select,
@@ -15,11 +15,11 @@ type AddressSelectorProps = {
     onChange: (fullAddress: string) => void;
 };
 
-// Hàm trợ giúp để phân tích địa chỉ
+// Hàm phân tích địa chỉ
 const parseAddress = (fullAddress: string) => {
     const parts = fullAddress.split(',').map(s => s.trim());
     return {
-        street: parts.slice(0, -3).join(', ').trim(),
+        street: parts.slice(0, -3).join(', ').trim() || '',
         ward: parts[parts.length - 3] || '',
         district: parts[parts.length - 2] || '',
         province: parts[parts.length - 1] || '',
@@ -27,68 +27,81 @@ const parseAddress = (fullAddress: string) => {
 };
 
 export default function AddressSelector({ value, onChange }: AddressSelectorProps) {
-    const [internal, setInternal] = React.useState(parseAddress(value));
+    // Tách state cho Tên và Code
+    const [street, setStreet] = useState(parseAddress(value).street);
+    const [selectedProvinceName, setSelectedProvinceName] = useState(parseAddress(value).province);
+    const [selectedDistrictName, setSelectedDistrictName] = useState(parseAddress(value).district);
+    const [selectedWardName, setSelectedWardName] = useState(parseAddress(value).ward);
 
+    const [selectedProvinceCode, setSelectedProvinceCode] = useState<string | undefined>();
+    const [selectedDistrictCode, setSelectedDistrictCode] = useState<string | undefined>();
+
+    // Tải dữ liệu
     const { data: provinces, isLoading: isLoadingProvinces } = useProvinces();
-
-    // Tìm code từ tên
-    const selectedProvinceCode = React.useMemo(() => {
-        return provinces?.find(p => p.name === internal.province)?.code.toString();
-    }, [provinces, internal.province]);
-
     const { data: districts, isLoading: isLoadingDistricts } = useDistricts(selectedProvinceCode || '');
-
-    const selectedDistrictCode = React.useMemo(() => {
-        return districts?.find(d => d.name === internal.district)?.code.toString();
-    }, [districts, internal.district]);
-
     const { data: wards, isLoading: isLoadingWards } = useWards(selectedDistrictCode || '');
 
-    // Khi bất kỳ phần nào của địa chỉ thay đổi, cập nhật `fullAddress`
-    React.useEffect(() => {
-        const { street, ward, district, province } = internal;
-        const fullAddress = [street, ward, district, province]
-            .filter(Boolean)
+    // Effect để tìm code khi Tên thay đổi (dùng cho việc load `initialAddress` trên trang Account)
+    useEffect(() => {
+        if (provinces && selectedProvinceName && !selectedProvinceCode) {
+            const p = provinces.find(p => p.name === selectedProvinceName);
+            if (p) setSelectedProvinceCode(p.code.toString());
+        }
+    }, [provinces, selectedProvinceName, selectedProvinceCode]);
+
+    useEffect(() => {
+        if (districts && selectedDistrictName && !selectedDistrictCode) {
+            const d = districts.find(d => d.name === selectedDistrictName);
+            if (d) setSelectedDistrictCode(d.code.toString());
+        }
+    }, [districts, selectedDistrictName, selectedDistrictCode]);
+
+    // Effect để cập nhật output `fullAddress` khi bất kỳ phần nào thay đổi
+    useEffect(() => {
+        const fullAddress = [street, selectedWardName, selectedDistrictName, selectedProvinceName]
+            .filter(Boolean) // Loại bỏ các giá trị rỗng
             .join(", ")
             .trim();
         onChange(fullAddress);
-    }, [internal, onChange]);
+    }, [street, selectedWardName, selectedDistrictName, selectedProvinceName, onChange]);
 
-    const handleSelectChange = (type: 'province' | 'district' | 'ward', value: string) => {
-        const newInternal = { ...internal, street: internal.street }; // Đảm bảo street được giữ lại
-
-        if (type === 'province') {
-            const provinceName = provinces?.find(p => p.code.toString() === value)?.name || '';
-            newInternal.province = provinceName;
-            newInternal.district = '';
-            newInternal.ward = '';
-        }
-        if (type === 'district') {
-            const districtName = districts?.find(d => d.code.toString() === value)?.name || '';
-            newInternal.district = districtName;
-            newInternal.ward = '';
-        }
-        if (type === 'ward') {
-            const wardName = wards?.find(w => w.code.toString() === value)?.name || '';
-            newInternal.ward = wardName;
-        }
-        setInternal(newInternal);
+    // Xử lý khi chọn Tỉnh
+    const handleProvinceChange = (code: string) => {
+        const province = provinces?.find(p => p.code.toString() === code);
+        setSelectedProvinceCode(code);
+        setSelectedProvinceName(province?.name || '');
+        // Reset quận/huyện/phường
+        setSelectedDistrictCode(undefined);
+        setSelectedDistrictName('');
+        setSelectedWardName('');
     };
 
-    const handleStreetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setInternal(prev => ({ ...prev, street: e.target.value }));
+    // Xử lý khi chọn Quận
+    const handleDistrictChange = (code: string) => {
+        const district = districts?.find(d => d.code.toString() === code);
+        setSelectedDistrictCode(code);
+        setSelectedDistrictName(district?.name || '');
+        // Reset phường
+        setSelectedWardName('');
+    };
+
+    // Xử lý khi chọn Phường
+    const handleWardChange = (code: string) => {
+        const ward = wards?.find(w => w.code.toString() === code);
+        setSelectedWardName(ward?.name || '');
     };
 
     return (
         <div className="space-y-3">
             <Select
-                value={selectedProvinceCode || ""}
-                onValueChange={(value) => handleSelectChange('province', value)}
+                value={selectedProvinceCode}
+                onValueChange={handleProvinceChange}
             >
                 <SelectTrigger>
                     <SelectValue placeholder="Chọn Tỉnh/Thành phố" />
                 </SelectTrigger>
-                <SelectContent>
+                {/* === THÊM `position="popper"` VÀO ĐÂY === */}
+                <SelectContent position="popper">
                     {isLoadingProvinces && <SelectItem value="loading" disabled>Đang tải...</SelectItem>}
                     {provinces?.map(p => (
                         <SelectItem key={p.code} value={p.code.toString()}>{p.name}</SelectItem>
@@ -97,14 +110,15 @@ export default function AddressSelector({ value, onChange }: AddressSelectorProp
             </Select>
 
             <Select
-                value={selectedDistrictCode || ""}
-                onValueChange={(value) => handleSelectChange('district', value)}
-                disabled={!selectedProvinceCode || isLoadingDistricts}
+                value={selectedDistrictCode}
+                onValueChange={handleDistrictChange}
+                disabled={!selectedProvinceCode || isLoadingDistricts || districts?.length === 0}
             >
                 <SelectTrigger>
                     <SelectValue placeholder="Chọn Quận/Huyện" />
                 </SelectTrigger>
-                <SelectContent>
+                {/* === THÊM `position="popper"` VÀO ĐÂY === */}
+                <SelectContent position="popper">
                     {isLoadingDistricts && <SelectItem value="loading" disabled>Đang tải...</SelectItem>}
                     {districts?.map(d => (
                         <SelectItem key={d.code} value={d.code.toString()}>{d.name}</SelectItem>
@@ -113,14 +127,15 @@ export default function AddressSelector({ value, onChange }: AddressSelectorProp
             </Select>
 
             <Select
-                value={wards?.find(w => w.name === internal.ward)?.code.toString() || ""}
-                onValueChange={(value) => handleSelectChange('ward', value)}
-                disabled={!selectedDistrictCode || isLoadingWards}
+                value={wards?.find(w => w.name === selectedWardName)?.code.toString()}
+                onValueChange={handleWardChange}
+                disabled={!selectedDistrictCode || isLoadingWards || wards?.length === 0}
             >
                 <SelectTrigger>
                     <SelectValue placeholder="Chọn Phường/Xã" />
                 </SelectTrigger>
-                <SelectContent>
+                {/* === THÊM `position="popper"` VÀO ĐÂY === */}
+                <SelectContent position="popper">
                     {isLoadingWards && <SelectItem value="loading" disabled>Đang tải...</SelectItem>}
                     {wards?.map(w => (
                         <SelectItem key={w.code} value={w.code.toString()}>{w.name}</SelectItem>
@@ -130,8 +145,8 @@ export default function AddressSelector({ value, onChange }: AddressSelectorProp
 
             <Input
                 placeholder="Số nhà, tên đường"
-                value={internal.street}
-                onChange={handleStreetChange}
+                value={street}
+                onChange={(e) => setStreet(e.target.value)}
             />
         </div>
     );

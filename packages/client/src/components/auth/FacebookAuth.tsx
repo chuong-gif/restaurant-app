@@ -7,7 +7,7 @@ import Image from 'next/image';
 // Lấy từ file FacebookAuth.js 
 const FACEBOOK_APP_ID = "410687418510018";
 
-export default function FacebookAuth() {
+function FacebookAuth() {
     const socialLoginMutation = useSocialLogin();
 
     return (
@@ -35,3 +35,4 @@ export default function FacebookAuth() {
         </LoginSocialFacebook>
     );
 }
+export default FacebookAuth;

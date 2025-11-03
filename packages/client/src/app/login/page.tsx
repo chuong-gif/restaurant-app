@@ -27,7 +27,13 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
 import GoogleAuth from '@/components/auth/GoogleAuth';
-import FacebookAuth from '@/components/auth/FacebookAuth';
+// import FacebookAuth from '@/components/auth/FacebookAuth';
+import dynamic from 'next/dynamic';
+const FacebookAuth = dynamic(
+    () => import('@/components/auth/FacebookAuth'),
+    { ssr: false } // Chỉ render ở client
+);
+
 
 export default function LoginPage() {
     const router = useRouter();
@@ -116,11 +122,11 @@ export default function LoginPage() {
                             <div className="space-y-2">
                                 <div className="flex justify-between items-center">
                                     <Label htmlFor="password">Mật khẩu</Label>
-                                    <Link href="/forgot-password" passHref legacyBehavior>
-                                        <a className="text-sm text-primary hover:underline">
-                                            Quên mật khẩu?
-                                        </a>
+                                    {/* === SỬA LỖI TẠI ĐÂY (Xóa legacyBehavior và <a>) === */}
+                                    <Link href="/forgot-password" className="text-sm text-primary hover:underline">
+                                        Quên mật khẩu?
                                     </Link>
+                                    {/* ============================================ */}
                                 </div>
                                 <Input
                                     id="password"
@@ -141,16 +147,12 @@ export default function LoginPage() {
                     <CardFooter className="flex-col gap-2 text-center text-sm">
                         <p>
                             Bạn chưa có tài khoản?{' '}
-                            <Link href="/register" passHref legacyBehavior>
-                                <a className="text-primary font-medium hover:underline">
-                                    Đăng ký ngay
-                                </a>
+                            <Link href="/register" className="text-primary font-medium hover:underline">
+                                Đăng ký ngay
                             </Link>
                         </p>
-                        <Link href="/policy" passHref legacyBehavior>
-                            <a className="text-muted-foreground hover:underline">
-                                Xem chính sách của nhà hàng
-                            </a>
+                        <Link href="/policy" className="text-muted-foreground hover:underline">
+                            Xem chính sách của nhà hàng
                         </Link>
                     </CardFooter>
                 </Card>

@@ -2,7 +2,7 @@
 import prisma from '../models';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { nguoi_dung_loai_nguoi_dung as UserType } from '@prisma/client';
+import { Prisma, nguoi_dung_loai_nguoi_dung as UserType } from '@prisma/client';
 
 const JWT_SECRET = process.env.JWT_SECRET_KEY || 'your-default-secret-key'; // 🔐 Khóa bí mật dùng để ký JWT
 
@@ -57,16 +57,33 @@ export const registerUser = async (userData: any) => {
     // Mã hóa mật khẩu bằng bcrypt
     const hashedPassword = await bcrypt.hash(userData.password, 10);
 
+    // === SỬA LỖI: Thêm `anh_dai_dien_id` vào data ===
+    const createData: Prisma.nguoi_dungCreateInput = {
+        ho_ten: userData.fullname,
+        email: userData.email,
+        dien_thoai: userData.tel,
+        dia_chi: userData.address,
+        mat_khau: hashedPassword,
+        loai_nguoi_dung: UserType.Khach_Hang,
+    };
+
+    // === SỬA LỖI Ở ĐÂY: Chỉ thêm địa chỉ nếu nó tồn tại ===
+    if (userData.address && userData.address.trim() !== '') {
+        createData.dia_chi = userData.address;
+    }
+    // ============================================
+
+    // Nếu client gửi ID ảnh, thì liên kết nó
+    if (userData.anh_dai_dien_id) {
+        createData.media_files = {
+            connect: { id: parseInt(userData.anh_dai_dien_id, 10) }
+        };
+    }
+    // ========================================
+
     // Tạo mới người dùng trong DB
     const newUser = await prisma.nguoi_dung.create({
-        data: {
-            ho_ten: userData.fullname,
-            email: userData.email,
-            dien_thoai: userData.tel,
-            dia_chi: userData.address,
-            mat_khau: hashedPassword,
-            loai_nguoi_dung: UserType.Khach_Hang, // Gán loại người dùng là khách hàng
-        },
+        data: createData, // Dùng data đã xử lý
     });
 
     // 🔰 Tạo thẻ thành viên mặc định (nếu tồn tại hạng “Mới”)
@@ -76,13 +93,14 @@ export const registerUser = async (userData: any) => {
             data: {
                 khach_hang_id: newUser.id,
                 hang_thanh_vien_id: defaultTier.id,
-                diem_tich_luy: 0, // Điểm tích lũy ban đầu
+                diem_tich_luy: 0,
             },
         });
     }
 
     return newUser;
 };
+
 // 🔐 Đăng nhập cho Khách hàng (phân biệt với admin)
 export const loginUser = async (email: string, password: string) => {
     // Tìm người dùng là Khách Hàng có email trùng khớp

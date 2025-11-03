@@ -2,6 +2,7 @@
 import { Request, Response } from 'express';
 import * as userService from '../services/user.service';
 import { nguoi_dung_loai_nguoi_dung as UserType } from '@prisma/client';
+import { AuthenticatedRequest } from '../middlewares/auth.middleware';
 
 // 📌 Lấy danh sách người dùng
 export const handleGetUsers = async (req: Request, res: Response) => {
@@ -98,6 +99,74 @@ export const handleCheckPassword = async (req: Request, res: Response) => {
         const { email, currentPassword } = req.body;
         await userService.checkCurrentPassword(email, currentPassword);
         res.status(200).json({ message: 'Mật khẩu chính xác.' });
+    } catch (error: any) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+// === CÁC HANDLER MỚI CHO KHÁCH HÀNG ===
+
+/**
+ * 👤 [USER] Lấy thông tin cá nhân của tôi
+ */
+export const handleGetMyProfile = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const userId = (req.user as any).id;
+        if (!userId) {
+            return res.status(401).json({ message: "Token không hợp lệ, không tìm thấy ID người dùng." });
+        }
+
+        const user = await userService.getUserById(userId);
+        res.status(200).json(user);
+    } catch (error: any) {
+        res.status(404).json({ message: error.message });
+    }
+};
+
+/**
+ * 🔄 [USER] Cập nhật thông tin cá nhân của tôi
+ */
+export const handleUpdateMyProfile = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const userId = (req.user as any).id;
+        if (!userId) {
+            return res.status(401).json({ message: "Token không hợp lệ, không tìm thấy ID người dùng." });
+        }
+
+        const updatedUser = await userService.updateUser(userId, req.body);
+        res.status(200).json({ message: 'Cập nhật thông tin thành công', data: updatedUser });
+    } catch (error: any) {
+        if (error.message === '❌ Người dùng không tồn tại.') {
+            res.status(404).json({ message: error.message });
+        } else {
+            res.status(400).json({ message: error.message });
+        }
+    }
+};
+
+/**
+ * 🔑 [USER] Đổi mật khẩu
+ */
+export const handleChangeMyPassword = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const userId = (req.user as any).id;
+        const email = (req.user as any).email;
+        const { currentPassword, newPassword } = req.body;
+
+        if (!userId || !email) {
+            return res.status(401).json({ message: "Token không hợp lệ." });
+        }
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ message: "Vui lòng nhập đủ mật khẩu cũ và mới." });
+        }
+
+        // 1. Kiểm tra mật khẩu cũ
+        await userService.checkCurrentPassword(email, currentPassword);
+
+        // 2. Cập nhật mật khẩu mới
+        await userService.changePassword(userId, newPassword);
+
+        res.status(200).json({ message: 'Đổi mật khẩu thành công.' });
     } catch (error: any) {
         res.status(400).json({ message: error.message });
     }

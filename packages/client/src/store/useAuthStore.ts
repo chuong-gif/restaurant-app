@@ -1,3 +1,4 @@
+// packages/client/src/store/useAuthStore.ts
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { User } from '@/types/user';
@@ -6,11 +7,11 @@ type AuthState = {
     user: User | null;
     token: string | null;
     setUserToken: (user: User, token: string) => void;
+    setUser: (user: User) => void; // <-- THÊM DÒNG NÀY
     logout: () => void;
 };
 
 export const useAuthStore = create<AuthState>()(
-    // Persist middleware để tự động lưu state vào localStorage
     persist(
         (set) => ({
             user: null,
@@ -19,14 +20,21 @@ export const useAuthStore = create<AuthState>()(
             setUserToken: (user, token) => {
                 set({ user, token });
             },
-            // Action để xoá state khi đăng xuất (giống handleLogout [cite: 16-20])
+            // === THÊM HÀM MỚI ĐỂ CẬP NHẬT USER ===
+            setUser: (user) => {
+                set((state) => ({
+                    ...state,
+                    user: { ...state.user, ...user }, // Cập nhật thông tin user
+                }));
+            },
+            // ======================================
+            // Action để xoá state khi đăng xuất
             logout: () => {
                 set({ user: null, token: null });
-                // (localStorage sẽ tự động được xoá bởi 'persist')
             },
         }),
         {
-            name: 'auth-storage', // Tên key trong localStorage
+            name: 'auth-storage',
             storage: createJSONStorage(() => localStorage),
         }
     )

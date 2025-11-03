@@ -8,8 +8,7 @@ export const loginSchema = z.object({
 });
 export type LoginSchema = z.infer<typeof loginSchema>;
 
-// === THÊM SCHEMA ĐĂNG KÝ MỚI ===
-// Dựa trên validation của Register.js
+// === SỬA SCHEMA ĐĂNG KÝ ===
 export const registerSchema = z.object({
     fullname: z.string().min(1, { message: "Họ và tên là bắt buộc" }),
     email: z.string().email({ message: "Email không hợp lệ" }),
@@ -22,15 +21,16 @@ export const registerSchema = z.object({
             message: "Mật khẩu phải có chữ hoa, số và ký tự đặc biệt",
         }),
     confirmPassword: z.string(),
-    address: z.string()
-        .min(1, { message: "Địa chỉ là bắt buộc" })
-        .refine(val => val.split(",").filter(part => part.trim()).length >= 4, {
-            message: "Vui lòng điền đầy đủ thông tin địa chỉ (Số nhà, Phường/Xã, Quận/Huyện, Tỉnh/Thành)",
-        }),
-    avatar: z.string().url({ message: "URL ảnh đại diện không hợp lệ" }).optional().or(z.literal('')),
+
+    // === SỬA LỖI Ở ĐÂY ===
+    // Bỏ các yêu cầu bắt buộc và .refine()
+    address: z.string().optional(),
+    // ===================
+
+    anh_dai_dien_id: z.number().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
     message: "Mật khẩu xác nhận không khớp",
-    path: ["confirmPassword"], // Gắn lỗi vào trường confirmPassword
+    path: ["confirmPassword"],
 });
 
 export type RegisterSchema = z.infer<typeof registerSchema>;

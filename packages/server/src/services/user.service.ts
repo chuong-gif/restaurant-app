@@ -215,3 +215,15 @@ export const checkCurrentPassword = async (email: string, currentPassword: strin
 
     return true;
 };
+
+// === 🔑 THÊM HÀM MỚI ĐỂ ĐỔI MẬT KHẨU ===
+export const changePassword = async (userId: number, newPassword: string) => {
+    // Mã hóa mật khẩu mới
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Cập nhật mật khẩu trong CSDL
+    await prisma.nguoi_dung.update({
+        where: { id: userId },
+        data: { mat_khau: hashedPassword },
+    });
+};

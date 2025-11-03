@@ -48,7 +48,7 @@ export default function RegisterPage() {
             password: "",
             confirmPassword: "",
             address: "",
-            avatar: "",
+            anh_dai_dien_id: undefined,
         },
     });
 
@@ -179,13 +179,13 @@ export default function RegisterPage() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                                     <FormField
                                         control={form.control}
-                                        name="avatar"
+                                        name="anh_dai_dien_id" // <-- SỬA TÊN FIELD
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Ảnh đại diện (Tùy chọn)</FormLabel>
                                                 <FormControl>
                                                     <ImageUpload
-                                                        onImageUpload={(url) => field.onChange(url)}
+                                                        onImageUpload={(id) => field.onChange(id)}
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
@@ -200,7 +200,7 @@ export default function RegisterPage() {
                                                 <FormLabel>Địa chỉ *</FormLabel>
                                                 <FormControl>
                                                     <AddressSelector
-                                                        value={field.value}
+                                                        value={field.value || ''} // Thêm || '' để xử lý giá trị undefined
                                                         onChange={(addr) => field.onChange(addr)}
                                                     />
                                                 </FormControl>
@@ -220,10 +220,9 @@ export default function RegisterPage() {
                     <CardFooter className="flex-col gap-2 text-center text-sm">
                         <p>
                             Bạn đã có tài khoản?{' '}
-                            <Link href="/login" passHref legacyBehavior>
-                                <a className="text-primary font-medium hover:underline">
-                                    Đăng nhập ngay
-                                </a>
+                            {/* === SỬA LẠI CODE Ở ĐÂY === */}
+                            <Link href="/login" className="text-primary font-medium hover:underline">
+                                Đăng nhập ngay
                             </Link>
                         </p>
                     </CardFooter>

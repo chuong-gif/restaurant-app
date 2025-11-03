@@ -11,6 +11,13 @@ import productCategoryAdminRoutes from './productCategory.routes';
 import { handleGetPublicCategories } from '../controllers/productCategory.controller';
 import mediaRoutes from './media.routes';
 import myReservationRoutes from './myReservation.routes';
+// === THÊM IMPORT HANDLER MỚI ===
+import {
+    handleGetMyProfile,
+    handleUpdateMyProfile,
+    handleChangeMyPassword
+} from '../controllers/user.controller';
+// ===============================
 import userAdminRoutes from './user.routes';
 import roleAdminRoutes from './role.routes';
 import reservationPublicRoutes from './reservation.public.routes';
@@ -41,6 +48,7 @@ publicRouter.get('/product-categories', handleGetPublicCategories);
 publicRouter.use('/blogs', blogRoutes); // Tạm thời dùng chung
 publicRouter.use('/blog-categories', blogCategoryRoutes); // Tạm thời dùng chung
 publicRouter.use('/reservations', reservationPublicRoutes);
+publicRouter.use('/media', mediaRoutes);
 // publicRouter.use('/promotions', promotionRoutes); // Promotion thường là private/admin
 router.use('/public', publicRouter);
 
@@ -50,6 +58,12 @@ router.use('/public', publicRouter);
 const privateUserRouter = Router();
 privateUserRouter.use(authenticateToken);
 privateUserRouter.use('/my-reservations', myReservationRoutes);
+// === THÊM CÁC ROUTE MỚI VÀO ĐÂY ===
+privateUserRouter.get('/me', handleGetMyProfile);         // GET /api/v1/user/me
+privateUserRouter.patch('/me', handleUpdateMyProfile);    // PATCH /api/v1/user/me
+privateUserRouter.post('/change-password', handleChangeMyPassword); // POST /api/v1/user/change-password
+// ==================================
+
 router.use('/user', privateUserRouter);
 
 /* ==========================================================
@@ -61,7 +75,7 @@ adminRouter.use(authenticateToken); // Middleware xác thực
 // Gắn các router quản lý
 adminRouter.use('/products', productAdminRoutes);
 adminRouter.use('/product-categories', productCategoryAdminRoutes);
-adminRouter.use('/media', mediaRoutes);
+
 adminRouter.use('/users', userAdminRoutes);
 adminRouter.use('/roles', roleAdminRoutes);
 adminRouter.use('/reservations', reservationAdminRoutes);
