@@ -1,0 +1,77 @@
+/* packages/client/src/styles/booking-steps.css */
+.progress-steps {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    position: relative;
+}
+
+.progress-steps::before {
+    content: '';
+    position: absolute;
+    top: 18px;
+    /* Căn giữa vòng tròn */
+    left: 10%;
+    right: 10%;
+    height: 4px;
+    background-color: #e0e0e0;
+    z-index: -1;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80px;
+    /* Đảm bảo các bước có không gian */
+    text-align: center;
+}
+
+.step .circle {
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    border: 4px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #999;
+    transition: all 0.3s ease;
+    z-index: 1;
+    /* Nằm trên thanh ngang */
+}
+
+.step p {
+    margin-top: 8px;
+    font-size: 0.875rem;
+    color: #999;
+    transition: all 0.3s ease;
+}
+
+/* Trạng thái Hoàn thành */
+.step.completed .circle {
+    background-color: #FEA116;
+    /* Màu primary */
+    border-color: #FEA116;
+    color: black;
+}
+
+.step.completed p {
+    color: #FEA116;
+}
+
+/* Trạng thái Đang hoạt động */
+.step.active .circle {
+    border-color: #FEA116;
+    color: #FEA116;
+    background-color: #fff;
+    transform: scale(1.1);
+}
+
+.step.active p {
+    color: #0F172B;
+    /* Màu dark */
+    font-weight: bold;
+}

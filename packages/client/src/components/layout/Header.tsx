@@ -45,7 +45,7 @@ export default function Header() {
             <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2">
-                    <Image src="/images/logo.jpg" alt="EnViSi Logo" width={40} height={40} />
+                    <Image src="/images/logo.png" alt="EnViSi Logo" width={40} height={40} />
                     <span className="font-secondary text-2xl text-primary">EnViSi</span>
                 </Link>
 
@@ -58,7 +58,7 @@ export default function Header() {
                                 <Link
                                     href="/"
                                     className={cn(navigationMenuTriggerStyle(), navLinkClass)}
-                                    data-active={pathname === '/'}
+                                    data-active={pathname === '/'} // Prop này để shadcn tự tô màu
                                 >
                                     Trang chủ
                                 </Link>

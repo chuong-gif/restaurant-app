@@ -15,7 +15,7 @@ export const ReservationStatus = {
 
 
 /**
- * 🍽️ Tìm bàn trống phù hợp
+ * 🍽️ [Helper 1] Tìm bàn trống phù hợp (Tự động)
  */
 const findAvailableTable = async (reservationDate: Date, partySize: number): Promise<number> => {
     let requiredCapacity: number[];
@@ -25,7 +25,7 @@ const findAvailableTable = async (reservationDate: Date, partySize: number): Pro
     else requiredCapacity = [8];
 
     const potentialTables = await prisma.ban_an.findMany({
-        where: { suc_chua: { in: requiredCapacity }, trang_thai: true }, // Chỉ tìm bàn đang trống (trang_thai = 1)
+        where: { suc_chua: { in: requiredCapacity }, trang_thai: true },
         select: { id: true },
         orderBy: { suc_chua: 'asc' },
     });
@@ -36,7 +36,6 @@ const findAvailableTable = async (reservationDate: Date, partySize: number): Pro
     }
 
     // Kiểm tra lịch đặt trong khoảng +/- 2 giờ của giờ đặt
-    // Ví dụ: Đặt lúc 19:00, kiểm tra xem có đơn nào từ 17:00 đến 21:00 không
     const startTime = new Date(reservationDate.getTime() - 2 * 60 * 60 * 1000);
     const endTime = new Date(reservationDate.getTime() + 2 * 60 * 60 * 1000);
 
@@ -44,7 +43,7 @@ const findAvailableTable = async (reservationDate: Date, partySize: number): Pro
         where: {
             ban_an_id: { in: potentialTableIds },
             ngay_dat_ban: { gte: startTime, lte: endTime },
-            trang_thai: { notIn: [ReservationStatus.CANCELLED, ReservationStatus.COMPLETED] } // Loại trừ đơn Hủy hoặc Hoàn thành
+            trang_thai: { notIn: [ReservationStatus.CANCELLED, ReservationStatus.COMPLETED] }
         },
         select: { ban_an_id: true }
     });
@@ -59,12 +58,50 @@ const findAvailableTable = async (reservationDate: Date, partySize: number): Pro
     return availableTableId;
 };
 
+// === THÊM HELPER MỚI ===
 /**
- * 🧾 Tạo mới một đơn đặt bàn
+ * ✅ [Helper 2] Kiểm tra một bàn cụ thể có trống không
+ */
+const checkSpecificTableAvailability = async (tableId: number, reservationDate: Date, partySize: number) => {
+    const table = await prisma.ban_an.findUnique({ where: { id: tableId } });
+
+    // 1. Kiểm tra bàn
+    if (!table) throw new Error('Bàn được chọn không tồn tại.');
+    if (!table.trang_thai) throw new Error(`Bàn ${table.so_ban} hiện không khả dụng (đang bảo trì).`);
+
+    // 2. Kiểm tra sức chứa
+    if (table.suc_chua < partySize) {
+        throw new Error(`Bàn ${table.so_ban} không đủ sức chứa (chỉ có ${table.suc_chua} chỗ, bạn cần ${partySize} chỗ).`);
+    }
+
+    // 3. Kiểm tra giờ (logic tương tự findAvailableTable [cite: 42-53])
+    const startTime = new Date(reservationDate.getTime() - 2 * 60 * 60 * 1000);
+    const endTime = new Date(reservationDate.getTime() + 2 * 60 * 60 * 1000);
+
+    const conflictingReservation = await prisma.dat_ban.findFirst({
+        where: {
+            ban_an_id: tableId,
+            ngay_dat_ban: { gte: startTime, lte: endTime },
+            trang_thai: { notIn: [ReservationStatus.CANCELLED, ReservationStatus.COMPLETED] }
+        }
+    });
+
+    if (conflictingReservation) {
+        throw new Error(`Rất tiếc, Bàn ${table.so_ban} đã được đặt trong khung giờ này.`);
+    }
+
+    return true; // Bàn hợp lệ
+};
+// =========================
+
+/**
+ * 🧾 Tạo mới một đơn đặt bàn (ĐÃ SỬA)
  */
 export const createReservation = async (data: any) => {
-    const { products, ...reservationData } = data;
-    const partySize = parseInt(reservationData.party_size || reservationData.partySize, 10); // Lấy partySize từ frontend
+    // Tách `ban_an_id` (do người dùng tự chọn) ra khỏi data
+    const { products, ban_an_id, ...reservationData } = data;
+
+    const partySize = parseInt(reservationData.party_size || reservationData.partySize, 10);
     const reservationDate = new Date(reservationData.reservation_date);
 
     if (isNaN(partySize) || partySize <= 0) {
@@ -74,12 +111,22 @@ export const createReservation = async (data: any) => {
         throw new Error('Ngày đặt bàn không hợp lệ.');
     }
 
-    const tableId = await findAvailableTable(reservationDate, partySize);
+    // === SỬA LOGIC CHỌN BÀN ===
+    let tableId: number;
+    if (ban_an_id) {
+        // Trường hợp 1: Người dùng tự chọn bàn
+        const userSelectedTableId = parseInt(ban_an_id, 10);
+        await checkSpecificTableAvailability(userSelectedTableId, reservationDate, partySize); // Kiểm tra bàn
+        tableId = userSelectedTableId;
+    } else {
+        // Trường hợp 2: Người dùng để hệ thống tự động chọn
+        tableId = await findAvailableTable(reservationDate, partySize);
+    }
+    // ========================
 
     // Tính tổng tiền món ăn ban đầu
     let initialTotalAmount = 0;
     if (products && Array.isArray(products) && products.length > 0) {
-        // Cần lấy giá sản phẩm từ DB để đảm bảo chính xác
         const productIds = products.map((p: any) => p.product_id);
         const dbProducts = await prisma.san_pham.findMany({
             where: { id: { in: productIds } },
@@ -95,26 +142,24 @@ export const createReservation = async (data: any) => {
 
     // Tính tiền cọc (30%)
     const depositAmount = initialTotalAmount * 0.3;
-    // Mặc định trạng thái là Chờ xác nhận/Chờ cọc
     const initialStatus = ReservationStatus.PENDING_CONFIRMATION;
 
     return prisma.$transaction(async (tx) => {
         const newReservation = await tx.dat_ban.create({
             data: {
-                ma_dat_ban: reservationData.reservation_code || `DB-${Date.now()}`, // Tự sinh nếu frontend không gửi
+                ma_dat_ban: reservationData.reservation_code || `DB-${Date.now()}`,
                 khach_hang_id: reservationData.user_id ? parseInt(reservationData.user_id, 10) : null,
-                ho_ten_khach: reservationData.fullname, // Sửa key cho khớp frontend
-                dien_thoai: reservationData.tel, // Sửa key
+                ho_ten_khach: reservationData.fullname,
+                dien_thoai: reservationData.tel,
                 email: reservationData.email,
                 ngay_dat_ban: reservationDate,
                 so_luong_khach: partySize,
-                ghi_chu: reservationData.note || reservationData.notes, // Sửa key
-                tong_tien: initialTotalAmount, // Tổng tiền món ăn ban đầu
+                ghi_chu: reservationData.note || reservationData.notes,
+                tong_tien: initialTotalAmount,
                 tien_dat_coc: depositAmount,
                 trang_thai: initialStatus,
-                ban_an_id: tableId,
+                ban_an_id: tableId, // Gán ID bàn đã được chọn hoặc tìm thấy
                 khuyen_mai_id: reservationData.promotion_id ? parseInt(reservationData.promotion_id, 10) : null,
-                // so_lan_doi mặc định là 1 (chưa đổi)
             },
         });
 
@@ -129,7 +174,7 @@ export const createReservation = async (data: any) => {
                     dat_ban_id: newReservation.id,
                     san_pham_id: p.product_id,
                     so_luong: p.quantity,
-                    gia_tai_thoi_diem: productPriceMap.get(p.product_id) || 0, // Lấy giá từ DB
+                    gia_tai_thoi_diem: productPriceMap.get(p.product_id) || 0,
                 })),
             });
         }
@@ -144,7 +189,6 @@ export const createReservation = async (data: any) => {
         return newReservation;
     });
 };
-
 /**
  * 🧮 Lấy danh sách đặt bàn cho trang quản trị
  */
