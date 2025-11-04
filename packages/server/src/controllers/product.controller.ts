@@ -22,6 +22,7 @@ export const handleGetProducts = async (req: Request, res: Response) => {
 
 // ====================== LẤY SẢN PHẨM THEO ID (SỬA LỖI 3) ======================
 export const handleGetProductById = async (req: Request, res: Response) => {
+    // ===================================
     try {
         const id = parseInt(req.params.id, 10);
         const product = await productService.getProductById(id);

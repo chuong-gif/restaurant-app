@@ -18,7 +18,7 @@ export const mediaApi = baseApi.injectEndpoints({
         // Mutation để lưu thông tin file vào CSDL sau khi upload lên Firebase
         createMediaFile: builder.mutation<CreateMediaFileResponse, CreateMediaFileRequest>({
             query: (mediaData) => ({
-                url: '/admin/media', // Dựa trên file media.routes.ts và index.ts của server
+                url: '/public/media', // Dựa trên file media.routes.ts và index.ts của server
                 method: 'POST',
                 body: mediaData,
             }),
