@@ -13,8 +13,8 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Chấp nhận tất cả các phương thức
     allowedHeaders: ['Content-Type', 'Authorization'], // Chấp nhận các header cần thiết
 }));                                               // 🌍 Cho phép truy cập từ domain khác (Cross-Origin)
-app.use(express.json());                                        // 📦 Cho phép server đọc dữ liệu JSON trong request body
-app.use(express.urlencoded({ extended: true }));                // 🧾 Hỗ trợ parse dữ liệu form URL-encoded
+app.use(express.json({ limit: '80mb' }));                                       // 📦 Cho phép server đọc dữ liệu JSON trong request body
+app.use(express.urlencoded({ limit: '80mb', extended: true }));               // 🧾 Hỗ trợ parse dữ liệu form URL-encoded
 
 // ❤️ Health check route (kiểm tra server có hoạt động không)
 app.get('/health', (req: Request, res: Response) => {

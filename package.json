@@ -7,10 +7,10 @@
   ],
   "scripts": {
     "dev:server": "npm --workspace=packages/server run dev",
-    "dev:admin": "npm --workspace=packages/web-admin run dev",
-    "dev:client": "npm --workspace=packages/web-client run dev",
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:admin\"",
-    "build": "npm run -w packages/server build && npm run -w packages/web-admin build && npm run -w packages/web-client build",
+    "dev:admin": "npm --workspace=packages/admin run dev",
+    "dev:client": "npm --workspace=packages/client run dev",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:admin\" \"npm run dev:client\"",
+    "build": "npm run -w packages/server build && npm run -w packages/admin build && npm run -w packages/client build",
     "lint": "eslint \"packages/**/src/**/*.{ts,tsx,js,jsx}\" --fix"
   },
   "prisma": {
