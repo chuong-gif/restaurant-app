@@ -1,6 +1,7 @@
 // packages/server/src/controllers/product.controller.ts
 import { Request, Response } from 'express';
 import * as productService from '../services/product.service';
+import { nguoi_dung_loai_nguoi_dung as UserType } from '@prisma/client';
 
 // ====================== LẤY DANH SÁCH SẢN PHẨM (ĐÃ SỬA) ======================
 export const handleGetProducts = async (req: Request, res: Response) => {
@@ -20,9 +21,8 @@ export const handleGetProducts = async (req: Request, res: Response) => {
     }
 };
 
-// ====================== LẤY SẢN PHẨM THEO ID (SỬA LỖI 3) ======================
+// ====================== LẤY SẢN PHẨM THEO ID ======================
 export const handleGetProductById = async (req: Request, res: Response) => {
-    // ===================================
     try {
         const id = parseInt(req.params.id, 10);
         const product = await productService.getProductById(id);
@@ -42,7 +42,14 @@ export const handleGetActiveProducts = async (req: Request, res: Response) => {
         const page = parseInt(req.query.page as string) || 1;
         const pageSize = parseInt(req.query.limit as string) || 10;
         const searchName = (req.query.searchName as string) || '';
-        const result = await productService.getProducts(searchName, page, pageSize, undefined, true);
+
+        // === SỬA LỖI Ở ĐÂY: Thêm bộ lọc danh mục ===
+        const categoryId = req.query.danh_muc_id ? parseInt(req.query.danh_muc_id as string) : undefined;
+        // ========================================
+
+        // Gọi service với trạng thái `true` và (tùy chọn) categoryId
+        const result = await productService.getProducts(searchName, page, pageSize, categoryId, true);
+
         res.status(200).json({ message: "Lấy danh sách sản phẩm đang hoạt động thành công", ...result });
     } catch (error: any) {
         res.status(500).json({ message: "Lỗi máy chủ khi lấy sản phẩm", error: error.message });
@@ -91,7 +98,7 @@ export const handleDeleteProduct = async (req: Request, res: Response) => {
     }
 };
 
-// ====================== XÓA VĨNH VIỄN SẢN PHẨM (SỬA LỖI 2) ======================
+// ====================== XÓA VĨNH VIỄN SẢN PHẨM ======================
 export const handlePermanentlyDeleteProduct = async (req: Request, res: Response) => {
     try {
         const id = parseInt(req.params.id, 10);
