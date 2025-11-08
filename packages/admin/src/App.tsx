@@ -5,34 +5,23 @@ import AdminLayout from './layouts/AdminLayout';
 import AuthLayout from './layouts/AuthLayout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
-import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedRoute from './components/ProtectedRoute'; // Đã sửa ở các bước trước
 
+// Import các trang
 import ProductListPage from './pages/products/ProductListPage';
 import ProductForm from './pages/products/ProductForm';
 import ProductTrashPage from './pages/products/ProductTrashPage';
 import CategoryListPage from './pages/categories/CategoryListPage';
-
-// --- IMPORT CÁC TRANG USER ---
 import UserListPage from './pages/users/UserListPage';
 import UserFormPage from './pages/users/UserFormPage';
 import UserTrashPage from './pages/users/UserTrashPage';
-
-// --- IMPORT CÁC TRANG RESERVATION ---
 import ReservationListPage from './pages/reservations/ReservationListPage';
 import ReservationDetailPage from './pages/reservations/ReservationDetailPage';
 import ReservationTrashPage from './pages/reservations/ReservationTrashPage';
-
-// --- IMPORT CÁC TRANG ROLE/PERMISSION ---
 import RoleListPage from './pages/roles/RoleListPage';
 import AssignPermissionPage from './pages/roles/AssignPermissionPage';
-
-// --- IMPORT TRANG TABLE ---
 import TableListPage from './pages/tables/TableListPage';
-
-// --- IMPORT TRANG PROMOTION ---
 import PromotionListPage from './pages/promotions/PromotionListPage';
-
-// --- IMPORT CÁC TRANG BLOG ---
 import BlogCategoryListPage from './pages/blogCategories/BlogCategoryListPage';
 import BlogListPage from './pages/blogs/BlogListPage';
 import BlogFormPage from './pages/blogs/BlogFormPage';
@@ -42,62 +31,88 @@ function App() {
     <AntdApp>
       <BrowserRouter>
         <Routes>
-          {/* Routes yêu cầu đăng nhập */}
-          <Route element={<ProtectedRoute />}>
-            <Route element={<AdminLayout />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-
-              {/* Sản phẩm */}
-              <Route path="/products" element={<ProductListPage />} />
-              <Route path="/products/new" element={<ProductForm />} />
-              <Route path="/products/edit/:id" element={<ProductForm />} />
-              <Route path="/products/trash" element={<ProductTrashPage />} />
-
-              {/* Danh mục */}
-              <Route path="/categories" element={<CategoryListPage />} />
-
-              {/* === THÊM ROUTES USER === */}
-              <Route path="/users" element={<UserListPage />} />
-              <Route path="/users/new" element={<UserFormPage />} />
-              <Route path="/users/edit/:id" element={<UserFormPage />} />
-              <Route path="/users/trash" element={<UserTrashPage />} />
-              {/* ======================== */}
-
-              {/* === THÊM ROUTES RESERVATION === */}
-              <Route path="/reservations" element={<ReservationListPage />} />
-              <Route path="/reservations/:id" element={<ReservationDetailPage />} />
-              <Route path="/reservations/trash" element={<ReservationTrashPage />} />
-              {/* ============================= */}
-
-              {/* === THÊM ROUTES ROLE/PERMISSION === */}
-              <Route path="/roles" element={<RoleListPage />} />
-              <Route path="/roles/permissions" element={<AssignPermissionPage />} />
-              {/* ================================ */}
-
-              {/* === THÊM ROUTE TABLE === */}
-              <Route path="/tables" element={<TableListPage />} />
-              {/* ======================= */}
-
-              {/* === THÊM ROUTE PROMOTION === */}
-              <Route path="/promotions" element={<PromotionListPage />} />
-              {/* ========================== */}
-
-              {/* === THÊM ROUTES BLOG === */}
-              <Route path="/blog-categories" element={<BlogCategoryListPage />} />
-              <Route path="/blogs" element={<BlogListPage />} />
-              <Route path="/blogs/new" element={<BlogFormPage />} />
-              <Route path="/blogs/edit/:id" element={<BlogFormPage />} />
-              {/* Có thể thêm route xem comments sau: /blog-comments/:blogId */}
-              {/* ======================= */}
-
-            </Route>
-          </Route>
-
-          {/* Routes công khai */}
+          {/* 1. Routes công khai (Đăng nhập) */}
           <Route element={<AuthLayout />}>
             <Route path="/login" element={<Login />} />
           </Route>
 
+          {/* 2. Routes yêu cầu đăng nhập */}
+          <Route element={<AdminLayout />}>
+            {/* Dashboard: Chỉ cần đăng nhập */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+            </Route>
+
+            {/* --- Sản phẩm --- */}
+            <Route element={<ProtectedRoute requiredPermission="view_product" />}>
+              <Route path="/products" element={<ProductListPage />} />
+            </Route>
+            <Route element={<ProtectedRoute requiredPermission="add_product" />}>
+              <Route path="/products/new" element={<ProductForm />} />
+            </Route>
+            <Route element={<ProtectedRoute requiredPermission="edit_product" />}>
+              <Route path="/products/edit/:id" element={<ProductForm />} />
+            </Route>
+            <Route element={<ProtectedRoute requiredPermission="view_product_trash" />}>
+              <Route path="/products/trash" element={<ProductTrashPage />} />
+            </Route>
+
+            {/* --- Danh mục --- */}
+            <Route element={<ProtectedRoute requiredPermission="view_product_category" />}>
+              <Route path="/categories" element={<CategoryListPage />} />
+            </Route>
+
+            {/* --- Người dùng --- */}
+            <Route element={<ProtectedRoute requiredPermission="view_user" />}>
+              <Route path="/users" element={<UserListPage />} />
+            </Route>
+            <Route element={<ProtectedRoute requiredPermission="add_user" />}>
+              <Route path="/users/new" element={<UserFormPage />} />
+            </Route>
+            <Route element={<ProtectedRoute requiredPermission="edit_user" />}>
+              <Route path="/users/edit/:id" element={<UserFormPage />} />
+            </Route>
+            <Route element={<ProtectedRoute requiredPermission="view_user_trash" />}>
+              <Route path="/users/trash" element={<UserTrashPage />} />
+            </Route>
+
+            {/* --- Đặt bàn --- */}
+            <Route element={<ProtectedRoute requiredPermission="view_reservation" />}>
+              <Route path="/reservations" element={<ReservationListPage />} />
+              <Route path="/reservations/:id" element={<ReservationDetailPage />} />
+            </Route>
+            <Route element={<ProtectedRoute requiredPermission="view_reservation_trash" />}>
+              <Route path="/reservations/trash" element={<ReservationTrashPage />} />
+            </Route>
+
+            {/* --- Vai trò & Quyền --- */}
+            <Route element={<ProtectedRoute requiredPermission="view_role" />}>
+              <Route path="/roles" element={<RoleListPage />} />
+            </Route>
+            <Route element={<ProtectedRoute requiredPermission="assign_permission" />}>
+              <Route path="/roles/permissions" element={<AssignPermissionPage />} />
+            </Route>
+
+            {/* --- Bàn ăn --- */}
+            <Route element={<ProtectedRoute requiredPermission="view_table" />}>
+              <Route path="/tables" element={<TableListPage />} />
+            </Route>
+
+            {/* --- Khuyến mãi --- */}
+            <Route element={<ProtectedRoute requiredPermission="view_promotion" />}>
+              <Route path="/promotions" element={<PromotionListPage />} />
+            </Route>
+
+            {/* --- Blog (Tạm thời chỉ cần đăng nhập, vì CSDL chưa có mã quyền cho Blog) --- */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/blog-categories" element={<BlogCategoryListPage />} />
+              <Route path="/blogs" element={<BlogListPage />} />
+              <Route path="/blogs/new" element={<BlogFormPage />} />
+              <Route path="/blogs/edit/:id" element={<BlogFormPage />} />
+            </Route>
+          </Route>
+
+          {/* 3. Route mặc định: Chuyển hướng về dashboard */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </BrowserRouter>

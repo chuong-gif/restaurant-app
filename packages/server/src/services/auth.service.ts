@@ -7,14 +7,17 @@ import { Prisma, nguoi_dung_loai_nguoi_dung as UserType } from '@prisma/client';
 const JWT_SECRET = process.env.JWT_SECRET_KEY || 'your-default-secret-key'; // 🔐 Khóa bí mật dùng để ký JWT
 
 // 🧩 Hàm helper tạo token JWT từ thông tin người dùng
-const generateToken = (user: { id: number; email: string; ho_ten: string; anh_dai_dien_id: number | null }) => {
+const generateToken = (
+    user: { id: number; email: string; ho_ten: string; vai_tro_id: number | null },
+    permissions: string[] // Mảng các mã quyền, ví dụ: ['view_user', 'add_user']
+) => {
     const payload = {
         id: user.id,
         email: user.email,
         name: user.ho_ten,
-        avatar: user.anh_dai_dien_id // Lưu ID ảnh đại diện nếu có
+        roleId: user.vai_tro_id, // Thêm vai trò
+        permissions: permissions, // Thêm danh sách quyền
     };
-    // Ký JWT có thời hạn 3 tiếng
     return jwt.sign(payload, JWT_SECRET, { expiresIn: '3h' });
 };
 
@@ -41,7 +44,7 @@ export const handleSocialLogin = async (email: string, fullname: string, avatarU
     }
 
     // Tạo JWT token cho user
-    const token = generateToken(user);
+    const token = generateToken(user, []);
     const { mat_khau, ...userWithoutPassword } = user; // Xóa mật khẩu khỏi dữ liệu trả về
     return { user: userWithoutPassword, token };
 };
@@ -123,7 +126,7 @@ export const loginUser = async (email: string, password: string) => {
     }
 
     // Nếu đúng, tạo token
-    const token = generateToken(user);
+    const token = generateToken(user, []);
     // Loại bỏ mật khẩu khỏi dữ liệu trả về để bảo mật
     const { mat_khau, ...userWithoutPassword } = user;
 
@@ -134,28 +137,47 @@ export const loginUser = async (email: string, password: string) => {
 
 // 🔐 Đăng nhập cho Admin/Nhân viên (phân biệt với khách hàng)
 export const loginAdmin = async (email: string, password: string) => {
-    // Tìm người dùng là nhân viên có email trùng khớp
     const admin = await prisma.nguoi_dung.findFirst({
         where: {
             email,
-            loai_nguoi_dung: UserType.Nhan_Vien, // Chỉ tìm người dùng loại nhân viên
+            loai_nguoi_dung: UserType.Nhan_Vien,
         },
     });
 
-    // Nếu không tìm thấy → báo lỗi
     if (!admin) {
         throw new Error('Email hoặc mật khẩu không đúng');
     }
 
-    // So sánh mật khẩu nhập vào với mật khẩu trong DB
     const isMatch = await bcrypt.compare(password, admin.mat_khau);
     if (!isMatch) {
         throw new Error('Email hoặc mật khẩu không đúng');
     }
 
-    // Tạo token đăng nhập cho admin
-    const token = generateToken(admin);
-    const { mat_khau, ...adminWithoutPassword } = admin; // Loại bỏ mật khẩu khỏi dữ liệu trả về
+    // === PHẦN THÊM VÀO RẤT QUAN TRỌNG ===
+    let userPermissions: string[] = [];
+    if (admin.vai_tro_id) {
+        // Nếu admin có vai trò, đi lấy quyền của vai trò đó
+        const rolePermissions = await prisma.vai_tro_quyen.findMany({
+            where: { vai_tro_id: admin.vai_tro_id },
+            include: {
+                quyen: true, // Lấy luôn thông tin của quyền
+            },
+        });
+        // Chỉ lấy 'ma_quyen'
+        userPermissions = rolePermissions.map(rp => rp.quyen.ma_quyen);
+    }
+    // ===================================
 
-    return { admin: adminWithoutPassword, token };
+    // 3. Tạo token mới với đầy đủ quyền
+    const token = generateToken(admin, userPermissions);
+    const { mat_khau, ...adminWithoutPassword } = admin;
+
+    // Gắn mảng quyền (userPermissions) vào đối tượng sẽ trả về
+    const adminWithPermissions = {
+        ...adminWithoutPassword,
+        permissions: userPermissions // <-- Gắn quyền vào đây
+    };
+
+    // Trả về đối tượng data ĐÃ CÓ QUYỀN
+    return { admin: adminWithPermissions, token };
 };
