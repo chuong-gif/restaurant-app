@@ -28,6 +28,29 @@ export const handleGetBlogsAdmin = async (req: Request, res: Response) => {
 };
 
 /**
+ * 🎮 Lấy danh sách bài viết (Public)
+ */
+export const handleGetPublicBlogs = async (req: Request, res: Response) => {
+    try {
+        const filters = {
+            page: parseInt(req.query.page as string) || 1,
+            limit: parseInt(req.query.limit as string) || 10,
+            search: (req.query.search as string) || undefined,
+            categoryId: req.query.danh_muc_id ? parseInt(req.query.danh_muc_id as string) : undefined,
+        };
+        const result = await blogService.getPublicBlogs(filters); // Gọi service mới
+        res.status(200).json({
+            message: 'Lấy danh sách bài viết thành công',
+            ...result,
+        });
+    } catch (error: any) {
+        res.status(500).json({ message: 'Lỗi máy chủ', error: error.message });
+    }
+};
+
+//=====================================================================
+
+/**
 
 * 🎮 Lấy chi tiết bài viết theo ID
   */

@@ -26,6 +26,18 @@ export const handleGetCategories = async (req: Request, res: Response) => {
         res.status(500).json({ message: error.message });
     }
 };
+/**
+ * 🎮 Controller để lấy danh mục bài viết (cho client, chỉ active)
+ */
+export const handleGetPublicCategories = async (req: Request, res: Response) => {
+    try {
+        const categories = await blogCategoryService.getPublicCategories();
+        res.status(200).json({ message: "Lấy danh mục thành công", data: categories });
+    } catch (error: any) {
+        res.status(500).json({ message: "Lỗi máy chủ khi lấy danh mục sản phẩm", error: error.message });
+    }
+};
+// =============================
 
 // Controller: Tạo mới một danh mục bài viết
 export const handleCreateCategory = async (req: Request, res: Response) => {

@@ -44,9 +44,43 @@ export const createComment = async (data: { blog_id: number, user_id: number, co
 };
 
 /**
- * ✅ Xóa một bình luận theo ID
+ * ✅ Cập nhật một bình luận (chỉ chủ sở hữu)
  */
-export const deleteComment = async (id: number) => {
+export const updateComment = async (commentId: number, userId: number, newContent: string) => {
+    const comment = await prisma.binh_luan_blog.findFirst({
+        where: { id: commentId, nguoi_dung_id: userId } // Đảm bảo đúng chủ
+    });
+
+    if (!comment) {
+        throw new Error('Không tìm thấy bình luận hoặc bạn không có quyền sửa.');
+    }
+
+    return prisma.binh_luan_blog.update({
+        where: { id: commentId },
+        data: { noi_dung: newContent }
+    });
+};
+// ===================
+
+/**
+ * ✅ Xóa một bình luận theo ID (SỬA: Thêm kiểm tra quyền)
+ */
+export const deleteComment = async (commentId: number, userId: number, userRole?: string) => {
+
+    // Tìm bình luận
+    const comment = await prisma.binh_luan_blog.findUnique({
+        where: { id: commentId }
+    });
+
+    if (!comment) {
+        throw new Error('Không tìm thấy bình luận.');
+    }
+
+    // Kiểm tra quyền: Hoặc là admin (vd: "Super Admin") hoặc là chủ sở hữu
+    if (userRole !== 'Super Admin' && comment.nguoi_dung_id !== userId) {
+        throw new Error('Bạn không có quyền xóa bình luận này.');
+    }
+
     // Xóa bản ghi trong bảng bình_luan_blog theo ID
-    return prisma.binh_luan_blog.delete({ where: { id } });
+    return prisma.binh_luan_blog.delete({ where: { id: commentId } });
 };

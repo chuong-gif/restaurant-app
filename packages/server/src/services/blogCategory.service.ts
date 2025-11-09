@@ -43,6 +43,17 @@ export const getCategories = async (
 };
 
 /**
+ * ✅ Lấy danh sách danh mục (Public - Chỉ lấy active)
+ */
+export const getPublicCategories = async () => {
+    return prisma.danh_muc_blog.findMany({
+        where: { trang_thai: true }, // Chỉ lấy danh mục đang hoạt động
+        orderBy: { id: 'asc' },
+    });
+};
+// =============================
+
+/**
  * ✅ Tạo một danh mục mới
  */
 export const createCategory = async (name: string, status: boolean) => {

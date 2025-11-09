@@ -55,19 +55,45 @@ export const handleCreateComment = async (req: AuthenticatedRequest, res: Respon
     }
 };
 
-// Controller: Xóa bình luận theo ID
-export const handleDeleteComment = async (req: Request, res: Response) => {
+// Controller: Cập nhật bình luận (chỉ chủ sở hữu)
+export const handleUpdateComment = async (req: AuthenticatedRequest, res: Response) => {
     try {
-        // Lấy id bình luận cần xóa từ params
+        const userId = (req.user as any)?.id;
+        const commentId = parseInt(req.params.id);
+        const { content } = req.body;
+
+        if (!userId) {
+            return res.status(401).json({ message: 'Yêu cầu không hợp lệ hoặc bạn cần đăng nhập.' });
+        }
+        if (!content) {
+            return res.status(400).json({ message: 'Nội dung bình luận là bắt buộc.' });
+        }
+
+        await blogCommentService.updateComment(commentId, userId, content);
+        res.status(200).json({ message: 'Cập nhật bình luận thành công' });
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
+};
+// ===================
+
+
+// Controller: Xóa bình luận theo ID (SỬA: Thêm kiểm tra quyền)
+export const handleDeleteComment = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const userId = (req.user as any)?.id;
+        const userRole = (req.user as any)?.role; // Giả sử token có vai trò
         const id = parseInt(req.params.id);
 
-        // Gọi service để xóa bình luận theo id
-        await blogCommentService.deleteComment(id);
+        if (!userId) {
+            return res.status(401).json({ message: 'Yêu cầu không hợp lệ hoặc bạn cần đăng nhập.' });
+        }
 
-        // Trả về phản hồi khi xóa thành công
+        // Truyền cả userId và userRole vào service
+        await blogCommentService.deleteComment(id, userId, userRole);
+
         res.status(200).json({ message: 'Xóa bình luận thành công' });
     } catch (error: any) {
-        // Nếu xảy ra lỗi (vd: không tìm thấy bình luận), trả mã lỗi 500
-        res.status(500).json({ message: error.message });
+        res.status(400).json({ message: error.message }); // Lỗi 400 nếu không có quyền
     }
 };

@@ -51,6 +51,54 @@ export async function getBlogsAdmin(filters: {
 }
 
 /**
+ * 📚 Lấy danh sách bài viết (Public - Chỉ lấy bài active)
+ */
+export async function getPublicBlogs(filters: {
+    page: number;
+    limit: number;
+    search?: string;
+    categoryId?: number;
+}) {
+    const { page, limit, search, categoryId } = filters;
+
+    const where: Prisma.bai_vietWhereInput = {
+        // CHỈ KHÁC NHAU Ở ĐÂY:
+        // trang_thai: true, // (Tạm thời bỏ qua nếu schema chưa có)
+    };
+
+    if (search) {
+        where.OR = [
+            { tieu_de: { contains: search } },
+            { noi_dung: { contains: search } },
+        ];
+    }
+    if (categoryId) where.danh_muc_blog_id = categoryId;
+
+    const [blogs, total] = await prisma.$transaction([
+        prisma.bai_viet.findMany({
+            where,
+            include: {
+                danh_muc_blog: { select: { ten_danh_muc: true } },
+                nguoi_dung: { select: { ho_ten: true } },
+                media_files: { select: { file_url: true } }
+            },
+            orderBy: { created_at: "desc" },
+            skip: (page - 1) * limit,
+            take: limit,
+        }),
+        prisma.bai_viet.count({ where })
+    ]);
+
+    return {
+        data: blogs,
+        total,
+        totalPages: Math.ceil(total / limit),
+        currentPage: page
+    };
+}
+// =============================
+
+/**
 
 * Lấy bài viết theo ID
   */
