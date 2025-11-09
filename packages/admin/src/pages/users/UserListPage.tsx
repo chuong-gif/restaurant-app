@@ -1,32 +1,17 @@
 // packages/admin/src/pages/users/UserListPage.tsx
 import React, { useState, useCallback, useMemo } from 'react';
-import {
-    Table,
-    Button,
-    Input,
-    Select,
-    Tag,
-    Space,
-    Row,
-    Col,
-    Avatar,
-    App,
-    Tabs // <-- Import Tabs
-} from 'antd';
-import {
-    PlusOutlined,
-    EditOutlined,
-    DeleteOutlined
-} from '@ant-design/icons';
+import { Table, Button, Input, Select, Tag, Space, Row, Col, Avatar, App, Tabs } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useDebounce } from 'use-debounce';
 
 import { useGetUsersQuery, useDeleteUserMutation } from '../../features/users/userApi';
-import { useGetRolesQuery } from '../../features/roles/roleApi'; // Import Role API
+import { useGetRolesQuery } from '../../features/roles/roleApi';
 import { setUserFilters, setUserPage } from '../../features/users/userSlice';
 import { RootState } from '../../app/store';
 import { User, UserType } from '../../types/user';
+import { useAuth } from '../../hooks/useAuth'; // <-- 1. IMPORT HOOK useAuth
 
 const { Search } = Input;
 const { Option } = Select;
@@ -36,26 +21,24 @@ const UserListPage: React.FC = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { message, modal } = App.useApp();
+    const { user } = useAuth(); // <-- 2. LẤY USER TỪ HOOK
 
     const filters = useSelector((state: RootState) => state.userFilters);
     const [searchTerm, setSearchTerm] = useState(filters.search);
     const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
 
-    // --- RTK Query ---
-    const {
-        data: usersData,
-        isLoading,
-        isFetching,
-    } = useGetUsersQuery({
+    const { data: usersData, isLoading, isFetching } = useGetUsersQuery({
         ...filters,
         search: debouncedSearchTerm,
-        trang_thai: true, // Chỉ lấy user đang hoạt động ở trang chính
+        trang_thai: true,
     });
-
-    // Lấy danh sách Vai trò cho bộ lọc
     const { data: roles, isLoading: isLoadingRoles } = useGetRolesQuery({ page: 1, limit: 100 });
-
     const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
+
+    // === 3. TẠO HÀM HELPER KIỂM TRA QUYỀN ===
+    const hasPermission = useCallback((permission: string): boolean => {
+        return user?.permissions?.includes(permission) ?? false;
+    }, [user]);
 
     // --- Handlers ---
     const handleTabChange = useCallback((key: string) => {
@@ -103,12 +86,10 @@ const UserListPage: React.FC = () => {
         });
     }, [deleteUser, message, modal]);
 
-    // --- Table columns ---
+    // --- Table columns (Sửa đổi) ---
     const columns = useMemo(() => [
         {
-            title: 'Avatar',
-            dataIndex: 'media_files',
-            key: 'avatar',
+            title: 'Avatar', dataIndex: 'media_files', key: 'avatar',
             render: (media_files: User['media_files']) => <Avatar src={media_files?.file_url} />,
         },
         { title: 'Họ tên', dataIndex: 'ho_ten', key: 'ho_ten', sorter: (a: User, b: User) => a.ho_ten.localeCompare(b.ho_ten) },
@@ -130,14 +111,18 @@ const UserListPage: React.FC = () => {
             title: 'Thao tác', key: 'action', align: 'center' as const,
             render: (_: any, record: User) => (
                 <Space size="middle">
-                    <Button type="primary" icon={<EditOutlined />} onClick={() => handleEdit(record.id)}>Sửa</Button>
-                    <Button type="primary" danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.id)}>Xóa</Button>
+                    {/* --- 4. ÁP DỤNG KIỂM TRA QUYỀN --- */}
+                    {hasPermission('edit_user') && (
+                        <Button type="primary" icon={<EditOutlined />} onClick={() => handleEdit(record.id)}>Sửa</Button>
+                    )}
+                    {hasPermission('soft_delete_user') && (
+                        <Button type="primary" danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.id)}>Xóa</Button>
+                    )}
                 </Space>
             ),
         },
-    ], [handleEdit, handleDelete]);
+    ], [handleEdit, handleDelete, hasPermission]); // Thêm hasPermission vào dependencies
 
-    // Xác định tab đang active
     const activeTabKey = filters.searchUserType === UserType.KHACH_HANG ? 'customers' : (filters.searchUserType === UserType.NHAN_VIEN ? 'employees' : 'all');
 
     return (
@@ -162,20 +147,25 @@ const UserListPage: React.FC = () => {
                         value={filters.searchRoleId}
                         allowClear
                         loading={isLoadingRoles}
-                        disabled={filters.searchUserType === UserType.KHACH_HANG} // Disable nếu đang xem KH
+                        disabled={filters.searchUserType === UserType.KHACH_HANG}
                     >
-                        {Array.isArray(roles) && roles.map((role) => ( // Chỉ map khi roles là mảng
+                        {Array.isArray(roles) && roles.map((role) => (
                             <Option key={role.id} value={role.id}>{role.ten_vai_tro}</Option>
                         ))}
                     </Select>
                 </Col>
                 <Col xs={24} sm={24} md={8} className="flex justify-end gap-2">
-                    <Button type="default" icon={<DeleteOutlined />} onClick={() => navigate('/users/trash')}>
-                        Thùng rác
-                    </Button>
-                    <Button type="primary" icon={<PlusOutlined />} onClick={handleAddNew}>
-                        Thêm mới
-                    </Button>
+                    {/* --- 5. ÁP DỤNG KIỂM TRA QUYỀN --- */}
+                    {hasPermission('view_user_trash') && (
+                        <Button type="default" icon={<DeleteOutlined />} onClick={() => navigate('/users/trash')}>
+                            Thùng rác
+                        </Button>
+                    )}
+                    {hasPermission('add_user') && (
+                        <Button type="primary" icon={<PlusOutlined />} onClick={handleAddNew}>
+                            Thêm mới
+                        </Button>
+                    )}
                 </Col>
             </Row>
 
@@ -197,7 +187,7 @@ const UserListPage: React.FC = () => {
                     onChange: handlePageChange,
                     showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} người dùng`,
                 }}
-                scroll={{ x: 'max-content' }} // Cho phép cuộn ngang nếu bảng quá rộng
+                scroll={{ x: 'max-content' }}
             />
         </div>
     );

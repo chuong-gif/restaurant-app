@@ -1,82 +1,81 @@
 // packages/admin/src/layouts/AdminLayout.tsx
 import React, { useState, useEffect } from 'react';
-import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom'; // Thêm useLocation
+import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '../features/auth/authSlice';
-import { useAuth } from '../hooks/useAuth';
-// Import icons từ Ant Design
+import { useAuth } from '../hooks/useAuth'; // <-- Đã có
 import {
     DashboardOutlined, AppstoreOutlined, FileTextOutlined, SettingOutlined, UserOutlined,
     CalendarOutlined, TeamOutlined, DownOutlined, GiftOutlined, ShopOutlined, ReadOutlined,
     MessageOutlined, SafetyCertificateOutlined, SolutionOutlined, RightOutlined, DeleteOutlined
 } from '@ant-design/icons';
 
-
-
-// --- Cấu trúc Menu Mới ---
+// --- Cấu trúc Menu Mới (Thêm requiredPermission) ---
 interface MenuItem {
     key: string;
     icon: React.ReactNode;
     label: React.ReactNode;
     path?: string;
     children?: MenuItem[];
+    requiredPermission?: string; // <-- THÊM DÒNG NÀY
 }
 
+// Bổ sung quyền yêu cầu cho từng mục
 const menuItems: MenuItem[] = [
-    { key: 'dashboard', icon: <DashboardOutlined />, label: 'Dashboard', path: '/dashboard' },
+    { key: 'dashboard', icon: <DashboardOutlined />, label: 'Dashboard', path: '/dashboard' }, // Dashboard không cần quyền
     {
-        key: 'food', icon: <ShopOutlined />, label: 'Quản Lý Món Ăn', children: [
-            { key: 'categories', icon: <AppstoreOutlined />, label: 'Danh mục', path: '/categories' },
-            { key: 'products', icon: <AppstoreOutlined />, label: 'Sản phẩm', path: '/products' },
-            { key: 'products-trash', icon: <DeleteOutlined />, label: 'Thùng rác SP', path: '/products/trash' },
+        key: 'food', icon: <ShopOutlined />, label: 'Quản Lý Món Ăn', requiredPermission: 'view_product_category', children: [ // Quyền 'view_product_category' hoặc 'view_product'
+            { key: 'categories', icon: <AppstoreOutlined />, label: 'Danh mục', path: '/categories', requiredPermission: 'view_product_category' },
+            { key: 'products', icon: <AppstoreOutlined />, label: 'Sản phẩm', path: '/products', requiredPermission: 'view_product' },
+            { key: 'products-trash', icon: <DeleteOutlined />, label: 'Thùng rác SP', path: '/products/trash', requiredPermission: 'view_product_trash' },
         ]
     },
     {
-        key: 'blog', icon: <ReadOutlined />, label: 'Quản Lý Bài Viết', children: [
-            { key: 'blog-categories', icon: <AppstoreOutlined />, label: 'Danh mục bài viết', path: '/blog-categories' }, // <-- Sửa/Thêm path
-            { key: 'blog-posts', icon: <FileTextOutlined />, label: 'Bài viết', path: '/blogs' }, // <-- Sửa/Thêm path
+        key: 'blog', icon: <ReadOutlined />, label: 'Quản Lý Bài Viết', children: [ // Blog chưa có quyền
+            { key: 'blog-categories', icon: <AppstoreOutlined />, label: 'Danh mục bài viết', path: '/blog-categories' },
+            { key: 'blog-posts', icon: <FileTextOutlined />, label: 'Bài viết', path: '/blogs' },
         ]
     },
     {
-        key: 'other', icon: <SettingOutlined />, label: 'Quản lý Khác', children: [
-            { key: 'promotions', icon: <GiftOutlined />, label: 'Khuyến mãi', path: '/promotions' }, // <-- Đã thêm/sửa
+        key: 'other', icon: <SettingOutlined />, label: 'Quản lý Khác', requiredPermission: 'view_promotion', children: [
+            { key: 'promotions', icon: <GiftOutlined />, label: 'Khuyến mãi', path: '/promotions', requiredPermission: 'view_promotion' },
         ]
     },
     {
-        key: 'accounts', icon: <UserOutlined />, label: 'Quản Lý Tài Khoản', children: [
-            { key: 'users', icon: <TeamOutlined />, label: 'Tất cả tài khoản', path: '/users' },
-            // Có thể thêm link lọc sẵn Khách hàng/Nhân viên nếu muốn
-            // { key: 'customers', label: 'Khách hàng', path: '/users?type=customer' },
-            // { key: 'employees', label: 'Nhân viên', path: '/users?type=employee' },
-            { key: 'users-trash', icon: <DeleteOutlined />, label: 'Thùng rác TK', path: '/users/trash' },
+        key: 'accounts', icon: <UserOutlined />, label: 'Quản Lý Tài Khoản', requiredPermission: 'view_user', children: [
+            { key: 'users', icon: <TeamOutlined />, label: 'Tất cả tài khoản', path: '/users', requiredPermission: 'view_user' },
+            { key: 'users-trash', icon: <DeleteOutlined />, label: 'Thùng rác TK', path: '/users/trash', requiredPermission: 'view_user_trash' },
         ]
     },
     {
-        key: 'booking', icon: <CalendarOutlined />, label: 'Quản Lý Đặt Bàn', children: [
-            { key: 'tables', icon: <AppstoreOutlined />, label: 'Quản lý bàn ăn', path: '/tables' }, // <-- Sửa/Thêm dòng này
-            { key: 'reservations', icon: <SolutionOutlined />, label: 'Quản lý đặt bàn', path: '/reservations' },
-            { key: 'reservations-trash', icon: <DeleteOutlined />, label: 'Đơn đã hủy', path: '/reservations/trash' },
+        key: 'booking', icon: <CalendarOutlined />, label: 'Quản Lý Đặt Bàn', requiredPermission: 'view_table', children: [ // Quyền 'view_table' hoặc 'view_reservation'
+            { key: 'tables', icon: <AppstoreOutlined />, label: 'Quản lý bàn ăn', path: '/tables', requiredPermission: 'view_table' },
+            { key: 'reservations', icon: <SolutionOutlined />, label: 'Quản lý đặt bàn', path: '/reservations', requiredPermission: 'view_reservation' },
+            { key: 'reservations-trash', icon: <DeleteOutlined />, label: 'Đơn đã hủy', path: '/reservations/trash', requiredPermission: 'view_reservation_trash' },
         ]
     },
-    { // === THÊM NHÓM MỚI ===
-        key: 'roles', icon: <SafetyCertificateOutlined />, label: 'Quản Lý Vai Trò', children: [
-            { key: 'assign-permissions', icon: <SolutionOutlined />, label: 'Phân quyền', path: '/roles/permissions' },
-            { key: 'role-list', icon: <TeamOutlined />, label: 'Vai trò', path: '/roles' },
+    {
+        key: 'roles', icon: <SafetyCertificateOutlined />, label: 'Quản Lý Vai Trò', requiredPermission: 'view_role', children: [
+            { key: 'assign-permissions', icon: <SolutionOutlined />, label: 'Phân quyền', path: '/roles/permissions', requiredPermission: 'assign_permission' },
+            { key: 'role-list', icon: <TeamOutlined />, label: 'Vai trò', path: '/roles', requiredPermission: 'view_role' },
         ]
-    }, // =====================
-    { key: 'chat', icon: <MessageOutlined />, label: 'Tư vấn với khách hàng', path: '/chat' },
+    },
+    // { key: 'chat', icon: <MessageOutlined />, label: 'Tư vấn với khách hàng', path: '/chat' }, // Tạm ẩn nếu chưa có quyền
 ];
-// -----------------------
-
 
 const AdminLayout = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const location = useLocation(); // Lấy path hiện tại
-    const { user } = useAuth();
-    const [openKeys, setOpenKeys] = useState<string[]>([]); // State để quản lý menu đang mở
+    const location = useLocation();
+    const { user } = useAuth(); // Lấy user từ hook
+    const [openKeys, setOpenKeys] = useState<string[]>([]);
 
-    // Tìm key của menu cha dựa trên path con
+    // === HÀM KIỂM TRA QUYỀN ===
+    const hasPermission = (permission?: string): boolean => {
+        if (!permission) return true; // Nếu mục không yêu cầu quyền, cho phép
+        return user?.permissions?.includes(permission) ?? false; // Kiểm tra quyền
+    };
+
     useEffect(() => {
         const currentPath = location.pathname;
         for (const item of menuItems) {
@@ -88,59 +87,70 @@ const AdminLayout = () => {
                     }
                 }
             } else if (item.path === currentPath) {
-                // Nếu là menu cấp 1, không cần mở gì
                 setOpenKeys([]);
                 return;
             }
         }
     }, [location.pathname]);
 
-
     const handleLogout = () => {
         dispatch(logout());
         navigate('/login');
     };
 
-    // Hàm xử lý đóng/mở menu cha
     const onOpenChange = (keys: string[]) => {
         setOpenKeys(keys);
     };
 
-    // Render menu item (đệ quy nếu có con)
-    const renderMenuItems = (items: MenuItem[]) => {
-        return items.map(item => {
-            if (item.children) {
+    // === SỬA HÀM RENDER MENU ===
+    const renderMenuItems = (items: MenuItem[]): React.ReactNode[] => {
+        return items
+            .filter(item => hasPermission(item.requiredPermission)) // Lọc các mục người dùng có quyền
+            .map(item => {
+                // Lọc tiếp các mục con
+                const visibleChildren = item.children?.filter(child => hasPermission(child.requiredPermission));
+
+                // Nếu có mục con, nhưng không mục con nào hiển thị -> ẩn luôn cha
+                if (item.children && visibleChildren?.length === 0) {
+                    return null;
+                }
+
+                // Nếu có mục con
+                if (item.children && visibleChildren && visibleChildren.length > 0) {
+                    return (
+                        <li key={item.key} className={`px-2 py-1 ${openKeys.includes(item.key) ? 'bg-gray-700 rounded' : ''}`}>
+                            <div
+                                className="flex items-center justify-between px-2 py-2 rounded hover:bg-gray-700 cursor-pointer"
+                                onClick={() => onOpenChange(openKeys.includes(item.key) ? openKeys.filter(k => k !== item.key) : [...openKeys, item.key])}
+                            >
+                                <span className="flex items-center">
+                                    {item.icon}
+                                    <span className="ml-3">{item.label}</span>
+                                </span>
+                                {openKeys.includes(item.key) ? <DownOutlined className="text-xs" /> : <RightOutlined className="text-xs" />}
+                            </div>
+                            {openKeys.includes(item.key) && (
+                                <ul className="pl-4 mt-1 border-l border-gray-600">
+                                    {renderMenuItems(visibleChildren)} {/* Chỉ render con có quyền */}
+                                </ul>
+                            )}
+                        </li>
+                    );
+                }
+
+                // Nếu là mục cha (không có con)
                 return (
-                    <li key={item.key} className={`px-2 py-1 ${openKeys.includes(item.key) ? 'bg-gray-700 rounded' : ''}`}>
-                        <div
-                            className="flex items-center justify-between px-2 py-2 rounded hover:bg-gray-700 cursor-pointer"
-                            onClick={() => onOpenChange(openKeys.includes(item.key) ? openKeys.filter(k => k !== item.key) : [...openKeys, item.key])}
+                    <li key={item.key} className="px-2 py-1">
+                        <Link to={item.path || '#'}
+                            className={`flex items-center px-2 py-2 rounded hover:bg-gray-700 ${location.pathname === item.path ? 'bg-gray-600 font-semibold' : ''}`}
                         >
-                            <span className="flex items-center">
-                                {item.icon}
-                                <span className="ml-3">{item.label}</span>
-                            </span>
-                            {openKeys.includes(item.key) ? <DownOutlined className="text-xs" /> : <RightOutlined className="text-xs" />}
-                        </div>
-                        {openKeys.includes(item.key) && (
-                            <ul className="pl-4 mt-1 border-l border-gray-600">
-                                {renderMenuItems(item.children)}
-                            </ul>
-                        )}
+                            {item.icon}
+                            <span className="ml-3">{item.label}</span>
+                        </Link>
                     </li>
                 );
-            }
-            return (
-                <li key={item.key} className="px-2 py-1">
-                    <Link to={item.path || '#'}
-                        className={`flex items-center px-2 py-2 rounded hover:bg-gray-700 ${location.pathname === item.path ? 'bg-gray-600 font-semibold' : ''}`}
-                    >
-                        {item.icon}
-                        <span className="ml-3">{item.label}</span>
-                    </Link>
-                </li>
-            );
-        });
+            })
+            .filter(Boolean); // Lọc bỏ các giá trị null
     };
 
     return (

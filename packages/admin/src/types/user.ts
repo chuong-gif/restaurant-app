@@ -40,6 +40,7 @@ export interface User {
     // Dữ liệu join từ `getUsers`
     vai_tro?: { ten_vai_tro: string } | null;
     media_files?: { file_url: string } | null; // URL ảnh
+    permissions: string[];
 }
 
 // Kiểu dữ liệu trả về từ API lấy danh sách User
