@@ -20,7 +20,7 @@ export default function Footer() {
                     <div>
                         <h4 className="font-secondary text-xl text-primary mb-4">Thông tin</h4>
                         <div className="flex flex-col gap-2">
-                            <p className="flex items-center gap-3"><i className="fa fa-map-marker-alt"></i>Quận Ninh Kiều, TP.Cần Thơ</p>
+                            <p className="flex items-center gap-3"><i className="fa fa-map-marker-alt"></i>Phường Quả Đất, Hệ Mặt Trời</p>
                             <p className="flex items-center gap-3"><i className="fa fa-phone-alt"></i>0123.546.789</p>
                             <p className="flex items-center gap-3"><i className="fa fa-envelope"></i>contact.envisi@gmail.com</p>
                             <div className="d-flex pt-2 gap-2">

@@ -21,6 +21,7 @@ import blogCategoryRoutes from './blogCategory.routes';
 import blogCommentRoutes from './blogComment.routes';
 import promotionRoutes from './promotion.routes';
 import statisticalRoutes from './statistical.routes';
+import contactRoutes from './contact.routes';
 
 // --- THÊM IMPORT CÁC CONTROLLER PUBLIC ---
 import {
@@ -54,6 +55,7 @@ publicRouter.get('/blogs', handleGetPublicBlogs); // Lấy danh sách blog
 publicRouter.get('/blog-categories', handleGetPublicBlogCategories); // Lấy danh mục blog
 publicRouter.get('/blogs/slug/:slug', handleGetBlogBySlug); // Lấy chi tiết blog
 publicRouter.use('/comments', blogCommentRoutes); // Gắn route bình luận (đã có public GET)
+publicRouter.use('/contact', contactRoutes);
 // ================================================
 
 router.use('/public', publicRouter);
