@@ -36,6 +36,15 @@ export interface BlogPost {
     nguoi_dung?: { ho_ten: string } | null; // Tên tác giả
     media_files?: { file_url: string } | null; // URL ảnh bìa
 }
+// Định nghĩa kiểu cho một bình luận
+export interface BlogComment {
+    id: number;
+    noi_dung: string;
+    created_at: string;
+    nguoi_dung: {
+        ho_ten: string;
+    };
+}
 
 // Kiểu dữ liệu trả về từ API lấy danh sách Bài viết
 export interface BlogPostListResponse {
@@ -50,4 +59,11 @@ export interface BlogPostListResponse {
 export interface BlogPostDetailResponse {
     message: string;
     data: BlogPost;
+}
+export interface BlogCommentListResponse {
+    message: string;
+    data: BlogComment[];
+    total: number;
+    totalPages: number;
+    currentPage: number;
 }

@@ -25,6 +25,7 @@ import PromotionListPage from './pages/promotions/PromotionListPage';
 import BlogCategoryListPage from './pages/blogCategories/BlogCategoryListPage';
 import BlogListPage from './pages/blogs/BlogListPage';
 import BlogFormPage from './pages/blogs/BlogFormPage';
+import BlogCommentsPage from './pages/blogs/BlogCommentsPage';
 
 function App() {
   return (
@@ -110,7 +111,11 @@ function App() {
               <Route path="/blogs/new" element={<BlogFormPage />} />
               <Route path="/blogs/edit/:id" element={<BlogFormPage />} />
             </Route>
+            <Route element={<ProtectedRoute requiredPermission="view_blog_comments" />}>
+              <Route path="/blog-comments/:blogId" element={<BlogCommentsPage />} />
+            </Route>
           </Route>
+
 
           {/* 3. Route mặc định: Chuyển hướng về dashboard */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />

@@ -91,6 +91,7 @@ adminRouter.use('/blogs', blogRoutes);
 adminRouter.use('/blog-categories', blogCategoryRoutes);
 adminRouter.use('/promotions', promotionRoutes);
 adminRouter.use('/statistical', statisticalRoutes);
+adminRouter.use('/blog-comments', blogCommentRoutes);
 router.use('/admin', adminRouter);
 
 // Gắn tableRoutes (đã tự xử lý /admin và /public bên trong)

@@ -78,22 +78,30 @@ export const handleUpdateComment = async (req: AuthenticatedRequest, res: Respon
 // ===================
 
 
-// Controller: Xóa bình luận theo ID (SỬA: Thêm kiểm tra quyền)
+// Controller: Xóa bình luận theo ID (Sửa lỗi: Kiểm tra bằng permissions)
 export const handleDeleteComment = async (req: AuthenticatedRequest, res: Response) => {
     try {
+        // Lấy thông tin xác thực từ token
         const userId = (req.user as any)?.id;
-        const userRole = (req.user as any)?.role; // Giả sử token có vai trò
-        const id = parseInt(req.params.id);
+        const permissions = (req.user as any)?.permissions || [];
+
+        const commentId = parseInt(req.params.id);
 
         if (!userId) {
             return res.status(401).json({ message: 'Yêu cầu không hợp lệ hoặc bạn cần đăng nhập.' });
         }
 
-        // Truyền cả userId và userRole vào service
-        await blogCommentService.deleteComment(id, userId, userRole);
+        // Gọi service, truyền thông tin xác thực vào
+        await blogCommentService.deleteComment(
+            commentId,
+            userId,
+            permissions.includes('delete_blog_comment') // Gửi `true` nếu có quyền admin
+        );
 
         res.status(200).json({ message: 'Xóa bình luận thành công' });
     } catch (error: any) {
-        res.status(400).json({ message: error.message }); // Lỗi 400 nếu không có quyền
+        // Trả về lỗi 403 (Forbidden) nếu không có quyền
+        const status = error.message.includes('không có quyền') ? 403 : 400;
+        res.status(status).json({ message: error.message });
     }
 };

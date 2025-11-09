@@ -1,7 +1,7 @@
 // packages/client/src/app/booking/select/page.tsx
 'use client';
 
-import React, { useEffect, useState } from 'react'; // Thêm useState
+import React, { useEffect, useState, useMemo } from 'react'; // Thêm useState
 import { useRouter } from 'next/navigation';
 import { useBookingStore } from '@/store/useBookingStore';
 import { useQuery } from '@tanstack/react-query';
@@ -27,14 +27,15 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { PlayCircle } from "lucide-react"; // Icon
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 // =======================
 
 
 // === COMPONENT CON 1: TableSelector (ĐÃ SỬA) ===
 function TableSelector() {
     const { info, selectedTable, setSelectedTable } = useBookingStore();
-    // State để quản lý URL video đang xem
     const [viewingVideo, setViewingVideo] = useState<string | null>(null);
+    const [selectedFloor, setSelectedFloor] = useState<string | null>(null); // <-- THÊM STATE LỌC TẦNG
 
     const { data, isLoading, error } = useQuery<TablesApiResponse>({
         queryKey: ['availableTables', info.reservation_date, info.party_size],
@@ -50,12 +51,27 @@ function TableSelector() {
         enabled: !!info.reservation_date && !!info.party_size,
     });
 
+    // === THÊM LOGIC LỌC TẦNG ===
+    // Lấy danh sách các tầng duy nhất
+    const floors = useMemo(() => {
+        if (!data?.data) return [];
+        const floorSet = new Set(data.data.map(table => table.tang.toString()));
+        return Array.from(floorSet).sort((a, b) => parseInt(a) - parseInt(b));
+    }, [data]);
+
+    // Lọc bàn theo tầng
+    const filteredTables = useMemo(() => {
+        if (!data?.data) return [];
+        if (!selectedFloor) return data.data; // Nếu không chọn, hiện tất cả
+        return data.data.filter(table => table.tang.toString() === selectedFloor);
+    }, [data, selectedFloor]);
+    // ==========================
+
     if (isLoading) return <p>Đang tìm bàn trống...</p>;
     if (error) return <p className="text-destructive">Lỗi: {error.message}</p>;
     if (!data || data.data.length === 0) return <p>Không tìm thấy bàn trống phù hợp.</p>;
 
     return (
-        // Bọc mọi thứ trong Dialog
         <Dialog open={!!viewingVideo} onOpenChange={(open) => !open && setViewingVideo(null)}>
             <div className="space-y-4">
                 <Button
@@ -66,11 +82,30 @@ function TableSelector() {
                     Tự động xếp bàn
                 </Button>
                 <Separator />
-                <p className="text-center text-sm text-muted-foreground">Hoặc chọn bàn cụ thể</p>
+
+                {/* === THÊM BỘ LỌC TẦNG === */}
+                {floors.length > 1 && ( // Chỉ hiển thị nếu có nhiều hơn 1 tầng
+                    <div className="flex flex-col items-center gap-2">
+                        <p className="text-sm text-muted-foreground">Hoặc chọn bàn cụ thể theo tầng</p>
+                        <ToggleGroup
+                            type="single"
+                            value={selectedFloor || ""}
+                            onValueChange={(value) => setSelectedFloor(value || null)}
+                        >
+                            <ToggleGroupItem value="" aria-label="Tất cả">Tất cả</ToggleGroupItem>
+                            {floors.map(floor => (
+                                <ToggleGroupItem key={floor} value={floor} aria-label={`Tầng ${floor}`}>
+                                    Tầng {floor}
+                                </ToggleGroupItem>
+                            ))}
+                        </ToggleGroup>
+                    </div>
+                )}
+                {/* ======================= */}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {data.data.map((table) => {
-                        // Lấy URL ảnh và video
+                    {/* Sửa: Dùng `filteredTables` thay vì `data.data` */}
+                    {filteredTables.map((table) => {
                         const imageUrl = (table.media_files_ban_an_anh_ban_idTomedia_files as any)?.file_url || '/images/logo.png';
                         const videoUrl = (table.media_files_ban_an_video_ban_idTomedia_files as any)?.file_url;
 
@@ -81,22 +116,19 @@ function TableSelector() {
                                     }`}
                                 onClick={() => setSelectedTable(table)}
                             >
-                                {/* === THÊM NÚT XEM VIDEO === */}
                                 {videoUrl && (
                                     <Button
                                         variant="secondary"
                                         size="icon"
                                         className="absolute top-2 right-2 z-10 h-8 w-8 rounded-full bg-black/50 text-white hover:bg-primary"
                                         onClick={(e) => {
-                                            e.stopPropagation(); // Ngăn không cho Card bị click
+                                            e.stopPropagation();
                                             setViewingVideo(videoUrl);
                                         }}
                                     >
                                         <PlayCircle className="h-5 w-5" />
                                     </Button>
                                 )}
-                                {/* ======================== */}
-
                                 <CardContent className="p-4">
                                     <Image
                                         src={imageUrl}
@@ -115,14 +147,14 @@ function TableSelector() {
                 </div>
             </div>
 
-            {/* === THÊM MODAL ĐỂ PHÁT VIDEO === */}
+            {/* Dialog Video (Giữ nguyên) */}
             <DialogContent className="max-w-3xl p-4">
                 <DialogHeader>
                     <DialogTitle>Xem video bàn</DialogTitle>
                 </DialogHeader>
                 {viewingVideo && (
                     <video
-                        key={viewingVideo} // Ép React render lại thẻ video khi URL thay đổi
+                        key={viewingVideo}
                         width="100%"
                         controls
                         autoPlay
@@ -133,7 +165,6 @@ function TableSelector() {
                     </video>
                 )}
             </DialogContent>
-            {/* ============================== */}
         </Dialog>
     );
 }

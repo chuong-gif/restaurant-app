@@ -1,6 +1,6 @@
 // packages/admin/src/features/blogs/blogApi.ts
 import { baseApi } from '../../services/baseApi';
-import { BlogPost, BlogPostListResponse, BlogPostDetailResponse } from '../../types/blog';
+import { BlogPost, BlogPostListResponse, BlogPostDetailResponse, BlogCommentListResponse } from '../../types/blog';
 
 // Kiểu dữ liệu cho các tham số query
 interface GetBlogPostsParams {
@@ -69,6 +69,26 @@ export const blogApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: [{ type: 'BlogPost', id: 'LIST' }],
         }),
+        // 6. Query lấy danh sách bình luận (Admin)
+        getBlogComments: builder.query<BlogCommentListResponse, { blogId: number; page: number; limit: number }>({
+            query: ({ blogId, ...params }) => ({
+                // API route này được tạo ở Bước 2
+                url: `/admin/blog-comments/blog/${blogId}`,
+                params: params, // Gửi page, limit
+            }),
+            providesTags: (result, error, { blogId }) => [{ type: 'BlogComment', id: `LIST-${blogId}` }],
+        }),
+
+        // 7. Mutation xóa bình luận (Admin)
+        deleteBlogComment: builder.mutation<{ message: string }, number>({
+            query: (id) => ({
+                // API route này được tạo ở Bước 2 (nó dùng route /:id)
+                url: `/admin/blog-comments/${id}`,
+                method: 'DELETE',
+            }),
+            // Sau khi xóa, làm mới tất cả danh sách bình luận
+            invalidatesTags: [{ type: 'BlogComment' }],
+        }),
 
     }),
 });
@@ -79,4 +99,6 @@ export const {
     useCreateBlogPostMutation,
     useUpdateBlogPostMutation,
     useDeleteBlogPostMutation,
+    useGetBlogCommentsQuery,
+    useDeleteBlogCommentMutation,
 } = blogApi;

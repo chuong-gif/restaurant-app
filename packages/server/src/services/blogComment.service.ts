@@ -63,11 +63,12 @@ export const updateComment = async (commentId: number, userId: number, newConten
 // ===================
 
 /**
- * ✅ Xóa một bình luận theo ID (SỬA: Thêm kiểm tra quyền)
+ * ✅ Xóa một bình luận theo ID
+ * (Kiểm tra quyền: 1. Phải là admin (isAdmin: true), HOẶC 2. Phải là chủ bình luận)
  */
-export const deleteComment = async (commentId: number, userId: number, userRole?: string) => {
+export const deleteComment = async (commentId: number, userId: number, isAdmin: boolean) => {
 
-    // Tìm bình luận
+    // 1. Tìm bình luận
     const comment = await prisma.binh_luan_blog.findUnique({
         where: { id: commentId }
     });
@@ -76,11 +77,12 @@ export const deleteComment = async (commentId: number, userId: number, userRole?
         throw new Error('Không tìm thấy bình luận.');
     }
 
-    // Kiểm tra quyền: Hoặc là admin (vd: "Super Admin") hoặc là chủ sở hữu
-    if (userRole !== 'Super Admin' && comment.nguoi_dung_id !== userId) {
+    // 2. Kiểm tra quyền
+    // Nếu KHÔNG phải admin VÀ KHÔNG phải chủ bình luận -> Lỗi
+    if (!isAdmin && comment.nguoi_dung_id !== userId) {
         throw new Error('Bạn không có quyền xóa bình luận này.');
     }
 
-    // Xóa bản ghi trong bảng bình_luan_blog theo ID
+    // 3. Xóa bản ghi
     return prisma.binh_luan_blog.delete({ where: { id: commentId } });
 };

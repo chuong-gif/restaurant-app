@@ -11,6 +11,7 @@ import { useGetAdminBlogPostsQuery, useDeleteBlogPostMutation } from '../../feat
 import { useGetPublicBlogCategoriesQuery } from '../../features/blogCategories/blogCategoryApi'; // Lấy danh mục active
 import { BlogPost, BlogCategory } from '../../types/blog';
 import { formatDateTime } from '../../utils/FormatDateTime';
+import { useAuth } from '../../hooks/useAuth';
 
 const { Search } = Input;
 const { Option } = Select;
@@ -18,6 +19,7 @@ const { Option } = Select;
 const BlogListPage: React.FC = () => {
     const navigate = useNavigate();
     const { message, modal } = App.useApp();
+    const { user } = useAuth();
 
     // State cho filter, pagination
     const [filters, setFilters] = useState({ page: 1, limit: 10, search: '', categoryId: undefined as number | undefined });
@@ -33,7 +35,9 @@ const BlogListPage: React.FC = () => {
 
     // Reset page khi filter
     useEffect(() => { setFilters(prev => ({ ...prev, page: 1 })); }, [debouncedSearch, filters.categoryId]);
-
+    const hasPermission = useCallback((permission: string): boolean => {
+        return user?.permissions?.includes(permission) ?? false;
+    }, [user]);
     // Handlers
     const handleFilterChange = useCallback((name: keyof typeof filters, value: any) => { setFilters(prev => ({ ...prev, [name]: value })); }, []);
     const handleTableChange = useCallback((newPagination: any) => { setFilters(prev => ({ ...prev, page: newPagination.current, limit: newPagination.pageSize })); }, []);
@@ -72,9 +76,9 @@ const BlogListPage: React.FC = () => {
             title: 'Thao tác', key: 'action', align: 'center' as const, fixed: 'right' as const, width: 180,
             render: (_: any, record: BlogPost) => (
                 <Space size="small">
-                    {/* <Tooltip title="Xem bình luận">
+                    <Tooltip title="Xem bình luận">
                         <Button shape="circle" icon={<CommentOutlined />} onClick={() => handleViewComments(record.id)} />
-                    </Tooltip> */}
+                    </Tooltip>
                     <Tooltip title="Sửa bài viết">
                         <Button type="primary" shape="circle" icon={<EditOutlined />} onClick={() => handleEdit(record.id)} />
                     </Tooltip>
@@ -84,7 +88,7 @@ const BlogListPage: React.FC = () => {
                 </Space>
             ),
         },
-    ], [filters, handleEdit, handleDelete, handleViewComments]);
+    ], [filters, handleEdit, handleDelete, handleViewComments, hasPermission]);
 
 
     return (
