@@ -38,10 +38,9 @@ export default function Header() {
     };
 
     // Định nghĩa style cho NavLink
-    const navLinkClass = "bg-transparent text-light hover:text-primary focus:text-primary data-[active]:text-primary";
-
+const navLinkClass = "bg-yellow-600 text-light hover:text-light-800 focus:text-light-800 data-[active]:text-light-800";
     return (
-        <header className="sticky top-0 z-50 w-full border-b bg-dark text-light shadow-sm">
+        <header className="sticky top-0 z-50 w-full border-b bg-dark shadow-sm">
             <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2">
@@ -103,16 +102,21 @@ export default function Header() {
 
                 {/* Actions (Booking & Auth) */}
                 <div className="flex items-center gap-3">
-                    <Button asChild className="hidden sm:flex" style={{ color: 'black' }}>
-                        <Link href="/booking">Đặt bàn</Link>
-                    </Button>
+                <Button
+                    asChild
+                    className="hidden sm:flex bg-light text-red-500 hover:bg-red-500 hover:text-light"
+                >
+                    <Link href="/booking">Đặt bàn</Link>
+                </Button>
+                
+
 
                     {user ? (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Avatar className="h-9 w-9 cursor-pointer border border-primary">
                                     <AvatarImage src={(user.media_files as any)?.file_url || ''} alt={user.ho_ten} />
-                                    <AvatarFallback className="bg-primary text-black">
+                                    <AvatarFallback className="bg-light text-red-500 hover:bg-red-500 hover:border-red-500 hover:text-light">
                                         {user.ho_ten.charAt(0).toUpperCase()}
                                     </AvatarFallback>
                                 </Avatar>
@@ -133,7 +137,7 @@ export default function Header() {
                             </DropdownMenuContent>
                         </DropdownMenu>
                     ) : (
-                        <Button variant="outline" asChild className="text-light hover:text-dark">
+                        <Button variant="outline" asChild className="bg-light text-red-500 hover:bg-red-500 hover:border-red-500 hover:text-light">
                             <Link href="/login">
                                 <i className="fa-solid fa-user me-2"></i>
                                 Đăng nhập

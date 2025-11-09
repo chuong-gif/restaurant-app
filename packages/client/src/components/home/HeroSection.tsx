@@ -5,6 +5,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { navigationMenuTriggerStyle } from '../ui/navigation-menu';
+import { cn } from '@/lib/utils';
+import { usePathname } from 'next/navigation';
 
 export default function HeroSection() {
     // Animation thay thế cho 'animated slideInLeft' [cite: 54]
@@ -12,6 +15,9 @@ export default function HeroSection() {
         hidden: { opacity: 0, x: -50 },
         visible: { opacity: 1, x: 0 },
     };
+    const pathname = usePathname();
+    
+    const navLinkClass = "bg-yellow-600 text-light hover:text-light-800 focus:text-light-800 data-[active]:text-light-800";
 
     return (
         <div className="w-full bg-dark text-white py-20 md:py-32">
@@ -40,11 +46,18 @@ export default function HeroSection() {
                             đáo.
                         </motion.p>
                         <motion.div variants={variants} className="mt-8">
-                            <Button asChild size="lg" style={{ color: 'black' }}>
-                                <Link href="/booking">
-                                    Đặt bàn ngay
-                                </Link>
-                            </Button>
+                        <Button
+                            asChild
+                            size="lg"
+                        >
+                            <Link
+                                href="/booking"
+                                className={cn(navigationMenuTriggerStyle(), navLinkClass)}
+                                data-active={pathname === '/booking'}
+                            >
+                                Đặt bàn ngay
+                            </Link>
+                        </Button>
                         </motion.div>
                     </motion.div>
 
