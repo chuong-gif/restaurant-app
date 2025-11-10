@@ -122,7 +122,11 @@ export const updateTable = async (id: number, data: any): Promise<Table> => {
 export const deleteTable = async (id: number): Promise<void> => {
     const activeReservation = await prisma.dat_ban.findFirst({
         where: {
-            ban_an_id: id,
+            ban_an: { // Kiểm tra quan hệ N-N
+                some: {
+                    id: id
+                }
+            },
             trang_thai: { notIn: [ReservationStatus.CANCELLED, ReservationStatus.COMPLETED] } // 0=Hủy, 5=Hoàn thành
         }
     });
@@ -134,18 +138,15 @@ export const deleteTable = async (id: number): Promise<void> => {
 };
 
 /**
- * ✅ Lấy danh sách bàn trống theo ngày và sức chứa (Cho Client)
+ * ✅ Lấy danh sách bàn trống theo ngày (Cho Client)
+ * (ĐÃ SỬA: Bỏ lọc partySize, chỉ lọc theo thời gian)
  */
-export const getAvailableTablesByDate = async (date: Date, partySize: number): Promise<Table[]> => {
-    let requiredCapacity: number[];
-    if (partySize <= 2) requiredCapacity = [2, 4, 6, 8];
-    else if (partySize <= 4) requiredCapacity = [4, 6, 8];
-    else if (partySize <= 6) requiredCapacity = [6, 8];
-    else requiredCapacity = [8];
+export const getAvailableTablesByDate = async (date: Date): Promise<Table[]> => {
+    // === BỎ LOGIC LỌC SỨC CHỨA (requiredCapacity) ===
 
+    // Lấy TẤT CẢ các bàn đang hoạt động
     const potentialTables = await prisma.ban_an.findMany({
         where: {
-            suc_chua: { in: requiredCapacity },
             trang_thai: true // ban_an.trang_thai là Boolean
         },
         include: {
@@ -154,20 +155,32 @@ export const getAvailableTablesByDate = async (date: Date, partySize: number): P
         },
         orderBy: { so_ban: 'asc' },
     });
+    // ===========================================
+
     const potentialTableIds = potentialTables.map(t => t.id);
 
     const startTime = new Date(date.getTime() - 2 * 60 * 60 * 1000);
     const endTime = new Date(date.getTime() + 2 * 60 * 60 * 1000);
 
-    const reservedTables = await prisma.dat_ban.findMany({
+    const reservedTableRelations = await prisma.dat_ban.findMany({
         where: {
-            ban_an_id: { in: potentialTableIds },
             ngay_dat_ban: { gte: startTime, lte: endTime },
-            trang_thai: { notIn: [ReservationStatus.CANCELLED, ReservationStatus.COMPLETED] }
+            trang_thai: { notIn: [ReservationStatus.CANCELLED, ReservationStatus.COMPLETED] },
+            ban_an: { // Kiểm tra quan hệ nhiều-nhiều
+                some: {
+                    id: { in: potentialTableIds }
+                }
+            }
         },
-        select: { ban_an_id: true }
+        include: {
+            ban_an: { select: { id: true } } // Lấy các bàn đã được đặt
+        }
     });
-    const reservedTableIds = new Set(reservedTables.map(r => r.ban_an_id).filter(id => id !== null));
+
+    // Lấy TẤT CẢ các ID bàn đã bị đặt trong khung giờ này
+    const reservedTableIds = new Set(
+        reservedTableRelations.flatMap(r => r.ban_an.map(b => b.id))
+    );
 
     const availableTables = potentialTables.filter(table => !reservedTableIds.has(table.id));
 

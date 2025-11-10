@@ -1,5 +1,5 @@
 // packages/admin/src/components/reservations/ReservationAddForm.tsx
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Form, Input, InputNumber, DatePicker, Select, TimePicker, Button, Spin, Row, Col, Divider, message, App, Table, Empty, Typography, } from 'antd';
 import { useForm, Controller } from 'react-hook-form';
 import dayjs from 'dayjs'; // Cần cài: npm install dayjs
@@ -8,9 +8,9 @@ import timezone from 'dayjs/plugin/timezone'; // Cần plugin timezone
 import vi from 'dayjs/locale/vi'; // Import locale tiếng Việt
 
 import { useGetProductsQuery } from '../../features/products/productApi';
-import * as tableApi from '../../features/tables/tableApi'; // Import module to safely pick available hook name
+import { useGetAvailableTablesByDateQuery } from '../../features/tables/tableApi';
 import { useCreateAdminReservationMutation } from '../../features/reservations/reservationApi';
-import { Product, Table as RestaurantTable } from '../../types/product'; // Import từ reservation types
+import { Table as RestaurantTable } from '../../types/product'; // Import từ reservation types
 import { formatCurrency } from '../../utils/FormatCurrency';
 import { useDebounce } from 'use-debounce';
 
@@ -35,7 +35,7 @@ type FormData = {
     reservation_time: dayjs.Dayjs | null;
     party_size: number;
     note?: string;
-    ban_an_id?: number; // Bàn được chọn
+    ban_an_ids: number[]; // Bàn được chọn
 };
 
 // Kiểu dữ liệu món ăn trong form
@@ -47,7 +47,7 @@ interface DishItem {
 }
 
 
-const ReservationAddForm: React.FC<ReservationAddFormProps> = ({ onSuccess, onCancel }) => {
+const ReservationAddForm: React.FC<ReservationAddFormProps> = ({ onSuccess }) => {
     const { message } = App.useApp();
     const [selectedDishes, setSelectedDishes] = useState<DishItem[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -64,31 +64,30 @@ const ReservationAddForm: React.FC<ReservationAddFormProps> = ({ onSuccess, onCa
             reservation_time: null,
             party_size: 1,
             note: '',
-            ban_an_id: undefined,
+            ban_an_ids: [],
         }
     });
 
     // Lấy giá trị ngày/giờ và số khách để tìm bàn
     const watchDate = watch('reservation_date');
     const watchTime = watch('reservation_time');
-    const watchPartySize = watch('party_size');
     const combinedDateTime = watchDate && watchTime ? watchDate.hour(watchTime.hour()).minute(watchTime.minute()).second(0).toISOString() : undefined;
 
     // --- RTK Query ---
     // Tìm bàn trống
     // tableApi may export different hook names depending on version; pick the first available one.
-    const _useGetAvailableTablesHook = (tableApi as any).useGetAvailableTablesByDateQuery || (tableApi as any).useGetAvailableTablesQuery || (tableApi as any).useGetTablesQuery;
-    const { data: availableTables, isLoading: isLoadingTables, isFetching: isFetchingTables } = _useGetAvailableTablesHook ? _useGetAvailableTablesHook({
+    const { data: availableTablesResult, isLoading: isLoadingTables, isFetching: isFetchingTables } = useGetAvailableTablesByDateQuery({
         date: combinedDateTime!, // Chỉ gọi khi có đủ ngày giờ
-        partySize: watchPartySize || 1,
     }, {
-        skip: !combinedDateTime || !watchPartySize || watchPartySize <= 0, // Bỏ qua nếu thiếu thông tin
-    }) : { data: undefined, isLoading: false, isFetching: false };
-
+        skip: !combinedDateTime, // Bỏ qua nếu thiếu ngày giờ
+    });
+    const availableTables = availableTablesResult?.data || [];
     // Tìm sản phẩm để thêm
     const { data: productsData, isLoading: isLoadingProducts } = useGetProductsQuery({
         page: 1, pageSize: 50, searchName: debouncedSearchTerm, trang_thai: true,
     });
+
+
 
     const [createAdminReservation, { isLoading: isCreating }] = useCreateAdminReservationMutation();
 
@@ -131,8 +130,16 @@ const ReservationAddForm: React.FC<ReservationAddFormProps> = ({ onSuccess, onCa
             message.error('Vui lòng chọn ngày và giờ đặt bàn.');
             return;
         }
+
+        // === THÊM KIỂM TRA NÀY ===
         if (selectedDishes.length === 0) {
             message.error('Vui lòng chọn ít nhất một món ăn.');
+            return;
+        }
+        // ========================
+
+        if (!data.ban_an_ids || data.ban_an_ids.length === 0) {
+            message.error('Vui lòng chọn ít nhất một bàn ăn.');
             return;
         }
 
@@ -151,7 +158,7 @@ const ReservationAddForm: React.FC<ReservationAddFormProps> = ({ onSuccess, onCa
             reservation_date: submitDateTime,
             party_size: data.party_size,
             note: data.note || undefined,
-            ban_an_id: data.ban_an_id, // Gửi ID bàn đã chọn (hoặc undefined)
+            ban_an_ids: data.ban_an_ids,// Gửi ID bàn đã chọn (hoặc undefined)
             products: selectedDishes.map(d => ({ product_id: d.productId, quantity: d.quantity })),
             // status: Mặc định backend sẽ xử lý
         };
@@ -176,7 +183,7 @@ const ReservationAddForm: React.FC<ReservationAddFormProps> = ({ onSuccess, onCa
         return current && (current < today || current > maxDate);
     };
 
-    const disabledTime = (now: dayjs.Dayjs | null) => {
+    const disabledTime = () => {
         // Chỉ cho chọn từ 9h đến 20h
         const disabledHours = () => {
             const hours = [];
@@ -242,13 +249,26 @@ const ReservationAddForm: React.FC<ReservationAddFormProps> = ({ onSuccess, onCa
                             <Controller name="party_size" control={control} rules={{ required: 'Nhập số khách', min: { value: 1, message: 'Ít nhất 1 khách' } }}
                                 render={({ field }) => <InputNumber {...field} min={1} style={{ width: '100%' }} placeholder="Số người" />} />
                         </Form.Item>
-                        <Form.Item label="Chọn bàn (Để trống nếu muốn tự động)">
-                            <Controller name="ban_an_id" control={control}
+                        <Form.Item label="Chọn bàn (Có thể chọn nhiều)" required validateStatus={errors.ban_an_ids ? 'error' : ''} help={errors.ban_an_ids?.message}>
+                            <Controller name="ban_an_ids" control={control} rules={{ required: 'Vui lòng chọn bàn' }}
                                 render={({ field }) => (
-                                    <Select {...field} placeholder="Chọn bàn trống phù hợp" loading={isFetchingTables} allowClear disabled={!watchDate || !watchTime || !watchPartySize}>
+                                    // === SỬA: Dùng mode="multiple" ===
+                                    <Select
+                                        {...field}
+                                        mode="multiple" // <-- CHO PHÉP CHỌN NHIỀU
+                                        placeholder="Chọn các bàn trống"
+                                        loading={isFetchingTables}
+                                        allowClear
+                                        disabled={!watchDate || !watchTime}
+                                        filterOption={(input, option) =>
+                                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                        }
+                                    >
                                         {(availableTables && availableTables.length > 0) ? availableTables.map((table: RestaurantTable) => (
-                                            <Option key={table.id} value={table.id}>Bàn {table.so_ban} (Tầng {table.tang || '?'}, {table.suc_chua} người)</Option>
-                                        )) : <Option value={undefined} disabled>Không có bàn trống phù hợp</Option>}
+                                            <Option key={table.id} value={table.id} label={`Bàn ${table.so_ban}`}>
+                                                Bàn {table.so_ban} (Tầng {table.tang || '?'}, {table.suc_chua} người)
+                                            </Option>
+                                        )) : <Option value={undefined} disabled>Không có bàn trống</Option>}
                                     </Select>
                                 )} />
                         </Form.Item>

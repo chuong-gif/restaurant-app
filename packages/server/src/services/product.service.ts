@@ -13,11 +13,14 @@ export const getProducts = async (
     danh_muc_id?: number,
     trang_thai?: boolean
 ) => {
-    const whereCondition: Prisma.san_phamWhereInput = {
-        ten_san_pham: {
+    const whereCondition: Prisma.san_phamWhereInput = {};
+
+    // === SỬA LỖI LỌC CHUỖI RỖNG ===
+    if (searchName) { // Chỉ thêm điều kiện này nếu searchName không rỗng
+        whereCondition.ten_san_pham = {
             contains: searchName,
-        },
-    };
+        };
+    }
     if (danh_muc_id) {
         whereCondition.danh_muc_id = danh_muc_id;
     }

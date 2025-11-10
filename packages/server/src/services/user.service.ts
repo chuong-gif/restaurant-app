@@ -131,11 +131,14 @@ export const createUser = async (data: any) => {
 }
 
 /**
- * 🔄 CẬP NHẬT THÔNG TIN NGƯỜI DÙNG (Sửa: Xử lý Avatar, Bỏ Password)
+ * 🔄 CẬP NHẬT THÔNG TIN NGƯỜI DÙNG (Sửa: Xử lý vai_tro_id)
  */
 export const updateUser = async (id: number, data: any) => {
     // Tách các trường đặc biệt (KHÔNG cho cập nhật mật khẩu/loại ở đây)
-    const { password, loai_nguoi_dung, anh_dai_dien_id, ...updates } = data;
+
+    // === SỬA LỖI 1: Tách 'vai_tro_id' ra khỏi ...updates ===
+    //
+    const { password, loai_nguoi_dung, anh_dai_dien_id, vai_tro_id, ...updates } = data;
 
     const existing = await prisma.nguoi_dung.findUnique({ where: { id } });
     if (!existing) {
@@ -153,10 +156,24 @@ export const updateUser = async (id: number, data: any) => {
     }
 
     const dataToUpdate: Prisma.nguoi_dungUpdateInput = {
-        ...updates, // Gán các trường thông thường (ho_ten, dien_thoai, dia_chi, trang_thai, vai_tro_id...)
+        ...updates, // Gán các trường thông thường (ho_ten, dien_thoai, dia_chi, trang_thai...)
     };
 
-    // === SỬA LỖI 2: Xử lý ảnh (anh_dai_dien_id) ===
+    // === SỬA LỖI 1: Xử lý quan hệ 'vai_tro' ===
+    // (Đây là logic gây ra lỗi crash trong ảnh)
+    //
+    if (vai_tro_id !== undefined) {
+        if (vai_tro_id === null) {
+            dataToUpdate.vai_tro = { disconnect: true };
+        } else {
+            // Kết nối vai trò mới bằng ID
+            dataToUpdate.vai_tro = { connect: { id: parseInt(vai_tro_id, 10) } };
+        }
+    }
+    // ======================================
+
+    // === Xử lý ảnh (anh_dai_dien_id) - Code của bạn đã đúng, giữ nguyên ===
+    //
     if (anh_dai_dien_id !== undefined) {
         if (anh_dai_dien_id === null) {
             dataToUpdate.media_files = { disconnect: true };

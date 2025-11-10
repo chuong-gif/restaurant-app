@@ -1,12 +1,12 @@
 // packages/admin/src/pages/reservations/ReservationDetailPage.tsx
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Descriptions, Table, Tag, Button, Spin, Row, Col, Avatar, Space, Divider, Tooltip } from 'antd';
+import { Card, Descriptions, Table, Tag, Button, Spin, Row, Col, Avatar, Space, Divider } from 'antd';
 import { ArrowLeftOutlined, EditOutlined, PrinterOutlined } from '@ant-design/icons';
 import { useGetAdminReservationByIdQuery } from '../../features/reservations/reservationApi';
-import { Reservation, ReservationDetailItem } from '../../types/reservation';
-import { Table as RestaurantTable } from '../../types/product';
-import { User } from '../../types/user';
+import { ReservationDetailItem } from '../../types/reservation';
+// import { Table as RestaurantTable } from '../../types/product';
+// import { User } from '../../types/user';
 import { formatDateTime } from '../../utils/FormatDateTime';
 import { formatCurrency } from '../../utils/FormatCurrency';
 import { statusMap } from '../../components/reservations/ChangeStatusSelect';
@@ -44,7 +44,7 @@ const ReservationDetailPage: React.FC = () => {
     const remainingAmount = totalAmount - (reservation.tien_dat_coc || 0);
 
     const detailColumns = [
-        { title: 'STT', key: 'stt', render: (text: any, record: any, index: number) => index + 1 },
+        { title: 'STT', key: 'stt', render: (_text: any, _record: any, index: number) => index + 1 },
         {
             title: 'Món ăn', dataIndex: ['san_pham', 'ten_san_pham'], key: 'name',
             render: (name: string, record: ReservationDetailItem) => (
@@ -107,7 +107,11 @@ const ReservationDetailPage: React.FC = () => {
                         <Descriptions title="Thông tin Đặt bàn" bordered column={1} size="small">
                             <Descriptions.Item label="Ngày đặt">{formatDateTime(reservation.ngay_dat_ban)}</Descriptions.Item>
                             <Descriptions.Item label="Số khách">{reservation.so_luong_khach}</Descriptions.Item>
-                            <Descriptions.Item label="Bàn số">{(reservation.ban_an as RestaurantTable)?.so_ban || '-'}</Descriptions.Item>
+                            <Descriptions.Item label="Bàn số">
+                                {(reservation.ban_an && reservation.ban_an.length > 0)
+                                    ? reservation.ban_an.map(table => `Bàn ${table.so_ban} (Tầng ${table.tang})`).join('; ')
+                                    : '-'}
+                            </Descriptions.Item>
                             <Descriptions.Item label="Trạng thái"><Tag color={currentStatus.color}>{currentStatus.text}</Tag></Descriptions.Item>
                             <Descriptions.Item label="Ghi chú">{reservation.ghi_chu || '-'}</Descriptions.Item>
                         </Descriptions>

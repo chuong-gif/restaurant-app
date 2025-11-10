@@ -56,17 +56,25 @@ async function RelatedProducts({ categoryId, currentProductId }: { categoryId: n
 // Hàm tải dữ liệu (Server-side)
 async function getProductDetail(id: string): Promise<SanPham | null> {
     try {
-        const response = await api.get(`/public/products/detail/${id}`);
-        return response.data.data;
+        const baseUrl = process.env.API_BASE_URL_SERVER; // server-side
+        const res = await fetch(`${baseUrl}/public/products/detail/${id}`, {
+            cache: "no-store",
+        });
+        if (!res.ok) throw new Error("Failed to fetch");
+        const json = await res.json();
+        return json.data;
     } catch (error) {
         console.error("Failed to fetch product detail:", error);
         return null;
     }
 }
 
+
+
 // Component Trang Chi Tiết
-export default async function ProductDetailPage({ params }: { params: { id: string } }) {
-    const product = await getProductDetail(params.id);
+export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params; // ← phải await Promise này
+    const product = await getProductDetail(id);
 
     if (!product) {
         return (

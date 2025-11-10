@@ -3,19 +3,20 @@ import { Request, Response } from 'express';
 import * as reservationService from '../services/reservation.service';
 import { ReservationStatus } from '../services/reservation.service'; // Import enum
 
-// ====================== TẠO MỚI ĐẶT BÀN ======================
+// ====================== TẠO MỚI ĐẶT BÀN (CLIENT) ======================
 export const handleCreateReservation = async (req: Request, res: Response) => {
     try {
+        // Hàm này gọi service N-N là ĐÚNG
         const newReservation = await reservationService.createReservation(req.body);
         res.status(201).json({
             message: 'Đặt bàn thành công',
-            data: { id: newReservation.id, tableId: newReservation.ban_an_id } // Sửa: tableId
+            // Sửa: Không trả về tableId vì ban_an_id không còn tồn tại
+            data: { id: newReservation.id }
         });
     } catch (error: any) {
         res.status(400).json({ message: error.message });
     }
 };
-
 // ====================== LẤY DANH SÁCH ĐẶT BÀN (CHO ADMIN) ======================
 export const handleGetAdminReservations = async (req: Request, res: Response) => {
     try {
@@ -154,14 +155,16 @@ export const handleGetMyBookingDetail = async (req: Request, res: Response) => {
 
 /**
  * 🎮 Admin tạo mới đặt bàn
+ * (SỬA: Gọi đúng service N-N)
  */
 export const handleAdminCreateReservation = async (req: Request, res: Response) => {
     try {
-        // Gọi service mới
-        const newReservation = await reservationService.createAdminReservation(req.body);
+        // Sửa: Gọi hàm "createReservation" (hàm N-N)
+        const newReservation = await reservationService.createReservation(req.body);
         res.status(201).json({
             message: 'Admin tạo đặt bàn thành công',
-            data: { id: newReservation.id, tableId: newReservation.ban_an_id }
+            // Sửa: Không trả về tableId vì ban_an_id không còn tồn tại
+            data: { id: newReservation.id }
         });
     } catch (error: any) {
         res.status(400).json({ message: error.message || 'Tạo đặt bàn thất bại.' });

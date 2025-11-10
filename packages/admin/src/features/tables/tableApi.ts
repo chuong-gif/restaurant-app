@@ -56,6 +56,14 @@ export const tableApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: [{ type: 'Table', id: 'LIST' }],
         }),
+        // 5. Query lấy bàn trống theo ngày (cho form admin)
+        getAvailableTablesByDate: builder.query<{ data: Table[] }, { date: string }>({
+            query: (params) => ({
+                url: '/public/tables/available', // <-- Dùng API public mà client đã dùng
+                params: params,
+            }),
+            // Không cần providesTags vì đây là data tạm thời cho form
+        }),
 
     }),
 });
@@ -65,4 +73,5 @@ export const {
     useCreateTableMutation,
     useUpdateTableMutation,
     useDeleteTableMutation,
+    useGetAvailableTablesByDateQuery,
 } = tableApi;

@@ -80,22 +80,25 @@ export const handleDeleteTable = async (req: Request, res: Response) => {
 };
 
 /**
- * 🎮 Lấy danh sách bàn trống theo ngày và sức chứa (Cho Client)
+ * 🎮 Lấy danh sách bàn trống theo ngày (Cho Client)
+ * (ĐÃ SỬA: Bỏ partySize)
  */
 export const handleGetAvailableTablesByDate = async (req: Request, res: Response) => {
     try {
         const dateString = req.query.date as string;
-        const partySize = parseInt(req.query.partySize as string);
+        // === BỎ LẤY partySize ===
+        // const partySize = parseInt(req.query.partySize as string);
 
-        if (!dateString || isNaN(partySize) || partySize <= 0) {
-            return res.status(400).json({ message: 'Ngày đặt và số lượng khách hợp lệ là bắt buộc.' });
+        if (!dateString) { // Chỉ cần ngày
+            return res.status(400).json({ message: 'Ngày đặt là bắt buộc.' });
         }
         const date = new Date(dateString);
         if (isNaN(date.getTime())) {
             return res.status(400).json({ message: 'Ngày đặt không hợp lệ.' });
         }
 
-        const availableTables = await tableService.getAvailableTablesByDate(date, partySize);
+        // Gọi service (đã bỏ partySize)
+        const availableTables = await tableService.getAvailableTablesByDate(date);
         res.status(200).json({ message: 'Lấy danh sách bàn trống thành công', data: availableTables });
     } catch (error: any) {
         res.status(400).json({ message: error.message || 'Lỗi khi tìm bàn trống.' });

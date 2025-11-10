@@ -26,7 +26,7 @@ interface ChangeDishesBody {
     }>;
 }
 
-type AdminReservationFormInput = {
+type AdminReservationNNInput = {
     fullname: string;
     tel: string;
     email?: string;
@@ -34,9 +34,8 @@ type AdminReservationFormInput = {
     party_size: number;
     note?: string;
     products?: Array<{ product_id: number; quantity: number }>;
-    ban_an_id?: number; // Admin có thể chọn bàn
-    status?: number;    // Admin có thể set status ban đầu
-    // reservation_code không cần gửi, backend tự sinh
+    ban_an_ids: number[]; // <-- Sửa từ ban_an_id (số ít) thành ban_an_ids (mảng)
+    status?: number;
 };
 
 
@@ -100,13 +99,13 @@ export const reservationApi = baseApi.injectEndpoints({
         }),
 
         // === THÊM MUTATION MỚI CHO ADMIN TẠO ===
-        createAdminReservation: builder.mutation<Reservation, AdminReservationFormInput>({
+        createAdminReservation: builder.mutation<Reservation, AdminReservationNNInput>({ // <-- Dùng kiểu NNInput mới
             query: (newReservationData) => ({
-                url: '/admin/reservations', // Gọi API admin mới
+                url: '/admin/reservations',
                 method: 'POST',
-                body: newReservationData,
+                body: newReservationData, // Body này giờ chứa ban_an_ids
             }),
-            invalidatesTags: [{ type: 'Reservation', id: 'LIST' }], // Cập nhật lại danh sách
+            invalidatesTags: [{ type: 'Reservation', id: 'LIST' }],
         }),
         // ======================================
 

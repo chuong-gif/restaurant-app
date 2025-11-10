@@ -41,13 +41,12 @@ export interface Reservation {
     tong_tien?: number | null; // Tổng tiền món ăn (chưa VAT, KM)
     tien_dat_coc: number;
     trang_thai: number; // Mã trạng thái (0-6)
-    ban_an_id?: number | null;
     khuyen_mai_id?: number | null;
     created_at: string;
     updated_at: string;
 
     // Dữ liệu join từ getAdminReservations / getAdminReservationById
-    ban_an?: { so_ban: number } | Table | null;
+    ban_an?: Table[] | null;
     khuyen_mai?: { giam_gia: number; loai_giam_gia: boolean } | Promotion | null;
     nguoi_dung?: {
         id: number;

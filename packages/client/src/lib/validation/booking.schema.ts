@@ -35,7 +35,7 @@ export const bookingInfoSchema = z.object({
         }),
     party_size: z.coerce.number() // Chuyển đổi string từ input sang number
         .min(1, "Số người ăn tối thiểu 1 người")
-        .max(8, "Số người ăn tối đa 8 người"), // [cite: 282-288]
+        .max(50, "Số người ăn tối đa 50 người"), // [cite: 282-288]
     note: z.string().optional(),
 });
 

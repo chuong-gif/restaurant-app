@@ -66,6 +66,7 @@ function App() {
             {/* --- Người dùng --- */}
             <Route element={<ProtectedRoute requiredPermission="view_user" />}>
               <Route path="/users" element={<UserListPage />} />
+              <Route path="/users/trash" element={<UserTrashPage />} />
             </Route>
             <Route element={<ProtectedRoute requiredPermission="add_user" />}>
               <Route path="/users/new" element={<UserFormPage />} />
@@ -73,9 +74,7 @@ function App() {
             <Route element={<ProtectedRoute requiredPermission="edit_user" />}>
               <Route path="/users/edit/:id" element={<UserFormPage />} />
             </Route>
-            <Route element={<ProtectedRoute requiredPermission="view_user_trash" />}>
-              <Route path="/users/trash" element={<UserTrashPage />} />
-            </Route>
+
 
             {/* --- Đặt bàn --- */}
             <Route element={<ProtectedRoute requiredPermission="view_reservation" />}>
@@ -90,7 +89,7 @@ function App() {
             <Route element={<ProtectedRoute requiredPermission="view_role" />}>
               <Route path="/roles" element={<RoleListPage />} />
             </Route>
-            <Route element={<ProtectedRoute requiredPermission="assign_permission" />}>
+            <Route element={<ProtectedRoute requiredPermission="assign_permission_to_role" />}> {/* Sửa từ 'assign_permission' */}
               <Route path="/roles/permissions" element={<AssignPermissionPage />} />
             </Route>
 
@@ -111,7 +110,7 @@ function App() {
               <Route path="/blogs/new" element={<BlogFormPage />} />
               <Route path="/blogs/edit/:id" element={<BlogFormPage />} />
             </Route>
-            <Route element={<ProtectedRoute requiredPermission="view_blog_comments" />}>
+            <Route element={<ProtectedRoute requiredPermission="view_blog_comment" />}>
               <Route path="/blog-comments/:blogId" element={<BlogCommentsPage />} />
             </Route>
           </Route>

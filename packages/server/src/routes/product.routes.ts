@@ -19,7 +19,7 @@ router.get('/active', handleGetActiveProducts);
 // GET /api/v1/public/products/newest -> Lấy sản phẩm mới nhất
 router.get('/newest', handleGetNewestProducts);
 
-router.get('/:id', handleGetProductById);
+router.get('/detail/:id', handleGetProductById);
 // Các route public khác (lấy chi tiết sản phẩm...) sẽ nằm ở đây
 
 export default router;

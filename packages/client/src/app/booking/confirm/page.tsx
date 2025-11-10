@@ -41,7 +41,7 @@ export default function BookingConfirmPage() {
     const { toast } = useToast();
 
     // Lấy dữ liệu từ các store
-    const { info, selectedTable, cart, getTotalPrice, clearBooking } = useBookingStore();
+    const { info, selectedTables, cart, getTotalPrice, clearBooking } = useBookingStore();
     const { user } = useAuthStore();
 
     // Bảo vệ route: Nếu chưa điền thông tin ở Bước 1, đá về
@@ -85,7 +85,7 @@ export default function BookingConfirmPage() {
         const bookingData = {
             ...info,
             user_id: user?.id || null, // Lấy ID nếu đã đăng nhập [cite: 99-100]
-            ban_an_id: selectedTable?.id || null, // Gửi ID bàn nếu tự chọn [cite: 74-170]
+            ban_an_ids: selectedTables.map(table => table.id),
             products: cart.map(item => ({ // Gửi danh sách món ăn
                 product_id: item.product_id,
                 quantity: item.quantity,
@@ -131,7 +131,9 @@ export default function BookingConfirmPage() {
                             <p><strong>Số người:</strong> {info.party_size} người</p>
                             <p>
                                 <strong>Bàn ăn:</strong>{' '}
-                                {selectedTable ? `Bàn số ${selectedTable.so_ban} (Tầng ${selectedTable.tang})` : "Tự động xếp bàn"}
+                                {selectedTables.length > 0
+                                    ? selectedTables.map(t => `Bàn ${t.so_ban}`).join(', ')
+                                    : "Tự động xếp bàn"}
                             </p>
                             <p><strong>Ghi chú:</strong> {info.note || 'Không có'}</p>
                         </div>

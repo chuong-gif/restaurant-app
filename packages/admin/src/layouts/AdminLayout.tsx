@@ -44,7 +44,14 @@ const menuItems: MenuItem[] = [
     {
         key: 'accounts', icon: <UserOutlined />, label: 'Quản Lý Tài Khoản', requiredPermission: 'view_user', children: [
             { key: 'users', icon: <TeamOutlined />, label: 'Tất cả tài khoản', path: '/users', requiredPermission: 'view_user' },
-            { key: 'users-trash', icon: <DeleteOutlined />, label: 'Thùng rác TK', path: '/users/trash', requiredPermission: 'view_user_trash' },
+            {
+                key: 'users-trash',
+                icon: <DeleteOutlined />,
+                label: 'Thùng rác TK',
+                path: '/users/trash',
+                // === SỬA TÊN QUYỀN Ở ĐÂY ===
+                requiredPermission: 'view_user' // Sửa từ 'view_user_trash'
+            },
         ]
     },
     {
@@ -56,7 +63,14 @@ const menuItems: MenuItem[] = [
     },
     {
         key: 'roles', icon: <SafetyCertificateOutlined />, label: 'Quản Lý Vai Trò', requiredPermission: 'view_role', children: [
-            { key: 'assign-permissions', icon: <SolutionOutlined />, label: 'Phân quyền', path: '/roles/permissions', requiredPermission: 'assign_permission' },
+            {
+                key: 'assign-permissions',
+                icon: <SolutionOutlined />,
+                label: 'Phân quyền',
+                path: '/roles/permissions',
+                // === SỬA TÊN QUYỀN Ở ĐÂY ===
+                requiredPermission: 'assign_permission_to_role' // Sửa từ 'assign_permission'
+            },
             { key: 'role-list', icon: <TeamOutlined />, label: 'Vai trò', path: '/roles', requiredPermission: 'view_role' },
         ]
     },

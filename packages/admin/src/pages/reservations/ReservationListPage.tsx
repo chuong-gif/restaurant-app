@@ -1,7 +1,7 @@
 // packages/admin/src/pages/reservations/ReservationListPage.tsx
 import React, { useState, useCallback, useMemo } from 'react';
-import { Table, Button, Input, Select, Tag, Space, Row, Col, App, Tooltip } from 'antd';
-import { EyeOutlined, DeleteOutlined, EditOutlined, PhoneOutlined, UserOutlined, NumberOutlined, RestOutlined } from '@ant-design/icons';
+import { Table, Button, Input, Select, Space, Row, Col, App, Tooltip } from 'antd';
+import { EyeOutlined, DeleteOutlined, PhoneOutlined, UserOutlined, NumberOutlined, RestOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useDebounce } from 'use-debounce';
@@ -10,6 +10,7 @@ import { useGetAdminReservationsQuery, useSoftDeleteReservationMutation } from '
 import { setReservationFilters, setReservationPage } from '../../features/reservations/reservationSlice';
 import { RootState } from '../../app/store';
 import { Reservation } from '../../types/reservation';
+import { Table as RestaurantTable } from '../../types/product';
 import ChangeStatusSelect, { statusMap } from '../../components/reservations/ChangeStatusSelect'; // Import component
 import { formatDateTime } from '../../utils/FormatDateTime'; // Giả sử có hàm này
 import { formatCurrency } from '../../utils/FormatCurrency'; // Giả sử có hàm này
@@ -19,7 +20,6 @@ import { PlusOutlined } from '@ant-design/icons';
 import ReservationAddForm from '../../components/reservations/ReservationAddForm';
 
 
-const { Search } = Input;
 const { Option } = Select;
 
 
@@ -40,7 +40,7 @@ const ReservationListPage: React.FC = () => {
     const [debouncedCode] = useDebounce(codeSearch, 500);
 
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [isCreating, setIsCreating] = useState(false); // để loading nút tạo
+    const [isCreating] = useState(false); // để loading nút tạo
 
 
     // --- RTK Query ---
@@ -98,7 +98,19 @@ const ReservationListPage: React.FC = () => {
             defaultSortOrder: 'descend' as const,
         },
         { title: 'Số khách', dataIndex: 'so_luong_khach', key: 'guests', align: 'center' as const, width: 80 },
-        { title: 'Số bàn', dataIndex: ['ban_an', 'so_ban'], key: 'table', align: 'center' as const, width: 80, render: (so_ban: number) => so_ban || '-' },
+        {
+            title: 'Số bàn',
+            dataIndex: 'ban_an', // Lấy cả mảng ban_an
+            key: 'table',
+            align: 'center' as const,
+            width: 100,
+            // Render: map qua mảng ban_an và join các so_ban
+            render: (ban_an_list: RestaurantTable[]) => (
+                (ban_an_list && ban_an_list.length > 0)
+                    ? ban_an_list.map(table => table.so_ban).join(', ')
+                    : '-'
+            )
+        },
         {
             title: 'Tổng tiền', dataIndex: 'tong_tien', key: 'total', align: 'right' as const, width: 130,
             render: (total?: number) => formatCurrency(total || 0), // Format tiền tệ

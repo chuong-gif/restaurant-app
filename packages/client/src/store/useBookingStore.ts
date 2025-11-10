@@ -26,12 +26,13 @@ type BookingInfo = {
 // Định nghĩa toàn bộ state của store
 type BookingState = {
     info: Partial<BookingInfo>; // Thông tin cơ bản (Bước 1)
-    selectedTable: BanAn | null; // Bàn đã chọn (Bước 2)
+    selectedTables: BanAn[]; // Bàn đã chọn (Bước 2)
     cart: CartItem[]; // Món ăn đã chọn (Bước 2)
 
     // Actions
     setBookingInfo: (info: BookingInfo) => void;
-    setSelectedTable: (table: BanAn | null) => void;
+    toggleTable: (table: BanAn) => void;
+    getTotalCapacity: () => number;
     addToCart: (product: SanPham) => void;
     removeFromCart: (productId: number) => void;
     updateQuantity: (productId: number, quantity: number) => void;
@@ -41,7 +42,7 @@ type BookingState = {
 
 const initialState = {
     info: {},
-    selectedTable: null,
+    selectedTables: [],
     cart: [],
 };
 
@@ -50,10 +51,29 @@ export const useBookingStore = create<BookingState>()(
         (set, get) => ({
             ...initialState,
 
-            // === ACTIONS ===
             setBookingInfo: (info) => set({ info }),
 
-            setSelectedTable: (table) => set({ selectedTable: table }),
+            // === SỬA LOGIC CHỌN BÀN ===
+            toggleTable: (table) => {
+                set((state) => {
+                    const isSelected = state.selectedTables.some(t => t.id === table.id);
+                    if (isSelected) {
+                        // Nếu đã chọn -> Bỏ chọn
+                        return {
+                            selectedTables: state.selectedTables.filter(t => t.id !== table.id)
+                        };
+                    } else {
+                        // Nếu chưa chọn -> Thêm vào
+                        return {
+                            selectedTables: [...state.selectedTables, table]
+                        };
+                    }
+                });
+            },
+
+            getTotalCapacity: () => {
+                return get().selectedTables.reduce((total, table) => total + table.suc_chua, 0);
+            },
 
             addToCart: (product) => {
                 set((state) => {

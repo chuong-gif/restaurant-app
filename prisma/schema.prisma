@@ -101,7 +101,8 @@ model dat_ban {
   ma_dat_ban             String?                  @db.VarChar(50)
   khach_hang_id          Int?
   so_lan_doi             Int                      @default(0)
-  ban_an_id              Int?
+
+  ban_an                 ban_an[]
   khuyen_mai_id          Int?
   ho_ten_khach           String                   @db.VarChar(255)
   dien_thoai             String                   @db.VarChar(15)
@@ -116,13 +117,13 @@ model dat_ban {
   created_at             DateTime                 @default(now()) @db.Timestamp(0)
   updated_at             DateTime                 @default(now()) @db.Timestamp(0)
   chi_tiet_dat_ban       chi_tiet_dat_ban[]
-  ban_an                 ban_an?                  @relation(fields: [ban_an_id], references: [id], onDelete: Restrict, map: "fk_datban_banan")
+  
   nguoi_dung             nguoi_dung?              @relation(fields: [khach_hang_id], references: [id], map: "fk_datban_khachhang")
   khuyen_mai             khuyen_mai?              @relation(fields: [khuyen_mai_id], references: [id], map: "fk_datban_khuyenmai")
   phuong_thuc_thanh_toan phuong_thuc_thanh_toan[]
   thay_doi_mon_an        thay_doi_mon_an[]
 
-  @@index([ban_an_id], map: "fk_datban_banan")
+ 
   @@index([khach_hang_id], map: "fk_datban_khachhang")
   @@index([khuyen_mai_id], map: "fk_datban_khuyenmai")
 }

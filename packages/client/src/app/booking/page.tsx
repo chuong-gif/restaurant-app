@@ -159,7 +159,7 @@ export default function BookingInfoPage() {
                                             <FormItem>
                                                 <FormLabel>Số người ăn *</FormLabel>
                                                 <FormControl>
-                                                    <Input type="number" min={1} max={8} {...field} />
+                                                    <Input type="number" min={1} max={50} {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
