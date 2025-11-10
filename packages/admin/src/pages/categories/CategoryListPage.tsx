@@ -1,4 +1,4 @@
-// packages/admin/src/pages/categories/CategoryListPage.tsx
+// CategoryListPage.tsx
 import React, { useState, useMemo, useCallback } from 'react';
 import {
     Table,
@@ -6,11 +6,10 @@ import {
     Input,
     Select,
     Tag,
-    // Sửa: Dùng Modal và message từ App.useApp()
     Space,
     Row,
     Col,
-    App // <-- THÊM DÒNG NÀY
+    App
 } from 'antd';
 import {
     PlusOutlined,
@@ -37,7 +36,7 @@ const { Option } = Select;
 
 const CategoryListPage: React.FC = () => {
     const dispatch = useDispatch();
-    const { message, modal } = App.useApp(); // <-- THÊM DÒNG NÀY: Lấy context
+    const { message, modal } = App.useApp();
 
     // Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -110,8 +109,7 @@ const CategoryListPage: React.FC = () => {
 
     const handleDelete = useCallback(
         (id: number) => {
-            // === SỬA LẠI HÀM NÀY ĐỂ DÙNG `modal` ===
-            modal.confirm({ // <-- Sửa từ Modal.confirm
+            modal.confirm({
                 title: 'Xác nhận xóa',
                 content:
                     'Bạn có chắc muốn xóa danh mục này? Nếu danh mục đang có sản phẩm, bạn sẽ không thể xóa.',
@@ -122,14 +120,12 @@ const CategoryListPage: React.FC = () => {
                         await deleteCategory(id).unwrap();
                         message.success('Xóa danh mục thành công.');
                     } catch (error: any) {
-                        // Thông báo lỗi giờ sẽ hiện ra
                         message.error(error.data?.message || 'Xóa danh mục thất bại.');
                     }
                 },
             });
-            // ===================================
         },
-        [deleteCategory, message, modal] // Thêm message, modal vào dependency
+        [deleteCategory, message, modal]
     );
 
     const handleCloseModal = useCallback(() => {
@@ -148,13 +144,20 @@ const CategoryListPage: React.FC = () => {
                 render: (_: any, __: ProductCategory, index: number) => {
                     const currentPage = categoriesData?.currentPage ?? 1;
                     const pageSize = filters.pageSize ?? 10;
-                    return (currentPage - 1) * pageSize + index + 1;
+                    return (
+                        <div className="text-gray-600 font-medium">
+                            {(currentPage - 1) * pageSize + index + 1}
+                        </div>
+                    );
                 },
             },
             {
                 title: 'Tên danh mục',
                 dataIndex: 'ten_danh_muc',
                 key: 'ten_danh_muc',
+                render: (text: string) => (
+                    <span className="text-gray-700 font-medium">{text}</span>
+                )
             },
             {
                 title: 'Trạng thái',
@@ -162,9 +165,12 @@ const CategoryListPage: React.FC = () => {
                 key: 'trang_thai',
                 align: 'center' as const,
                 render: (status: boolean) => (
-                    <Tag color={status ? 'green' : 'red'}>
+                    <div className={`px-3 py-1 rounded-full text-xs font-medium ${status
+                            ? 'bg-green-100 text-green-800 border border-green-200'
+                            : 'bg-red-100 text-red-800 border border-red-200'
+                        }`}>
                         {status ? 'Hoạt động' : 'Ngưng'}
-                    </Tag>
+                    </div>
                 ),
             },
             {
@@ -180,6 +186,7 @@ const CategoryListPage: React.FC = () => {
                                 icon={<EditOutlined />}
                                 onClick={() => handleEdit(record)}
                                 disabled={isDisabled}
+                                className="bg-blue-500 hover:bg-blue-600 border-0 shadow-md hover:shadow-lg transition-all"
                             >
                                 Sửa
                             </Button>
@@ -189,6 +196,7 @@ const CategoryListPage: React.FC = () => {
                                 icon={<DeleteOutlined />}
                                 onClick={() => handleDelete(record.id)}
                                 disabled={isDisabled}
+                                className="shadow-md hover:shadow-lg transition-all"
                             >
                                 Xóa
                             </Button>
@@ -200,69 +208,98 @@ const CategoryListPage: React.FC = () => {
         [categoriesData, filters.pageSize, handleEdit, handleDelete]
     );
 
-    // --- Render ---
     return (
-        <div>
-            <h2 className="text-2xl font-bold mb-4">
-                Quản lý Danh mục Sản phẩm
-            </h2>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-6">
+            <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl p-6 transition-all duration-300 animate-fade-in">
+                <h2 className="text-2xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                    Quản lý Danh mục Sản phẩm
+                </h2>
 
-            <Row gutter={[16, 16]} className="mb-4">
-                <Col xs={24} sm={12} md={8}>
-                    <Search
-                        placeholder="Tìm theo tên danh mục..."
-                        onSearch={handleSearch}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        value={searchTerm}
-                        allowClear
+                <Row gutter={[16, 16]} className="mb-6">
+                    <Col xs={24} sm={12} md={8}>
+                        <Search
+                            placeholder="Tìm theo tên danh mục..."
+                            onSearch={handleSearch}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            value={searchTerm}
+                            allowClear
+                            className="rounded-xl border-white/30"
+                        />
+                    </Col>
+
+                    <Col xs={24} sm={12} md={8}>
+                        <Select
+                            placeholder="Lọc theo trạng thái"
+                            className="w-full rounded-xl border-white/30"
+                            onChange={handleStatusChange}
+                            value={filters.trang_thai}
+                            allowClear
+                        >
+                            <Option value={true}>Hoạt động</Option>
+                            <Option value={false}>Ngưng</Option>
+                        </Select>
+                    </Col>
+
+                    <Col xs={24} sm={24} md={8} className="flex justify-end">
+                        <Button
+                            type="primary"
+                            icon={<PlusOutlined />}
+                            onClick={handleAddNew}
+                            className="h-10 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 border-0 shadow-lg hover:shadow-xl transition-all"
+                        >
+                            Thêm mới
+                        </Button>
+                    </Col>
+                </Row>
+
+                <div className="bg-white/20 backdrop-blur-lg border border-white/30 rounded-2xl shadow-lg overflow-hidden">
+                    <Table
+                        columns={columns}
+                        dataSource={categoriesData?.data || []}
+                        rowKey="id"
+                        loading={isLoading || isFetching || isDeleting}
+                        pagination={{
+                            current: categoriesData?.currentPage || 1,
+                            pageSize: filters.pageSize || 10,
+                            total: categoriesData?.total || 0,
+                            onChange: handlePageChange,
+                            showTotal: (total, range) =>
+                                `${range[0]}-${range[1]} của ${total} danh mục`,
+                            className: 'px-4 py-2'
+                        }}
+                        className="custom-table"
                     />
-                </Col>
+                </div>
 
-                <Col xs={24} sm={12} md={8}>
-                    <Select
-                        placeholder="Lọc theo trạng thái"
-                        style={{ width: '100%' }}
-                        onChange={handleStatusChange}
-                        value={filters.trang_thai}
-                        allowClear
-                    >
-                        <Option value={true}>Hoạt động</Option>
-                        <Option value={false}>Ngưng</Option>
-                    </Select>
-                </Col>
+                <CategoryFormModal
+                    open={isModalOpen}
+                    onClose={handleCloseModal}
+                    category={selectedCategory}
+                />
+            </div>
 
-                <Col xs={24} sm={24} md={8} className="flex justify-end">
-                    <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        onClick={handleAddNew}
-                    >
-                        Thêm mới
-                    </Button>
-                </Col>
-            </Row>
-
-            <Table
-                columns={columns}
-                dataSource={categoriesData?.data || []}
-                rowKey="id"
-                loading={isLoading || isFetching || isDeleting}
-                pagination={{
-                    current: categoriesData?.currentPage || 1,
-                    pageSize: filters.pageSize || 10,
-                    total: categoriesData?.total || 0,
-                    onChange: handlePageChange,
-                    showTotal: (total, range) =>
-                        `${range[0]}-${range[1]} của ${total} danh mục`,
-                }}
-            />
-
-            {/* Modal Thêm/Sửa */}
-            <CategoryFormModal
-                open={isModalOpen}
-                onClose={handleCloseModal}
-                category={selectedCategory}
-            />
+            <style>{`
+                .custom-table .ant-table-thead > tr > th {
+                    background: rgba(255, 255, 255, 0.3) !important;
+                    backdrop-filter: blur(10px);
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+                    color: #4B5563;
+                    font-weight: 600;
+                }
+                .custom-table .ant-table-tbody > tr > td {
+                    background: rgba(255, 255, 255, 0.2) !important;
+                    backdrop-filter: blur(5px);
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+                }
+                .custom-table .ant-table-tbody > tr:hover > td {
+                    background: rgba(255, 255, 255, 0.3) !important;
+                }
+                @keyframes fade-in {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .animate-fade-in { animation: fade-in 0.6s ease-out; }
+            `}</style>
         </div>
     );
 };

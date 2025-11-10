@@ -5,7 +5,7 @@ import React from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
-import { DatBan } from '@/types/booking'; // Import kiểu chi tiết
+import { DatBan } from '@/types/booking';
 import Link from 'next/link';
 
 import GlobalSpinner from '@/components/common/GlobalSpinner';
@@ -15,7 +15,7 @@ import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
 import Image from 'next/image';
 
-// === Helper Functions (Giống file trước) ===
+// === Helper Functions ===
 const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('vi-VN', {
         style: 'currency',
@@ -36,29 +36,27 @@ const formatDateTime = (isoString: string) => {
 
 const getStatusInfo = (status: number): { text: string; className: string } => {
     const statusMapping: { [key: number]: { text: string; className: string } } = {
-        0: { text: 'Đã hủy', className: 'text-destructive' },
-        1: { text: 'Chờ cọc', className: 'text-yellow-600' },
-        2: { text: 'Đã cọc', className: 'text-primary' },
-        3: { text: 'Đã check-in', className: 'text-blue-500' },
-        4: { text: 'Chờ thanh toán', className: 'text-blue-600' },
-        5: { text: 'Hoàn thành', className: 'text-green-600' },
-        6: { text: 'Không đến', className: 'text-gray-500' },
+        0: { text: 'SYSTEM TERMINATED', className: 'text-red-400' },
+        1: { text: 'AWAITING DEPOSIT', className: 'text-yellow-400' },
+        2: { text: 'DEPOSIT SECURED', className: 'text-cyan-400' },
+        3: { text: 'ACTIVE SESSION', className: 'text-blue-400' },
+        4: { text: 'PENDING PAYMENT', className: 'text-purple-400' },
+        5: { text: 'MISSION COMPLETE', className: 'text-green-400' },
+        6: { text: 'SYSTEM OFFLINE', className: 'text-gray-400' },
     };
-    return statusMapping[status] || { text: 'Không xác định', className: 'text-gray-500' };
+    return statusMapping[status] || { text: 'UNKNOWN STATUS', className: 'text-gray-400' };
 };
-// ===================================
 
 export default function MyBookingDetailPage() {
     const router = useRouter();
     const params = useParams();
     const id = params.id as string;
 
-    // Gọi API `GET /api/v1/user/my-reservations/:id` (từ myReservation.routes.ts [cite: 11-12])
     const { data: booking, isLoading, error } = useQuery<DatBan>({
         queryKey: ['myBookingDetail', id],
         queryFn: async () => {
             const response = await api.get(`/user/my-reservations/${id}`);
-            return response.data; // Server trả về một object DatBan
+            return response.data;
         },
         enabled: !!id,
     });
@@ -66,33 +64,38 @@ export default function MyBookingDetailPage() {
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-64">
-                <GlobalSpinner />
+                <div className="text-center">
+                    <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-cyan-400 font-mono">ACCESSING RESERVATION DATA...</p>
+                </div>
             </div>
         );
     }
 
     if (error) {
         return (
-            <Card className="border-destructive">
-                <CardHeader><CardTitle>Lỗi</CardTitle></CardHeader>
-                <CardContent>
-                    <p>Không thể tải chi tiết đơn đặt bàn. Đơn có thể không tồn tại hoặc bạn không có quyền xem.</p>
-                    <Button variant="outline" className="mt-4" asChild>
-                        <Link href="/my-bookings">Quay lại danh sách</Link>
-                    </Button>
-                </CardContent>
-            </Card>
+            <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-red-600 to-pink-600 rounded-2xl blur opacity-30"></div>
+                <Card className="relative bg-[#0f0f1a] border border-red-500/30 backdrop-blur-lg">
+                    <CardHeader><CardTitle className="text-red-400 font-mono">DATA STREAM ERROR</CardTitle></CardHeader>
+                    <CardContent>
+                        <p className="text-red-300 font-mono mb-4">UNABLE TO ACCESS RESERVATION DATA STREAM.</p>
+                        <Button variant="outline" className="font-mono border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10 transition-all duration-300" asChild>
+                            <Link href="/my-bookings">RETURN TO DATABASE</Link>
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
         );
     }
 
     if (!booking) return null;
 
-    // Tái tạo logic tính tiền từ MyBookingDetail.js [cite: 194-203]
     const subTotal = booking.chi_tiet_dat_ban.reduce((acc, item) => acc + (item.gia_tai_thoi_diem * item.so_luong), 0);
     const discountAmount = booking.khuyen_mai
         ? (booking.khuyen_mai.loai_giam_gia ? (subTotal * booking.khuyen_mai.giam_gia / 100) : booking.khuyen_mai.giam_gia)
         : 0;
-    const tax = (subTotal - discountAmount) * 0.10; // Giả sử thuế 10%
+    const tax = (subTotal - discountAmount) * 0.10;
     const total = subTotal - discountAmount + tax;
     const deposit = booking.tien_dat_coc;
     const remaining = total - deposit;
@@ -100,95 +103,106 @@ export default function MyBookingDetailPage() {
     const statusInfo = getStatusInfo(booking.trang_thai);
 
     return (
-        <Card className="shadow-lg max-w-4xl mx-auto">
-            <CardHeader className="text-center">
-                <Image src="/images/logo.png" alt="Logo" width={60} height={60} className="mx-auto" />
-                <CardTitle className="text-3xl font-secondary text-primary mt-2">
-                    Hóa đơn Đặt bàn
-                </CardTitle>
-                <CardDescription>
-                    Mã đơn: {booking.ma_dat_ban || `DB-${booking.id}`}
-                </CardDescription>
-                <div className={`text-lg font-semibold ${statusInfo.className}`}>
-                    {statusInfo.text}
-                </div>
-            </CardHeader>
-            <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                        <h3 className="font-semibold mb-2">Thông tin khách hàng</h3>
-                        <p><strong>Tên:</strong> {booking.ho_ten_khach}</p>
-                        <p><strong>Phone:</strong> {booking.dien_thoai}</p>
-                        <p><strong>Email:</strong> {booking.email}</p>
+        <div className="relative group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-cyan-600 to-purple-600 rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-1000 group-hover:duration-200"></div>
+            <Card className="relative bg-[#0f0f1a] border border-cyan-500/30 backdrop-blur-lg shadow-2xl max-w-4xl mx-auto">
+                <CardHeader className="text-center bg-gradient-to-b from-cyan-900/20 to-transparent p-8">
+                    <div className="relative inline-block mb-4">
+                        <div className="absolute inset-0 bg-cyan-500 rounded-full blur-md opacity-50"></div>
+                        <Image src="/images/logo.png" alt="Logo" width={80} height={80} className="relative z-10 rounded-full border-2 border-cyan-400/50 mx-auto" />
                     </div>
-                    <div>
-                        <h3 className="font-semibold mb-2">Chi tiết đặt bàn</h3>
-                        <p><strong>Ngày giờ:</strong> {formatDateTime(booking.ngay_dat_ban)}</p>
-                        <p><strong>Số người:</strong> {booking.so_luong_khach} người</p>
-                        <p><strong>Bàn:</strong> {booking.ban_an ? `Bàn ${booking.ban_an.so_ban} (Tầng ${booking.ban_an.tang})` : 'Tự động'}</p>
-                        <p><strong>Ghi chú:</strong> {booking.ghi_chu || 'Không có'}</p>
+                    <CardTitle className="text-4xl font-mono text-transparent bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text mt-4">
+                        RESERVATION PROTOCOL
+                    </CardTitle>
+                    <CardDescription className="text-cyan-300 font-mono mt-2">
+                        ID: {booking.ma_dat_ban || `DB-${booking.id}`}
+                    </CardDescription>
+                    <div className={`text-xl font-mono font-bold ${statusInfo.className} mt-3`}>
+                        {statusInfo.text}
                     </div>
-                </div>
+                </CardHeader>
+                <CardContent className="p-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                        <div className="space-y-4">
+                            <h3 className="font-mono text-cyan-400 text-lg border-b border-cyan-500/30 pb-2">CLIENT DATA</h3>
+                            <div className="space-y-2">
+                                <p className="text-cyan-200 font-mono"><strong>NAME:</strong> {booking.ho_ten_khach}</p>
+                                <p className="text-cyan-200 font-mono"><strong>COMM LINK:</strong> {booking.dien_thoai}</p>
+                                <p className="text-cyan-200 font-mono"><strong>NEURAL ID:</strong> {booking.email}</p>
+                            </div>
+                        </div>
+                        <div className="space-y-4">
+                            <h3 className="font-mono text-purple-400 text-lg border-b border-purple-500/30 pb-2">RESERVATION DATA</h3>
+                            <div className="space-y-2">
+                                <p className="text-purple-200 font-mono"><strong>TIME STAMP:</strong> {formatDateTime(booking.ngay_dat_ban)}</p>
+                                <p className="text-purple-200 font-mono"><strong>UNITS:</strong> {booking.so_luong_khach} CYBERNETIC ENTITIES</p>
+                                <p className="text-purple-200 font-mono"><strong>LOCATION:</strong> {booking.ban_an ? `TABLE ${booking.ban_an.so_ban} (LEVEL ${booking.ban_an.tang})` : 'AUTO-ASSIGN'}</p>
+                                <p className="text-purple-200 font-mono"><strong>MEMO:</strong> {booking.ghi_chu || 'NO DATA'}</p>
+                            </div>
+                        </div>
+                    </div>
 
-                <Separator className="my-6" />
+                    <Separator className="my-8 bg-cyan-500/30" />
 
-                <h3 className="font-semibold mb-4">Chi tiết món ăn</h3>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Món ăn</TableHead>
-                            <TableHead className="text-center">Số lượng</TableHead>
-                            <TableHead className="text-right">Đơn giá</TableHead>
-                            <TableHead className="text-right">Thành tiền</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {booking.chi_tiet_dat_ban.map((item, index) => (
-                            <TableRow key={index}>
-                                <TableCell>{(item.san_pham as any).ten_san_pham}</TableCell>
-                                <TableCell className="text-center">{item.so_luong}</TableCell>
-                                <TableCell className="text-right">{formatCurrency(item.gia_tai_thoi_diem)}</TableCell>
-                                <TableCell className="text-right">{formatCurrency(item.gia_tai_thoi_diem * item.so_luong)}</TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                    <TableFooter>
-                        <TableRow>
-                            <TableCell colSpan={3} className="text-right font-medium">Tạm tính (Món ăn)</TableCell>
-                            <TableCell className="text-right font-medium">{formatCurrency(subTotal)}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell colSpan={3} className="text-right">Giảm giá {booking.khuyen_mai ? `(${booking.khuyen_mai.ma_khuyen_mai})` : ''}</TableCell>
-                            <TableCell className="text-right">-{formatCurrency(discountAmount)}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell colSpan={3} className="text-right">Thuế (10%)</TableCell>
-                            <TableCell className="text-right">{formatCurrency(tax)}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell colSpan={3} className="text-right text-lg font-bold">Tổng cộng</TableCell>
-                            <TableCell className="text-right text-lg font-bold">{formatCurrency(total)}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell colSpan={3} className="text-right text-primary font-semibold">Đã cọc / Cần cọc</TableCell>
-                            <TableCell className="text-right text-primary font-semibold">{formatCurrency(deposit)}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell colSpan={3} className="text-right text-xl font-bold">Còn lại</TableCell>
-                            <TableCell className="text-right text-xl font-bold">
-                                {booking.trang_thai === 5 ? formatCurrency(0) : formatCurrency(remaining > 0 ? remaining : 0)}
-                            </TableCell>
-                        </TableRow>
-                    </TableFooter>
-                </Table>
+                    <h3 className="font-mono text-cyan-400 text-lg mb-6">CONSUMPTION DATA STREAM</h3>
+                    <div className="border border-cyan-500/30 rounded-lg overflow-hidden">
+                        <Table className="bg-black/50">
+                            <TableHeader>
+                                <TableRow className="border-b border-cyan-500/30">
+                                    <TableHead className="font-mono text-cyan-300">ITEM</TableHead>
+                                    <TableHead className="text-center font-mono text-cyan-300">QUANTITY</TableHead>
+                                    <TableHead className="text-right font-mono text-cyan-300">UNIT PRICE</TableHead>
+                                    <TableHead className="text-right font-mono text-cyan-300">TOTAL</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {booking.chi_tiet_dat_ban.map((item, index) => (
+                                    <TableRow key={index} className="border-b border-cyan-500/10 hover:bg-cyan-500/5 transition-colors duration-300">
+                                        <TableCell className="font-mono text-cyan-200">{(item.san_pham as any).ten_san_pham.toUpperCase()}</TableCell>
+                                        <TableCell className="text-center font-mono text-cyan-200">{item.so_luong}</TableCell>
+                                        <TableCell className="text-right font-mono text-cyan-200">{formatCurrency(item.gia_tai_thoi_diem)}</TableCell>
+                                        <TableCell className="text-right font-mono text-cyan-200">{formatCurrency(item.gia_tai_thoi_diem * item.so_luong)}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                            <TableFooter className="bg-cyan-900/20">
+                                <TableRow>
+                                    <TableCell colSpan={3} className="text-right font-mono font-medium text-cyan-300">SUB-TOTAL</TableCell>
+                                    <TableCell className="text-right font-mono font-medium text-cyan-300">{formatCurrency(subTotal)}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell colSpan={3} className="text-right font-mono text-purple-300">DISCOUNT {booking.khuyen_mai ? `(${booking.khuyen_mai.ma_khuyen_mai})` : ''}</TableCell>
+                                    <TableCell className="text-right font-mono text-purple-300">-{formatCurrency(discountAmount)}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell colSpan={3} className="text-right font-mono text-blue-300">SYSTEM TAX (10%)</TableCell>
+                                    <TableCell className="text-right font-mono text-blue-300">{formatCurrency(tax)}</TableCell>
+                                </TableRow>
+                                <TableRow className="border-t border-cyan-500/30">
+                                    <TableCell colSpan={3} className="text-right font-mono text-lg font-bold text-cyan-400">TOTAL CHARGE</TableCell>
+                                    <TableCell className="text-right font-mono text-lg font-bold text-cyan-400">{formatCurrency(total)}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell colSpan={3} className="text-right font-mono font-semibold text-purple-400">SECURITY DEPOSIT</TableCell>
+                                    <TableCell className="text-right font-mono font-semibold text-purple-400">{formatCurrency(deposit)}</TableCell>
+                                </TableRow>
+                                <TableRow className="border-t border-cyan-500/30 bg-gradient-to-r from-cyan-900/30 to-purple-900/30">
+                                    <TableCell colSpan={3} className="text-right font-mono text-xl font-bold text-white">REMAINING BALANCE</TableCell>
+                                    <TableCell className="text-right font-mono text-xl font-bold text-white">
+                                        {booking.trang_thai === 5 ? formatCurrency(0) : formatCurrency(remaining > 0 ? remaining : 0)}
+                                    </TableCell>
+                                </TableRow>
+                            </TableFooter>
+                        </Table>
+                    </div>
 
-                <div className="flex justify-end gap-2 mt-8">
-                    <Button variant="outline" asChild>
-                        <Link href="/my-bookings">Quay lại danh sách</Link>
-                    </Button>
-                    {/* Nút thanh toán sẽ được thêm vào đây */}
-                </div>
-            </CardContent>
-        </Card>
+                    <div className="flex justify-end gap-4 mt-8">
+                        <Button variant="outline" className="font-mono border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10 transition-all duration-300" asChild>
+                            <Link href="/my-bookings">RETURN TO DATABASE</Link>
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
     );
 }

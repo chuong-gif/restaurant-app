@@ -4,9 +4,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-// === THÊM `keepPreviousData` VÀO IMPORT ===
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
-// =======================================
 import api from '@/lib/api';
 import { formatCurrency } from '@/lib/utils';
 
@@ -35,51 +33,65 @@ function CategorySidebar({
     selectedId: number | null;
     onSelectCategory: (id: number | null) => void;
 }) {
-    // 1. Tải danh sách danh mục (chỉ các mục active)
     const { data, isLoading, error } = useQuery<CategoriesApiResponse>({
         queryKey: ['productCategories'],
         queryFn: async () => {
             const res = await api.get('/public/product-categories');
             return res.data;
         },
-        staleTime: 1000 * 60 * 60, // Cache 1 giờ
+        staleTime: 1000 * 60 * 60,
     });
 
-    if (isLoading) return <p>Đang tải danh mục...</p>;
-    if (error) return <p className="text-destructive">Lỗi tải danh mục.</p>;
+    if (isLoading) return (
+        <div className="text-cyan-400 font-mono text-sm p-4 text-center">
+            LOADING CATEGORIES...
+        </div>
+    );
+    if (error) return (
+        <div className="text-red-400 font-mono text-sm p-4 text-center">
+            SYSTEM ERROR: CATEGORY DATA CORRUPTED
+        </div>
+    );
 
     return (
-        <Card className="sticky top-24 shadow-lg">
-            <CardContent className="p-4">
-                <h4 className="mb-4 font-secondary text-2xl text-primary text-center">
-                    Thực Đơn
-                </h4>
-                <ul className="space-y-2">
-                    {/* Nút Xem tất cả */}
-                    <li>
-                        <Button
-                            variant={selectedId === null ? 'default' : 'ghost'}
-                            className="w-full justify-start text-base"
-                            onClick={() => onSelectCategory(null)}
-                        >
-                            Xem tất cả
-                        </Button>
-                    </li>
-                    {/* Danh sách danh mục */}
-                    {data?.data.map((category) => (
-                        <li key={category.id}>
+        <div className="relative group">
+            <div className="absolute -inset-1 bg-gradient-to-b from-cyan-600 to-purple-600 rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-1000 group-hover:duration-200"></div>
+            <Card className="relative bg-[#0f0f1a] border border-cyan-500/30 backdrop-blur-lg sticky top-24">
+                <CardContent className="p-6">
+                    <h4 className="mb-6 font-mono text-xl text-cyan-400 text-center border-b border-cyan-500/30 pb-3">
+                        DATABASE QUERY
+                    </h4>
+                    <ul className="space-y-3">
+                        <li>
                             <Button
-                                variant={selectedId === category.id ? 'default' : 'ghost'}
-                                className="w-full justify-start text-base"
-                                onClick={() => onSelectCategory(category.id)}
+                                variant={selectedId === null ? 'default' : 'ghost'}
+                                className={`w-full justify-start font-mono text-sm transition-all duration-300 ${selectedId === null
+                                        ? 'bg-gradient-to-r from-cyan-600 to-purple-600 text-white border-cyan-400/50'
+                                        : 'bg-transparent text-cyan-300 hover:text-white hover:bg-cyan-500/10 border border-transparent hover:border-cyan-500/30'
+                                    }`}
+                                onClick={() => onSelectCategory(null)}
                             >
-                                {category.ten_danh_muc}
+                                [ALL SYSTEMS]
                             </Button>
                         </li>
-                    ))}
-                </ul>
-            </CardContent>
-        </Card>
+                        {data?.data.map((category) => (
+                            <li key={category.id}>
+                                <Button
+                                    variant={selectedId === category.id ? 'default' : 'ghost'}
+                                    className={`w-full justify-start font-mono text-sm transition-all duration-300 ${selectedId === category.id
+                                            ? 'bg-gradient-to-r from-cyan-600 to-purple-600 text-white border-cyan-400/50'
+                                            : 'bg-transparent text-cyan-300 hover:text-white hover:bg-cyan-500/10 border border-transparent hover:border-cyan-500/30'
+                                        }`}
+                                    onClick={() => onSelectCategory(category.id)}
+                                >
+                                    {category.ten_danh_muc.toUpperCase()}
+                                </Button>
+                            </li>
+                        ))}
+                    </ul>
+                </CardContent>
+            </Card>
+        </div>
     );
 }
 
@@ -95,7 +107,6 @@ function ProductGrid({
 }) {
     const PRODUCTS_PER_PAGE = 8;
 
-    // 2. Tải danh sách sản phẩm (LỌC THEO SERVER)
     const { data, isLoading, error } = useQuery<ProductsApiResponse>({
         queryKey: ['products', selectedCategoryId, currentPage],
         queryFn: async () => {
@@ -109,18 +120,21 @@ function ProductGrid({
             });
             return res.data;
         },
-        // === SỬA LỖI TẠI ĐÂY (thay `keepPreviousData: true`) ===
-        placeholderData: keepPreviousData, // Giữ dữ liệu cũ khi đang tải trang mới
-        // ===============================================
+        placeholderData: keepPreviousData,
     });
 
     if (isLoading) return <GlobalSpinner />;
-    if (error) return <p className="text-destructive">Lỗi tải sản phẩm.</p>;
-    // Lỗi 2, 3, 4, 5 sẽ tự động được sửa vì `data` giờ đã có kiểu `ProductsApiResponse | undefined`
+    if (error) return (
+        <div className="text-center py-20">
+            <p className="text-red-400 font-mono">DATA STREAM INTERRUPTED</p>
+        </div>
+    );
+
     if (!data || data.data.length === 0) {
         return (
             <div className="text-center py-20">
-                <p className="text-muted-foreground">Đang cập nhật thêm món ăn...</p>
+                <p className="text-cyan-300 font-mono">NO DATA STREAMS DETECTED</p>
+                <p className="text-cyan-200/60 text-sm mt-2 font-mono">AWAITING SYSTEM UPDATE</p>
             </div>
         );
     }
@@ -129,86 +143,114 @@ function ProductGrid({
 
     return (
         <div>
+            {/* Status Bar */}
+            <div className="mb-6 p-4 bg-black/50 border border-cyan-500/30 rounded-lg">
+                <div className="flex justify-between items-center text-sm font-mono">
+                    <span className="text-cyan-400">ACTIVE STREAMS: {data.data.length}</span>
+                    <span className="text-purple-400">PAGE {currentPage}/{totalPages}</span>
+                </div>
+            </div>
+
             {/* Lưới sản phẩm */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8">
-                {data.data.map((product: SanPham) => ( // Thêm kiểu `SanPham` để sửa lỗi 5
-                    <Link
-                        href={`/product-detail/${product.id}`}
-                        key={product.id}
-                        className="group flex gap-4"
-                    >
-                        <Image
-                            src={(product.media_files as any)?.file_url || '/images/logo.png'}
-                            alt={product.ten_san_pham}
-                            width={100}
-                            height={100}
-                            className="w-24 h-24 object-cover rounded-lg flex-shrink-0"
-                        />
-                        <div className="flex-1 min-w-0">
-                            <div className="flex justify-between border-b border-dashed pb-2">
-                                <h5 className="font-semibold truncate group-hover:text-primary">
-                                    {product.ten_san_pham}
-                                </h5>
-                                <span className="text-primary font-semibold text-nowrap ml-2">
-                                    {formatCurrency(product.gia_khuyen_mai > 0 ? product.gia_khuyen_mai : product.gia_ban)}
-                                </span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {data.data.map((product: SanPham) => (
+                    <div key={product.id} className="group relative">
+                        <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-600 to-purple-600 rounded-xl blur opacity-30 group-hover:opacity-60 transition duration-1000 group-hover:duration-200"></div>
+                        <Link
+                            href={`/product-detail/${product.id}`}
+                            className="relative flex gap-4 bg-[#0f0f1a] p-4 rounded-xl border border-cyan-500/30 hover:border-cyan-400/50 transition-all duration-300"
+                        >
+                            <div className="relative">
+                                <div className="absolute inset-0 bg-cyan-500 rounded-lg blur-sm opacity-20 group-hover:opacity-40 transition duration-300"></div>
+                                <Image
+                                    src={(product.media_files as any)?.file_url || '/images/logo.png'}
+                                    alt={product.ten_san_pham}
+                                    width={100}
+                                    height={100}
+                                    className="w-24 h-24 object-cover rounded-lg flex-shrink-0 relative z-10 border border-cyan-500/30"
+                                />
                             </div>
-                            {product.gia_khuyen_mai > 0 && (
-                                <span className="text-xs text-muted-foreground line-through">
-                                    {formatCurrency(product.gia_ban)}
-                                </span>
-                            )}
-                            <p className="text-sm text-muted-foreground mt-1 truncate">
-                                {product.mo_ta}
-                            </p>
-                        </div>
-                    </Link>
+                            <div className="flex-1 min-w-0">
+                                <div className="flex justify-between border-b border-cyan-500/30 pb-2 mb-2">
+                                    <h5 className="font-semibold text-white group-hover:text-cyan-300 transition-colors duration-300 truncate font-mono text-sm">
+                                        {product.ten_san_pham.toUpperCase()}
+                                    </h5>
+                                    <span className="text-cyan-400 font-bold text-nowrap ml-2 font-mono text-sm">
+                                        {formatCurrency(product.gia_khuyen_mai > 0 ? product.gia_khuyen_mai : product.gia_ban)}
+                                    </span>
+                                </div>
+                                {product.gia_khuyen_mai > 0 && (
+                                    <span className="text-xs text-purple-300 line-through font-mono">
+                                        {formatCurrency(product.gia_ban)}
+                                    </span>
+                                )}
+                                <p className="text-cyan-200/70 text-xs mt-2 line-clamp-2 font-mono">
+                                    {product.mo_ta}
+                                </p>
+                            </div>
+                        </Link>
+                    </div>
                 ))}
             </div>
 
             {/* Phân trang */}
             {totalPages > 1 && (
-                <Pagination className="mt-8">
-                    <PaginationContent>
-                        <PaginationItem>
-                            <PaginationPrevious
-                                href="#"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    onPageChange(Math.max(1, currentPage - 1));
-                                }}
-                            />
-                        </PaginationItem>
-                        {[...Array(totalPages)].map((_, i) => (
-                            <PaginationItem key={i}>
-                                <PaginationLink
+                <div className="mt-8 p-4 bg-black/50 border border-cyan-500/30 rounded-lg">
+                    <Pagination>
+                        <PaginationContent className="flex justify-between w-full">
+                            <PaginationItem>
+                                <PaginationPrevious
                                     href="#"
-                                    isActive={i + 1 === currentPage}
+                                    className="font-mono text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500/10 transition-all duration-300"
                                     onClick={(e) => {
                                         e.preventDefault();
-                                        onPageChange(i + 1);
+                                        onPageChange(Math.max(1, currentPage - 1));
                                     }}
                                 >
-                                    {i + 1}
-                                </PaginationLink>
+                                    PREV
+                                </PaginationPrevious>
                             </PaginationItem>
-                        ))}
-                        <PaginationItem>
-                            <PaginationNext
-                                href="#"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    onPageChange(Math.min(totalPages, currentPage + 1));
-                                }}
-                            />
-                        </PaginationItem>
-                    </PaginationContent>
-                </Pagination>
+
+                            <div className="flex space-x-2">
+                                {[...Array(totalPages)].map((_, i) => (
+                                    <PaginationItem key={i}>
+                                        <PaginationLink
+                                            href="#"
+                                            isActive={i + 1 === currentPage}
+                                            className={`font-mono transition-all duration-300 ${i + 1 === currentPage
+                                                    ? 'bg-gradient-to-r from-cyan-600 to-purple-600 text-white border-cyan-400/50'
+                                                    : 'text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/10'
+                                                }`}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                onPageChange(i + 1);
+                                            }}
+                                        >
+                                            {i + 1}
+                                        </PaginationLink>
+                                    </PaginationItem>
+                                ))}
+                            </div>
+
+                            <PaginationItem>
+                                <PaginationNext
+                                    href="#"
+                                    className="font-mono text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500/10 transition-all duration-300"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        onPageChange(Math.min(totalPages, currentPage + 1));
+                                    }}
+                                >
+                                    NEXT
+                                </PaginationNext>
+                            </PaginationItem>
+                        </PaginationContent>
+                    </Pagination>
+                </div>
             )}
         </div>
     );
 }
-
 
 // ================== COMPONENT TRANG CHÍNH ==================
 export default function MenuPage() {
@@ -217,23 +259,41 @@ export default function MenuPage() {
 
     const handleSelectCategory = (id: number | null) => {
         setSelectedCategoryId(id);
-        setCurrentPage(1); // Reset về trang 1 khi đổi danh mục
+        setCurrentPage(1);
     };
 
     return (
-        <div>
+        <div className="bg-[#0a0a0f] min-h-screen">
             {/* Hero Header */}
-            <div className="w-full py-20 bg-dark flex items-center justify-center mb-12">
-                <div className="text-center text-white">
-                    <h1 className="text-4xl font-secondary">Thực Đơn</h1>
+            <div className="w-full py-24 bg-gradient-to-br from-[#0a0a0f] via-[#1a1a2f] to-[#0a0a0f] relative overflow-hidden">
+                {/* Animated Grid Background */}
+                <div className="absolute inset-0 opacity-20">
+                    <div className="absolute inset-0" style={{
+                        backgroundImage: `linear-gradient(#00ffff 1px, transparent 1px), linear-gradient(90deg, #00ffff 1px, transparent 1px)`,
+                        backgroundSize: '50px 50px',
+                    }}></div>
+                </div>
+
+                {/* Glowing Effects */}
+                <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-cyan-500 rounded-full blur-3xl opacity-20 animate-pulse"></div>
+                <div className="absolute bottom-1/4 right-1/4 w-40 h-40 bg-purple-600 rounded-full blur-3xl opacity-20 animate-pulse"></div>
+
+                <div className="text-center text-white relative z-10">
+                    <h1 className="text-5xl font-bold mb-4">
+                        <span className="bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
+                            DATA STREAM
+                        </span>
+                    </h1>
+                    <p className="text-cyan-300 text-lg mb-4 font-mono">NEURAL MENU INTERFACE</p>
                     <nav aria-label="breadcrumb" className="mt-2">
-                        <ol className="breadcrumb justify-content-center text-uppercase">
-                            <li className="breadcrumb-item">
-                                <Link href="/" className="text-gray-300 hover:text-white">Trang chủ</Link>
+                        <ol className="flex justify-center items-center space-x-2 text-sm uppercase font-mono">
+                            <li className="flex items-center">
+                                <Link href="/" className="text-cyan-300 hover:text-cyan-100 transition-colors duration-300">
+                                    HOME SYSTEM
+                                </Link>
+                                <span className="mx-2 text-cyan-500">/</span>
                             </li>
-                            <li className="breadcrumb-item text-white active" aria-current="page">
-                                Thực Đơn
-                            </li>
+                            <li className="text-cyan-100 font-semibold">DATA STREAM</li>
                         </ol>
                     </nav>
                 </div>
@@ -259,6 +319,14 @@ export default function MenuPage() {
                         />
                     </div>
                 </div>
+            </div>
+
+            {/* Cyberpunk Grid Overlay */}
+            <div className="fixed inset-0 pointer-events-none z-0 opacity-5">
+                <div className="absolute inset-0" style={{
+                    backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0, 255, 255, 0.15) 1px, transparent 0)`,
+                    backgroundSize: '50px 50px',
+                }}></div>
             </div>
         </div>
     );

@@ -1,3 +1,4 @@
+// packages/client/src/app/booking/page.tsx
 'use client';
 
 import React, { useEffect } from 'react';
@@ -24,14 +25,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 export default function BookingInfoPage() {
     const router = useRouter();
 
-    // Lấy thông tin từ các store (chọn state cụ thể để tránh re-render không cần thiết)
     const user = useAuthStore(state => state.user);
     const info = useBookingStore(state => state.info);
     const setBookingInfo = useBookingStore(state => state.setBookingInfo);
 
     const form = useForm<BookingInfoSchema>({
         resolver: zodResolver(bookingInfoSchema),
-        // Lấy giá trị mặc định từ store, hoặc từ user đã đăng nhập, hoặc rỗng
         defaultValues: {
             fullname: info.fullname || user?.ho_ten || "",
             email: info.email || user?.email || "",
@@ -42,13 +41,9 @@ export default function BookingInfoPage() {
         },
     });
 
-    // === SỬA LỖI VÒNG LẶP VÔ HẠN TẠI ĐÂY ===
-    const { reset } = form; // Lấy hàm `reset` từ useForm
+    const { reset } = form;
 
     useEffect(() => {
-        // Khi `user` hoặc `info` thay đổi (ví dụ: khi user đăng nhập hoặc quay lại)
-        // chúng ta "reset" form để điền giá trị mới nhất.
-        // `reset` sẽ cập nhật giá trị mà không kích hoạt lại `useEffect` một cách lặp lại.
         reset({
             fullname: info.fullname || user?.ho_ten || "",
             email: info.email || user?.email || "",
@@ -57,50 +52,50 @@ export default function BookingInfoPage() {
             party_size: info.party_size || 1,
             note: info.note || "",
         });
-    }, [user, info, reset]); // Phụ thuộc vào `user`, `info`, và `reset`
-    // ======================================
+    }, [user, info, reset]);
 
-    // Hàm xử lý khi nhấn "Tiếp theo"
     const onSubmit = (data: BookingInfoSchema) => {
-        setBookingInfo(data); // Lưu vào store
-        router.push('/booking/select'); // Chuyển sang Bước 2
+        setBookingInfo(data);
+        router.push('/booking/select');
     };
 
-    // Hàm lấy thời gian tối thiểu (2 giờ sau)
     const getMinTime = () => {
         const minTime = new Date(Date.now() + 2 * 60 * 60 * 1000);
         return minTime.toISOString().slice(0, 16);
     };
 
-    // Hàm lấy thời gian tối đa (7 ngày sau)
     const getMaxTime = () => {
         const maxTime = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
         return maxTime.toISOString().slice(0, 16);
     };
 
     return (
-        <div className="row g-0 justify-content-center">
-            <div className="col-md-8 col-lg-6">
-                <Card className="shadow-lg border-0">
-                    <CardHeader>
-                        <CardTitle className="text-center text-2xl font-secondary text-primary">
-                            Điền thông tin của bạn
+        <div className="flex justify-center">
+            <div className="w-full max-w-2xl">
+                <Card className="bg-[#0a0a0f] border border-cyan-500/30 shadow-2xl shadow-cyan-500/10 backdrop-blur-sm">
+                    <CardHeader className="border-b border-cyan-500/20">
+                        <CardTitle className="text-center text-2xl font-mono text-cyan-400 tracking-wider">
+                            USER_DATA_INPUT
                         </CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-6">
                         <Form {...form}>
-                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <FormField
                                         control={form.control}
                                         name="fullname"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Họ và Tên *</FormLabel>
+                                                <FormLabel className="font-mono text-cyan-300 text-sm tracking-wider">USER_NAME</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="Nguyễn Văn A" {...field} />
+                                                    <Input
+                                                        placeholder="ENTER_USER_IDENTIFIER"
+                                                        {...field}
+                                                        className="bg-[#0a0a0f] border-cyan-500/30 text-cyan-100 font-mono focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-500/20 transition-all"
+                                                    />
                                                 </FormControl>
-                                                <FormMessage />
+                                                <FormMessage className="font-mono text-xs" />
                                             </FormItem>
                                         )}
                                     />
@@ -109,11 +104,16 @@ export default function BookingInfoPage() {
                                         name="email"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Email *</FormLabel>
+                                                <FormLabel className="font-mono text-cyan-300 text-sm tracking-wider">EMAIL_PROTOCOL</FormLabel>
                                                 <FormControl>
-                                                    <Input type="email" placeholder="email@example.com" {...field} />
+                                                    <Input
+                                                        type="email"
+                                                        placeholder="USER@DOMAIN.COM"
+                                                        {...field}
+                                                        className="bg-[#0a0a0f] border-cyan-500/30 text-cyan-100 font-mono focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-500/20 transition-all"
+                                                    />
                                                 </FormControl>
-                                                <FormMessage />
+                                                <FormMessage className="font-mono text-xs" />
                                             </FormItem>
                                         )}
                                     />
@@ -124,11 +124,16 @@ export default function BookingInfoPage() {
                                     name="tel"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Số điện thoại *</FormLabel>
+                                            <FormLabel className="font-mono text-cyan-300 text-sm tracking-wider">CONTACT_CHANNEL</FormLabel>
                                             <FormControl>
-                                                <Input type="tel" placeholder="090xxxxxxx" {...field} />
+                                                <Input
+                                                    type="tel"
+                                                    placeholder="COMMUNICATION_FREQUENCY"
+                                                    {...field}
+                                                    className="bg-[#0a0a0f] border-cyan-500/30 text-cyan-100 font-mono focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-500/20 transition-all"
+                                                />
                                             </FormControl>
-                                            <FormMessage />
+                                            <FormMessage className="font-mono text-xs" />
                                         </FormItem>
                                     )}
                                 />
@@ -139,16 +144,17 @@ export default function BookingInfoPage() {
                                         name="reservation_date"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Thời gian dùng bữa *</FormLabel>
+                                                <FormLabel className="font-mono text-cyan-300 text-sm tracking-wider">TIME_SLOT</FormLabel>
                                                 <FormControl>
                                                     <Input
                                                         type="datetime-local"
                                                         {...field}
                                                         min={getMinTime()}
                                                         max={getMaxTime()}
+                                                        className="bg-[#0a0a0f] border-cyan-500/30 text-cyan-100 font-mono focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-500/20 transition-all"
                                                     />
                                                 </FormControl>
-                                                <FormMessage />
+                                                <FormMessage className="font-mono text-xs" />
                                             </FormItem>
                                         )}
                                     />
@@ -157,11 +163,17 @@ export default function BookingInfoPage() {
                                         name="party_size"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Số người ăn *</FormLabel>
+                                                <FormLabel className="font-mono text-cyan-300 text-sm tracking-wider">PARTY_SIZE</FormLabel>
                                                 <FormControl>
-                                                    <Input type="number" min={1} max={50} {...field} />
+                                                    <Input
+                                                        type="number"
+                                                        min={1}
+                                                        max={50}
+                                                        {...field}
+                                                        className="bg-[#0a0a0f] border-cyan-500/30 text-cyan-100 font-mono focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-500/20 transition-all"
+                                                    />
                                                 </FormControl>
-                                                <FormMessage />
+                                                <FormMessage className="font-mono text-xs" />
                                             </FormItem>
                                         )}
                                     />
@@ -172,18 +184,26 @@ export default function BookingInfoPage() {
                                     name="note"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Ghi chú (Tùy chọn)</FormLabel>
+                                            <FormLabel className="font-mono text-cyan-300 text-sm tracking-wider">ADDITIONAL_INSTRUCTIONS</FormLabel>
                                             <FormControl>
-                                                <Textarea placeholder="Ví dụ: Cho tôi bàn gần cửa sổ..." {...field} />
+                                                <Textarea
+                                                    placeholder="SPECIAL_REQUIREMENTS_OR_NOTES..."
+                                                    {...field}
+                                                    className="bg-[#0a0a0f] border-cyan-500/30 text-cyan-100 font-mono focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-500/20 min-h-[100px] transition-all"
+                                                />
                                             </FormControl>
-                                            <FormMessage />
+                                            <FormMessage className="font-mono text-xs" />
                                         </FormItem>
                                     )}
                                 />
 
-                                <div className="flex justify-end pt-4">
-                                    <Button type="submit" size="lg" className="w-full md:w-auto" style={{ color: 'black' }}>
-                                        Tiếp theo
+                                <div className="flex justify-end pt-6">
+                                    <Button
+                                        type="submit"
+                                        size="lg"
+                                        className="w-full md:w-auto bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white border-0 shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 font-mono tracking-wider transition-all duration-300"
+                                    >
+                                        PROCEED_TO_SELECTION →
                                     </Button>
                                 </div>
                             </form>

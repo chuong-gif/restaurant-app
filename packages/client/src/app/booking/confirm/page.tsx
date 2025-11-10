@@ -16,7 +16,6 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import Image from 'next/image';
 
-// Hàm format tiền
 const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('vi-VN', {
         style: 'currency',
@@ -24,7 +23,6 @@ const formatCurrency = (value: number) => {
     }).format(value);
 };
 
-// Hàm format ngày (lấy từ file cũ [cite: 18-20])
 const formatDateTime = (isoString: string) => {
     const date = new Date(isoString);
     return date.toLocaleString('vi-VN', {
@@ -40,129 +38,131 @@ export default function BookingConfirmPage() {
     const router = useRouter();
     const { toast } = useToast();
 
-    // Lấy dữ liệu từ các store
     const { info, selectedTables, cart, getTotalPrice, clearBooking } = useBookingStore();
     const { user } = useAuthStore();
 
-    // Bảo vệ route: Nếu chưa điền thông tin ở Bước 1, đá về
     useEffect(() => {
         if (!info.reservation_date || !info.party_size) {
             router.replace('/booking');
         }
     }, [info, router]);
 
-    // Mutation để gọi API tạo đơn
     const mutation = useMutation({
         mutationFn: (bookingData: any) => {
-            return api.post('/public/reservations', bookingData); // [cite: 5-6]
+            return api.post('/public/reservations', bookingData);
         },
         onSuccess: (response) => {
             toast({
-                title: "Đặt bàn thành công!",
-                description: "Đơn của bạn đang chờ xác nhận. Vui lòng kiểm tra email.",
+                title: "BOOKING_CONFIRMED",
+                description: "RESERVATION_QUEUED_FOR_PROCESSING",
             });
-            clearBooking(); // Xóa giỏ hàng
+            clearBooking();
 
-            // Chuyển hướng
             if (user) {
-                router.push('/my-bookings'); // Về trang đơn của tôi nếu đã đăng nhập
+                router.push('/my-bookings');
             } else {
-                router.push('/'); // Về trang chủ nếu là khách
+                router.push('/');
             }
         },
         onError: (error: any) => {
             toast({
                 variant: "destructive",
-                title: "Đặt bàn thất bại",
-                description: error.response?.data?.message || "Đã có lỗi xảy ra. Vui lòng thử lại.",
+                title: "BOOKING_FAILED",
+                description: error.response?.data?.message || "SYSTEM_ERROR_OCCURRED",
             });
         },
     });
 
-    // Hàm xử lý khi nhấn nút "Xác nhận Đặt bàn"
     const handleConfirmBooking = () => {
-        // Chuẩn bị dữ liệu gửi lên server
         const bookingData = {
             ...info,
-            user_id: user?.id || null, // Lấy ID nếu đã đăng nhập [cite: 99-100]
+            user_id: user?.id || null,
             ban_an_ids: selectedTables.map(table => table.id),
-            products: cart.map(item => ({ // Gửi danh sách món ăn
+            products: cart.map(item => ({
                 product_id: item.product_id,
                 quantity: item.quantity,
             })),
-            // Server sẽ tự tính tổng tiền và tiền cọc
         };
         mutation.mutate(bookingData);
     };
 
-    // Tính toán tiền
     const total = getTotalPrice();
-    const deposit = total * 0.3; // 30% tiền cọc (theo logic server [cite: 120-121])
+    const deposit = total * 0.3;
 
-    // Nếu state chưa sẵn sàng (bị F5), quay về
     if (!info.reservation_date) {
         return <GlobalSpinner />;
     }
 
     return (
         <div className="container mx-auto max-w-4xl px-4">
-            <Card className="shadow-lg border-0">
-                <CardHeader>
-                    <CardTitle className="text-2xl font-secondary text-primary text-center">
-                        Xác nhận thông tin đặt bàn
+            <Card className="bg-[#0a0a0f] border border-cyan-500/30 shadow-2xl shadow-cyan-500/10 backdrop-blur-sm">
+                <CardHeader className="border-b border-cyan-500/20">
+                    <CardTitle className="text-2xl font-mono text-cyan-400 text-center tracking-wider">
+                        CONFIRMATION_PROTOCOL
                     </CardTitle>
-                    <CardDescription className="text-center">
-                        Vui lòng kiểm tra kỹ thông tin trước khi xác nhận.
+                    <CardDescription className="text-center font-mono text-cyan-400/70">
+                        VERIFY_ALL_DATA_BEFORE_CONFIRMATION
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* Cột 1: Thông tin đơn */}
-                    <div className="space-y-4">
+                // packages/client/src/app/booking/confirm/page.tsx (sửa phần CardContent)
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6">
+                    {/* Column 1: Booking Information */}
+                    <div className="space-y-6">
                         <div>
-                            <h3 className="font-semibold text-lg mb-2">Thông tin khách hàng</h3>
-                            <p><strong>Họ tên:</strong> {info.fullname}</p>
-                            <p><strong>Email:</strong> {info.email}</p>
-                            <p><strong>SĐT:</strong> {info.tel}</p>
+                            <h3 className="font-mono text-cyan-300 text-lg mb-4 tracking-wider">USER_DATA</h3>
+                            <div className="space-y-3 font-mono text-sm">
+                                {/* SỬA: Đổi màu chữ thành sáng hơn */}
+                                <p className="text-cyan-100"><span className="text-cyan-400/70">NAME:</span> {info.fullname}</p>
+                                <p className="text-cyan-100"><span className="text-cyan-400/70">EMAIL:</span> {info.email}</p>
+                                <p className="text-cyan-100"><span className="text-cyan-400/70">CONTACT:</span> {info.tel}</p>
+                            </div>
                         </div>
-                        <Separator />
+                        <Separator className="bg-cyan-500/30" />
                         <div>
-                            <h3 className="font-semibold text-lg mb-2">Chi tiết đặt bàn</h3>
-                            <p><strong>Ngày giờ:</strong> {formatDateTime(info.reservation_date!)}</p>
-                            <p><strong>Số người:</strong> {info.party_size} người</p>
-                            <p>
-                                <strong>Bàn ăn:</strong>{' '}
-                                {selectedTables.length > 0
-                                    ? selectedTables.map(t => `Bàn ${t.so_ban}`).join(', ')
-                                    : "Tự động xếp bàn"}
-                            </p>
-                            <p><strong>Ghi chú:</strong> {info.note || 'Không có'}</p>
+                            <h3 className="font-mono text-cyan-300 text-lg mb-4 tracking-wider">RESERVATION_DETAILS</h3>
+                            <div className="space-y-3 font-mono text-sm">
+                                {/* SỬA: Đổi màu chữ thành sáng hơn */}
+                                <p className="text-cyan-100"><span className="text-cyan-400/70">TIMESTAMP:</span> {formatDateTime(info.reservation_date!)}</p>
+                                <p className="text-cyan-100"><span className="text-cyan-400/70">PARTY_SIZE:</span> {info.party_size}</p>
+                                <p className="text-cyan-100">
+                                    <span className="text-cyan-400/70">TABLES:</span>{' '}
+                                    {selectedTables.length > 0
+                                        ? selectedTables.map(t => `TABLE_${t.so_ban}`).join(', ')
+                                        : "AUTO_ASSIGN"}
+                                </p>
+                                <p className="text-cyan-100"><span className="text-cyan-400/70">NOTES:</span> {info.note || 'NONE'}</p>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Cột 2: Món ăn đã chọn */}
-                    <div className="space-y-4">
-                        <h3 className="font-semibold text-lg mb-2">Món ăn đã chọn ({cart.length})</h3>
-                        <ScrollArea className="h-[250px] w-full pr-4 border rounded-md p-3">
+                    {/* Column 2: Selected Items */}
+                    <div className="space-y-6">
+                        <h3 className="font-mono text-cyan-300 text-lg tracking-wider">SELECTED_ITEMS ({cart.length})</h3>
+                        <ScrollArea className="h-[250px] w-full pr-4 border border-cyan-500/30 rounded-md p-4">
                             {cart.length === 0 ? (
-                                <p className="text-muted-foreground text-center py-10">Chưa chọn món nào</p>
+                                <p className="font-mono text-cyan-400/70 text-center py-10">NO_ITEMS_SELECTED</p>
                             ) : (
                                 <div className="space-y-4">
                                     {cart.map((item) => (
-                                        <div key={item.product_id} className="flex items-center gap-3">
-                                            <Image
-                                                src={item.hinh_anh}
-                                                alt={item.ten_san_pham}
-                                                width={40}
-                                                height={40}
-                                                className="rounded-md object-cover h-10 w-10"
-                                            />
+                                        <div key={item.product_id} className="flex items-center gap-3 group">
+                                            <div className="relative">
+                                                <div className="absolute inset-0 bg-cyan-500/20 rounded-md opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                                <Image
+                                                    src={item.hinh_anh}
+                                                    alt={item.ten_san_pham}
+                                                    width={40}
+                                                    height={40}
+                                                    className="rounded-md object-cover h-10 w-10 relative z-10"
+                                                />
+                                            </div>
                                             <div className="flex-1 space-y-1">
-                                                <h4 className="text-sm font-medium leading-none truncate">
+                                                {/* SỬA: Đổi màu chữ thành sáng hơn */}
+                                                <h4 className="font-mono text-cyan-100 text-sm leading-none truncate">
                                                     {item.ten_san_pham} (x{item.quantity})
                                                 </h4>
-                                                <p className="text-xs text-muted-foreground">{formatCurrency(item.gia)}</p>
+                                                <p className="font-mono text-cyan-400/70 text-xs">{formatCurrency(item.gia)}</p>
                                             </div>
-                                            <span className="text-sm font-medium">
+                                            <span className="font-mono text-cyan-400 text-sm font-medium">
                                                 {formatCurrency(item.gia * item.quantity)}
                                             </span>
                                         </div>
@@ -170,36 +170,39 @@ export default function BookingConfirmPage() {
                                 </div>
                             )}
                         </ScrollArea>
-                        <Separator />
-                        <div className="space-y-2">
-                            <div className="flex justify-between font-medium">
-                                <span>Tạm tính (Món ăn)</span>
-                                <span>{formatCurrency(total)}</span>
+                        <Separator className="bg-cyan-500/30" />
+                        <div className="space-y-3">
+                            <div className="flex justify-between font-mono font-medium">
+                                {/* SỬA: Đổi màu chữ thành sáng hơn */}
+                                <span className="text-cyan-100">SUBTOTAL</span>
+                                <span className="text-cyan-400">{formatCurrency(total)}</span>
                             </div>
-                            <div className="flex justify-between font-semibold text-lg text-primary">
-                                <span>Tiền cọc (30%)</span>
-                                <span>{formatCurrency(deposit)}</span>
+                            <div className="flex justify-between font-mono font-semibold text-lg">
+                                {/* SỬA: Đổi màu chữ thành sáng hơn */}
+                                <span className="text-cyan-100">DEPOSIT (30%)</span>
+                                <span className="text-cyan-400 bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+                                    {formatCurrency(deposit)}
+                                </span>
                             </div>
                         </div>
                     </div>
                 </CardContent>
-                <CardFooter className="flex-col gap-4">
+                <CardFooter className="flex-col gap-4 p-6">
                     <Button
                         size="lg"
-                        className="w-full"
-                        style={{ color: 'black' }}
+                        className="w-full bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white border-0 shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 font-mono tracking-wider transition-all duration-300 disabled:opacity-50"
                         onClick={handleConfirmBooking}
                         disabled={mutation.isPending}
                     >
-                        {mutation.isPending ? "Đang xử lý..." : `Xác nhận & Đặt cọc ${formatCurrency(deposit)}`}
+                        {mutation.isPending ? "PROCESSING..." : `CONFIRM_&_PAY_DEPOSIT ${formatCurrency(deposit)}`}
                     </Button>
                     <Button
                         variant="outline"
-                        className="w-full"
+                        className="w-full border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/10 hover:text-cyan-400 font-mono tracking-wider transition-all"
                         onClick={() => router.push('/booking/select')}
                         disabled={mutation.isPending}
                     >
-                        Quay lại (Chọn món)
+                        RETURN_TO_SELECTION
                     </Button>
                 </CardFooter>
             </Card>

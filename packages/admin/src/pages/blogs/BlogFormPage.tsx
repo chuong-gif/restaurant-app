@@ -196,81 +196,145 @@ const BlogFormPage: React.FC = () => {
     const isLoading = isCreating || isUpdating || isLoadingPost || isFetchingPost || isLoadingCategories;
 
     return (
-        <Card>
-            {/* ... (Button quay lại, Tiêu đề) ... */}
-            <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/blogs')} className="mb-4">
-                Quay lại danh sách
-            </Button>
-            <h2 className="text-2xl font-bold mb-4">
-                {isEditMode ? 'Chỉnh sửa Bài viết' : 'Tạo mới Bài viết'}
-            </h2>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-6">
+            <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl p-6 transition-all duration-300 animate-fade-in">
+                <Button
+                    icon={<ArrowLeftOutlined />}
+                    onClick={() => navigate('/blogs')}
+                    className="mb-6 rounded-xl border-white/30 bg-white/20 hover:bg-white/30 transition-all"
+                >
+                    Quay lại danh sách
+                </Button>
 
-            <Spin spinning={isLoading}>
-                <Form layout="vertical" onFinish={handleSubmit(onSubmit)}>
-                    <Row gutter={24}>
-                        {/* Cột trái */}
-                        <Col xs={24} md={16}>
-                            <Form.Item label="Tiêu đề" required validateStatus={errors.tieu_de ? 'error' : ''} help={errors.tieu_de?.message}>
-                                <Controller name="tieu_de" control={control} rules={{ required: 'Tiêu đề là bắt buộc' }}
-                                    render={({ field }) => <Input {...field} placeholder="Nhập tiêu đề bài viết" />} />
-                            </Form.Item>
-                            <Form.Item label="Nội dung" required validateStatus={errors.noi_dung ? 'error' : ''} help={errors.noi_dung?.message}>
-                                <Controller
-                                    name="noi_dung"
-                                    control={control}
-                                    rules={{
-                                        required: 'Nội dung là bắt buộc',
-                                        validate: (value) => (value && value !== '<p><br></p>') || 'Nội dung là bắt buộc'
-                                    }}
-                                    render={({ field }) => (
-                                        <ReactQuill
-                                            ref={quillRef}
-                                            theme="snow"
-                                            value={field.value}
-                                            onChange={field.onChange}
-                                            modules={quillModules} // <-- Truyền modules CÓ handlers
-                                            style={{ height: '300px', marginBottom: '40px' }}
-                                        />
-                                    )}
-                                />
-                            </Form.Item>
-                        </Col>
+                <h2 className="text-2xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                    {isEditMode ? 'Chỉnh sửa Bài viết' : 'Tạo mới Bài viết'}
+                </h2>
 
-                        {/* Cột phải (giữ nguyên) */}
-                        <Col xs={24} md={8}>
-                            <Form.Item label="Tác giả">
-                                <Input prefix={<UserOutlined />} value={postData?.nguoi_dung?.ho_ten || loggedInUser?.ho_ten || 'N/A'} disabled />
-                            </Form.Item>
-                            <Form.Item label="Danh mục">
-                                <Controller name="danh_muc_blog_id" control={control}
-                                    render={({ field }) => (
-                                        <Select {...field} placeholder="Chọn danh mục" loading={isLoadingCategories} allowClear>
-                                            {categories?.map(cat => (
-                                                <Option key={cat.id} value={cat.id}>{cat.ten_danh_muc}</Option>
-                                            ))}
-                                        </Select>
-                                    )} />
-                            </Form.Item>
-                            <Form.Item label="Ảnh bìa">
-                                <Controller name="anh_bia_id" control={control}
-                                    render={({ field }) => (
-                                        <ImageUpload
-                                            value={field.value}
-                                            onChange={field.onChange}
-                                            initialImageUrl={postData?.media_files?.file_url}
+                <Spin spinning={isLoading}>
+                    <Form layout="vertical" onFinish={handleSubmit(onSubmit)}>
+                        <Row gutter={24}>
+                            {/* Cột trái */}
+                            <Col xs={24} md={16}>
+                                <div className="bg-white/20 backdrop-blur-lg border border-white/30 rounded-2xl p-6 mb-6">
+                                    <Form.Item
+                                        label={<span className="text-gray-700 font-medium">Tiêu đề</span>}
+                                        required
+                                        validateStatus={errors.tieu_de ? 'error' : ''}
+                                        help={errors.tieu_de?.message}
+                                    >
+                                        <Controller
+                                            name="tieu_de"
+                                            control={control}
+                                            rules={{ required: 'Tiêu đề là bắt buộc' }}
+                                            render={({ field }) => (
+                                                <Input
+                                                    {...field}
+                                                    placeholder="Nhập tiêu đề bài viết"
+                                                    className="rounded-xl border-white/30 bg-white/50"
+                                                />
+                                            )}
                                         />
-                                    )} />
-                            </Form.Item>
-                        </Col>
-                    </Row>
-                    <Form.Item className="mt-8">
-                        <Button type="primary" htmlType="submit" loading={isCreating || isUpdating}>
-                            {isEditMode ? 'Cập nhật' : 'Đăng bài viết'}
-                        </Button>
-                    </Form.Item>
-                </Form>
-            </Spin>
-        </Card>
+                                    </Form.Item>
+                                    <Form.Item
+                                        label={<span className="text-gray-700 font-medium">Nội dung</span>}
+                                        required
+                                        validateStatus={errors.noi_dung ? 'error' : ''}
+                                        help={errors.noi_dung?.message}
+                                    >
+                                        <Controller
+                                            name="noi_dung"
+                                            control={control}
+                                            rules={{
+                                                required: 'Nội dung là bắt buộc',
+                                                validate: (value) => (value && value !== '<p><br></p>') || 'Nội dung là bắt buộc'
+                                            }}
+                                            render={({ field }) => (
+                                                <div className="bg-white rounded-xl overflow-hidden">
+                                                    <ReactQuill
+                                                        ref={quillRef}
+                                                        theme="snow"
+                                                        value={field.value}
+                                                        onChange={field.onChange}
+                                                        modules={quillModules}
+                                                        style={{ height: '300px', marginBottom: '40px' }}
+                                                    />
+                                                </div>
+                                            )}
+                                        />
+                                    </Form.Item>
+                                </div>
+                            </Col>
+
+                            {/* Cột phải */}
+                            <Col xs={24} md={8}>
+                                <div className="bg-white/20 backdrop-blur-lg border border-white/30 rounded-2xl p-6 space-y-6">
+                                    <Form.Item label={<span className="text-gray-700 font-medium">Tác giả</span>}>
+                                        <Input
+                                            prefix={<UserOutlined />}
+                                            value={postData?.nguoi_dung?.ho_ten || loggedInUser?.ho_ten || 'N/A'}
+                                            disabled
+                                            className="rounded-xl border-white/30 bg-white/50"
+                                        />
+                                    </Form.Item>
+                                    <Form.Item label={<span className="text-gray-700 font-medium">Danh mục</span>}>
+                                        <Controller
+                                            name="danh_muc_blog_id"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <Select
+                                                    {...field}
+                                                    placeholder="Chọn danh mục"
+                                                    loading={isLoadingCategories}
+                                                    allowClear
+                                                    className="rounded-xl border-white/30"
+                                                >
+                                                    {categories?.map(cat => (
+                                                        <Option key={cat.id} value={cat.id}>{cat.ten_danh_muc}</Option>
+                                                    ))}
+                                                </Select>
+                                            )}
+                                        />
+                                    </Form.Item>
+                                    <Form.Item label={<span className="text-gray-700 font-medium">Ảnh bìa</span>}>
+                                        <Controller
+                                            name="anh_bia_id"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <ImageUpload
+                                                    value={field.value}
+                                                    onChange={field.onChange}
+                                                    initialImageUrl={postData?.media_files?.file_url}
+                                                />
+                                            )}
+                                        />
+                                    </Form.Item>
+                                </div>
+                            </Col>
+                        </Row>
+                        <Form.Item className="mt-8">
+                            <Button
+                                type="primary"
+                                htmlType="submit"
+                                loading={isCreating || isUpdating}
+                                className="h-12 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-500 border-0 shadow-lg hover:shadow-xl transition-all text-lg font-medium px-8"
+                            >
+                                {isEditMode ? 'Cập nhật' : 'Đăng bài viết'}
+                            </Button>
+                        </Form.Item>
+                    </Form>
+                </Spin>
+            </div>
+
+            <style>{`
+                @keyframes fade-in {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .animate-fade-in { animation: fade-in 0.6s ease-out; }
+                .ql-toolbar { border-top-left-radius: 12px; border-top-right-radius: 12px; }
+                .ql-container { border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
+            `}</style>
+        </div>
     );
 };
 

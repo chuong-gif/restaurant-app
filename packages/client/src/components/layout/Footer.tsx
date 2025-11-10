@@ -1,67 +1,128 @@
+// Footer.tsx
 import React from 'react';
 import Link from 'next/link';
 
 export default function Footer() {
     return (
-        <div className="bg-dark text-light pt-12 mt-12">
-            <div className="container mx-auto max-w-7xl px-4 py-12">
-                <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
-                    {/* Col 1: Về nhà hàng */}
-                    <div>
-                        <h4 className="font-secondary text-xl text-primary mb-4">Về nhà hàng</h4>
-                        <div className="flex flex-col gap-2">
-                            <Link href="/about" className="hover:text-primary transition-colors">Về chúng tôi</Link>
-                            <Link href="/contact" className="hover:text-primary transition-colors">Liên hệ</Link>
-                            <Link href="/service" className="hover:text-primary transition-colors">Dịch vụ</Link>
-                            <Link href="/policy" className="hover:text-primary transition-colors">Chính sách</Link>
+        <div className="bg-[#0a0a0f] text-cyan-100 pt-16 mt-16 relative overflow-hidden">
+            {/* Background Effects */}
+            <div className="absolute inset-0 bg-gradient-to-t from-cyan-500/5 to-purple-500/5"></div>
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
+            <div className="absolute top-0 right-0 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl"></div>
+
+            {/* Grid Pattern */}
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,255,0.03)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black,transparent)]"></div>
+
+            <div className="container mx-auto max-w-7xl px-4 py-12 relative z-10">
+                <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
+                    {/* Col 1: About Restaurant */}
+                    <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-cyan-500/20 shadow-lg shadow-cyan-500/10">
+                        <h4 className="font-mono text-cyan-400 text-lg tracking-wider mb-6">SYSTEM_CORE</h4>
+                        <div className="flex flex-col gap-4">
+                            <Link href="/about" className="hover:text-cyan-400 transition-all duration-300 font-mono text-sm tracking-wider group">
+                                <span className="group-hover:tracking-widest transition-all">ABOUT_NODE</span>
+                            </Link>
+                            <Link href="/contact" className="hover:text-cyan-400 transition-all duration-300 font-mono text-sm tracking-wider group">
+                                <span className="group-hover:tracking-widest transition-all">CONTACT_MATRIX</span>
+                            </Link>
+                            <Link href="/service" className="hover:text-cyan-400 transition-all duration-300 font-mono text-sm tracking-wider group">
+                                <span className="group-hover:tracking-widest transition-all">SERVICE_GRID</span>
+                            </Link>
+                            <Link href="/policy" className="hover:text-cyan-400 transition-all duration-300 font-mono text-sm tracking-wider group">
+                                <span className="group-hover:tracking-widest transition-all">SECURITY_PROTOCOL</span>
+                            </Link>
                         </div>
                     </div>
-                    {/* Col 2: Thông tin */}
-                    <div>
-                        <h4 className="font-secondary text-xl text-primary mb-4">Thông tin</h4>
-                        <div className="flex flex-col gap-2">
-                            <p className="flex items-center gap-3"><i className="fa fa-map-marker-alt"></i>Phường Quả Đất, Hệ Mặt Trời</p>
-                            <p className="flex items-center gap-3"><i className="fa fa-phone-alt"></i>0123.546.789</p>
-                            <p className="flex items-center gap-3"><i className="fa fa-envelope"></i>contact.envisi@gmail.com</p>
-                            <div className="d-flex pt-2 gap-2">
-                                <a className="h-9 w-9 flex items-center justify-center border border-light rounded-full hover:bg-primary hover:border-primary transition-colors" href="#">
-                                    <i className="fab fa-facebook-f"></i>
+
+                    {/* Col 2: Information */}
+                    <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-cyan-500/20 shadow-lg shadow-cyan-500/10">
+                        <h4 className="font-mono text-cyan-400 text-lg tracking-wider mb-6">NETWORK_DATA</h4>
+                        <div className="flex flex-col gap-4">
+                            <div className="flex items-center gap-3 group">
+                                <div className="w-8 h-8 bg-cyan-500/20 rounded-full flex items-center justify-center group-hover:bg-cyan-500/40 transition-all">
+                                    <i className="fa fa-map-marker-alt text-cyan-400 text-sm"></i>
+                                </div>
+                                <span className="font-mono text-sm">PHUONG_QUA_DAT, HE_MAT_TROI</span>
+                            </div>
+                            <div className="flex items-center gap-3 group">
+                                <div className="w-8 h-8 bg-cyan-500/20 rounded-full flex items-center justify-center group-hover:bg-cyan-500/40 transition-all">
+                                    <i className="fa fa-phone-alt text-cyan-400 text-sm"></i>
+                                </div>
+                                <span className="font-mono text-sm">0123.546.789</span>
+                            </div>
+                            <div className="flex items-center gap-3 group">
+                                <div className="w-8 h-8 bg-cyan-500/20 rounded-full flex items-center justify-center group-hover:bg-cyan-500/40 transition-all">
+                                    <i className="fa fa-envelope text-cyan-400 text-sm"></i>
+                                </div>
+                                <span className="font-mono text-sm">CONTACT.ENVISI@GMAIL.COM</span>
+                            </div>
+                            <div className="flex pt-4 gap-3">
+                                <a className="h-10 w-10 flex items-center justify-center border border-cyan-500/50 rounded-full hover:bg-cyan-500 hover:border-cyan-400 hover:scale-110 transition-all duration-300 shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40" href="#">
+                                    <i className="fab fa-facebook-f text-cyan-400 hover:text-[#0a0a0f] transition-colors"></i>
                                 </a>
-                                <a className="h-9 w-9 flex items-center justify-center border border-light rounded-full hover:bg-primary hover:border-primary transition-colors" href="#">
-                                    <i className="fab fa-youtube"></i>
+                                <a className="h-10 w-10 flex items-center justify-center border border-purple-500/50 rounded-full hover:bg-purple-500 hover:border-purple-400 hover:scale-110 transition-all duration-300 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40" href="#">
+                                    <i className="fab fa-youtube text-purple-400 hover:text-[#0a0a0f] transition-colors"></i>
                                 </a>
                             </div>
                         </div>
                     </div>
-                    {/* Col 3: Giờ mở cửa */}
-                    <div>
-                        <h4 className="font-secondary text-xl text-primary mb-4">Giờ mở cửa</h4>
-                        <h5 className="font-semibold">Thứ Hai - Thứ Sáu</h5>
-                        <p>8:00 - 22:00</p>
-                        <h5 className="font-semibold">Thứ Bảy - Chủ Nhật</h5>
-                        <p>10:00 - 23:00</p>
+
+                    {/* Col 3: Opening Hours */}
+                    <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-cyan-500/20 shadow-lg shadow-cyan-500/10">
+                        <h4 className="font-mono text-cyan-400 text-lg tracking-wider mb-6">OPERATION_TIME</h4>
+                        <div className="space-y-4">
+                            <div className="border-l-4 border-cyan-400 pl-4 hover:border-cyan-300 transition-colors">
+                                <h5 className="font-mono text-cyan-300 text-sm tracking-wider">MONDAY - FRIDAY</h5>
+                                <p className="font-mono text-cyan-100/80 text-sm">8:00 - 22:00</p>
+                            </div>
+                            <div className="border-l-4 border-purple-400 pl-4 hover:border-purple-300 transition-colors">
+                                <h5 className="font-mono text-purple-300 text-sm tracking-wider">SATURDAY - SUNDAY</h5>
+                                <p className="font-mono text-cyan-100/80 text-sm">10:00 - 23:00</p>
+                            </div>
+                        </div>
                     </div>
-                    {/* Col 4: Liên hệ nhanh */}
-                    <div>
-                        <h4 className="font-secondary text-xl text-primary mb-4">Liên hệ nhanh</h4>
-                        <p>Nếu có thắc mắc hoặc muốn nhận thêm ưu đãi hãy liên hệ ngay.</p>
-                        {/* Input (sẽ dùng shadcn/ui sau) */}
+
+                    {/* Col 4: Quick Contact */}
+                    <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-cyan-500/20 shadow-lg shadow-cyan-500/10">
+                        <h4 className="font-mono text-cyan-400 text-lg tracking-wider mb-6">QUERY_INTERFACE</h4>
+                        <p className="text-cyan-100/70 mb-6 font-mono text-sm leading-relaxed">
+                            FOR SYSTEM_INQUIRIES OR PROMOTION_ALGORITHMS, INITIATE_CONTACT_PROTOCOL
+                        </p>
+                        {/* Input placeholder with futuristic style */}
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 rounded-lg blur-sm opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+                            <input
+                                type="text"
+                                placeholder="INPUT_QUERY_HERE..."
+                                className="relative w-full bg-[#0a0a0f] border border-cyan-500/30 rounded-lg px-4 py-3 font-mono text-sm focus:outline-none focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-500/20 transition-all"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
+
             {/* Copyright */}
-            <div className="container mx-auto max-w-7xl px-4 py-6 border-t border-gray-700">
-                <div className="flex flex-col md:flex-row justify-between text-center md:text-start">
-                    <div className="mb-3 md:mb-0">
-                        &copy; <a className="border-b" href="#">EnViSi Restaurant</a>, All Right Reserved.
+            <div className="container mx-auto max-w-7xl px-4 py-8 border-t border-cyan-500/30 relative z-10">
+                <div className="flex flex-col md:flex-row justify-between items-center text-center md:text-start gap-4">
+                    <div className="mb-3 md:mb-0 font-mono text-cyan-400/70 text-sm">
+                        &copy; <a className="border-b border-cyan-400/50 hover:border-cyan-400 transition-colors" href="#">ENVISI_RESTAURANT</a>, SYSTEM_RIGHTS_RESERVED.
                     </div>
-                    <div className="flex justify-center gap-4">
-                        <Link href="/">Trang chủ</Link>
-                        <Link href="/menu">Thực đơn</Link>
-                        <Link href="/blog">Tin tức</Link>
+                    <div className="flex justify-center gap-6 font-mono text-sm">
+                        <Link href="/" className="text-cyan-400/70 hover:text-cyan-400 transition-colors hover:tracking-widest">
+                            HOME_NODE
+                        </Link>
+                        <Link href="/menu" className="text-cyan-400/70 hover:text-cyan-400 transition-colors hover:tracking-widest">
+                            MENU_MATRIX
+                        </Link>
+                        <Link href="/blog" className="text-cyan-400/70 hover:text-cyan-400 transition-colors hover:tracking-widest">
+                            DATA_FEED
+                        </Link>
                     </div>
                 </div>
             </div>
+
+            {/* Bottom scanning line */}
+            <div className="h-0.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-lg shadow-cyan-400/30 animate-pulse"></div>
         </div>
     );
 }

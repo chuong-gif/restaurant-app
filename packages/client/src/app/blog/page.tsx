@@ -3,16 +3,13 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image'; // <-- SỬA LỖI 4, 5: THÊM IMPORT NÀY
-import { useQuery, keepPreviousData } from '@tanstack/react-query'; // <-- SỬA LỖI 6: THÊM `keepPreviousData`
+import Image from 'next/image';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import api from '@/lib/api';
 
-// Types
 import { Blog, BlogsApiResponse } from '@/types/blog';
-// SỬA LỖI 1, 2: Sửa tên import
 import { BlogCategory, BlogCategoriesApiResponse } from '@/types/blog';
 
-// Components
 import GlobalSpinner from '@/components/common/GlobalSpinner';
 import BlogCard from '@/components/blog/BlogCard';
 import { Button } from '@/components/ui/button';
@@ -36,18 +33,16 @@ function BlogSidebar({
 }) {
     const [searchTerm, setSearchTerm] = useState('');
 
-    // 1. Tải danh sách danh mục
     const { data: categories, isLoading: isLoadingCategories } = useQuery<BlogCategoriesApiResponse>({
         queryKey: ['blogCategories'],
         queryFn: async () => api.get('/public/blog-categories').then(res => res.data),
-        staleTime: 1000 * 60 * 60, // 1 giờ
+        staleTime: 1000 * 60 * 60,
     });
 
-    // 2. Tải bài viết mới nhất (cho sidebar)
     const { data: recentPosts, isLoading: isLoadingRecent } = useQuery<BlogsApiResponse>({
         queryKey: ['recentBlogs'],
         queryFn: async () => api.get('/public/blogs', { params: { page: 1, limit: 5 } }).then(res => res.data),
-        staleTime: 1000 * 60 * 5, // 5 phút
+        staleTime: 1000 * 60 * 5,
     });
 
     const handleSearchSubmit = (e: React.FormEvent) => {
@@ -56,65 +51,78 @@ function BlogSidebar({
     };
 
     return (
-        <div className="sticky top-24 space-y-6">
+        <div className="sticky top-24 space-y-8">
             {/* Tìm kiếm */}
-            <form onSubmit={handleSearchSubmit}>
-                <Input
-                    placeholder="Tìm kiếm bài viết..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
-            </form>
+            <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-cyan-500/20 shadow-lg shadow-cyan-500/10">
+                <h3 className="font-mono text-cyan-400 text-lg tracking-wider mb-4">SEARCH_MATRIX</h3>
+                <form onSubmit={handleSearchSubmit}>
+                    <Input
+                        placeholder="INPUT_SEARCH_QUERY..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="bg-[#0a0a0f] border-cyan-500/30 text-cyan-100 font-mono focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-500/20"
+                    />
+                </form>
+            </div>
 
             {/* Danh mục */}
-            <div>
-                <h3 className="text-xl font-semibold mb-3">Danh mục</h3>
-                <div className="flex flex-col space-y-2">
-                    <Button variant="ghost" className="justify-start" onClick={() => onSelectCategory(null)}>
-                        Tất cả
+            <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-cyan-500/20 shadow-lg shadow-cyan-500/10">
+                <h3 className="font-mono text-cyan-400 text-lg tracking-wider mb-4">DATA_CATEGORIES</h3>
+                <div className="flex flex-col space-y-3">
+                    <Button
+                        variant="ghost"
+                        className="justify-start font-mono text-cyan-300/70 hover:text-cyan-400 hover:bg-cyan-500/10 transition-all"
+                        onClick={() => onSelectCategory(null)}
+                    >
+                        ALL_STREAMS
                     </Button>
-                    {isLoadingCategories ? <p>Đang tải...</p> :
-                        // SỬA LỖI 3: Thêm kiểu `BlogCategory`
+                    {isLoadingCategories ? (
+                        <p className="font-mono text-cyan-400/50">LOADING_CATEGORIES...</p>
+                    ) : (
                         categories?.data.map((cat: BlogCategory) => (
                             <Button
                                 key={cat.id}
                                 variant="ghost"
-                                className="justify-start"
+                                className="justify-start font-mono text-cyan-300/70 hover:text-cyan-400 hover:bg-cyan-500/10 transition-all"
                                 onClick={() => onSelectCategory(cat.id)}
                             >
-                                {cat.ten_danh_muc}
+                                {cat.ten_danh_muc.toUpperCase()}
                             </Button>
                         ))
-                    }
+                    )}
                 </div>
             </div>
 
             {/* Bài viết mới */}
-            <div>
-                <h3 className="text-xl font-semibold mb-3">Bài viết mới</h3>
+            <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-cyan-500/20 shadow-lg shadow-cyan-500/10">
+                <h3 className="font-mono text-cyan-400 text-lg tracking-wider mb-4">RECENT_UPDATES</h3>
                 <div className="space-y-4">
-                    {isLoadingRecent ? <p>Đang tải...</p> :
-                        recentPosts?.data.map((post: Blog) => ( // Thêm kiểu `Blog`
-                            <Link href={`/blog/${post.slug}`} key={post.id} className="flex items-center gap-3 group">
-                                <Image
-                                    src={(post.media_files as any)?.file_url || '/images/placeholder-post.jpg'}
-                                    alt={post.tieu_de}
-                                    width={64}
-                                    height={64}
-                                    className="w-16 h-16 object-cover rounded-md"
-                                />
-                                <h4 className="text-sm font-medium group-hover:text-primary leading-snug">
+                    {isLoadingRecent ? (
+                        <p className="font-mono text-cyan-400/50">LOADING_STREAMS...</p>
+                    ) : (
+                        recentPosts?.data.map((post: Blog) => (
+                            <Link href={`/blog/${post.slug}`} key={post.id} className="flex items-center gap-4 group p-3 rounded-lg hover:bg-cyan-500/10 transition-all">
+                                <div className="relative">
+                                    <div className="absolute inset-0 bg-cyan-500/20 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    <Image
+                                        src={(post.media_files as any)?.file_url || '/images/placeholder-post.jpg'}
+                                        alt={post.tieu_de}
+                                        width={64}
+                                        height={64}
+                                        className="w-16 h-16 object-cover rounded-md border border-cyan-500/30 relative z-10 group-hover:border-cyan-400/50 transition-all"
+                                    />
+                                </div>
+                                <h4 className="text-sm font-medium text-cyan-200/80 group-hover:text-cyan-400 leading-snug font-mono transition-colors flex-1">
                                     {post.tieu_de.length > 50 ? `${post.tieu_de.slice(0, 50)}...` : post.tieu_de}
                                 </h4>
                             </Link>
                         ))
-                    }
+                    )}
                 </div>
             </div>
         </div>
     );
 }
-
 
 // ================== COMPONENT TRANG CHÍNH ==================
 export default function BlogPage() {
@@ -128,46 +136,65 @@ export default function BlogPage() {
             const res = await api.get('/public/blogs', {
                 params: {
                     page: currentPage,
-                    limit: 9, // Hiển thị 9 bài mỗi trang
+                    limit: 9,
                     danh_muc_id: selectedCategoryId || undefined,
                     search: searchTerm || undefined,
                 },
             });
             return res.data;
         },
-        placeholderData: keepPreviousData, // SỬA LỖI 6
+        placeholderData: keepPreviousData,
     });
 
     const handleSelectCategory = (id: number | null) => {
         setSelectedCategoryId(id);
-        setCurrentPage(1); // Reset trang
+        setCurrentPage(1);
     };
 
     const handleSearch = (term: string) => {
         setSearchTerm(term);
-        setCurrentPage(1); // Reset trang
+        setCurrentPage(1);
     };
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
-        window.scrollTo(0, 0); // Cuộn lên đầu trang
+        window.scrollTo(0, 0);
     };
 
     const totalPages = data?.totalPages || 1;
 
     return (
-        <div className="w-full">
+        <div className="w-full bg-[#0a0a0f] min-h-screen">
             {/* Hero Header */}
-            <div className="w-full py-20 bg-dark flex items-center justify-center mb-12">
-                <div className="text-center text-white">
-                    <h1 className="text-4xl font-secondary">Tin tức & Mẹo hay</h1>
-                    <nav aria-label="breadcrumb" className="mt-2">
-                        <ol className="breadcrumb justify-content-center text-uppercase">
-                            <li className="breadcrumb-item"><Link href="/" className="text-gray-300 hover:text-white">Trang chủ</Link></li>
-                            <li className="breadcrumb-item text-white active" aria-current="page">Blog</li>
+            <div className="w-full py-28 bg-[#0a0a0f] relative overflow-hidden flex items-center justify-center mb-16">
+                {/* Background Effects */}
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-purple-500/10 to-cyan-500/10"></div>
+                <div className="absolute top-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
+
+                {/* Grid Pattern */}
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,255,0.03)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black,transparent)]"></div>
+
+                <div className="text-center text-white relative z-10">
+                    <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent mb-6">
+                        DATA_FEED
+                    </h1>
+                    <nav aria-label="breadcrumb" className="mt-4">
+                        <ol className="flex justify-center items-center space-x-4 font-mono text-sm tracking-wider">
+                            <li className="flex items-center">
+                                <Link href="/" className="text-cyan-300/70 hover:text-cyan-400 transition-colors hover:tracking-widest">
+                                    HOME_NODE
+                                </Link>
+                                <span className="mx-2 text-cyan-400/50">/</span>
+                            </li>
+                            <li className="text-cyan-400 font-semibold" aria-current="page">
+                                DATA_STREAMS
+                            </li>
                         </ol>
                     </nav>
                 </div>
+
+                {/* Scanning line */}
+                <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-lg shadow-cyan-400/50 animate-pulse"></div>
             </div>
 
             {/* Main Content */}
@@ -176,7 +203,11 @@ export default function BlogPage() {
                     {/* Cột chính: Danh sách bài viết */}
                     <div className="lg:col-span-3">
                         {isLoading && <GlobalSpinner />}
-                        {error && <p className="text-destructive">Đã xảy ra lỗi khi tải bài viết.</p>}
+                        {error && (
+                            <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-6 text-center">
+                                <p className="font-mono text-red-400 tracking-wider">DATA_STREAM_ERROR</p>
+                            </div>
+                        )}
 
                         {data && (
                             <>
@@ -187,18 +218,22 @@ export default function BlogPage() {
                                 </div>
 
                                 {data.data.length === 0 && (
-                                    <div className="text-center py-20">
-                                        <p className="text-muted-foreground">Không tìm thấy bài viết nào.</p>
+                                    <div className="text-center py-20 bg-white/5 backdrop-blur-lg rounded-2xl border border-cyan-500/20">
+                                        <div className="w-16 h-16 mx-auto mb-4 bg-cyan-500/20 rounded-full flex items-center justify-center">
+                                            <div className="w-8 h-8 bg-cyan-400 rounded-full animate-pulse"></div>
+                                        </div>
+                                        <p className="font-mono text-cyan-300/70 tracking-wider">NO_DATA_STREAMS_FOUND</p>
                                     </div>
                                 )}
 
                                 {/* Phân trang */}
                                 {totalPages > 1 && (
                                     <Pagination className="mt-8">
-                                        <PaginationContent>
+                                        <PaginationContent className="flex items-center space-x-2">
                                             <PaginationItem>
                                                 <PaginationPrevious
                                                     href="#"
+                                                    className="font-mono border border-cyan-500/30 bg-[#0a0a0f] text-cyan-300 hover:bg-cyan-500/10 hover:text-cyan-400 transition-all"
                                                     onClick={(e) => { e.preventDefault(); handlePageChange(Math.max(1, currentPage - 1)); }}
                                                 />
                                             </PaginationItem>
@@ -207,6 +242,10 @@ export default function BlogPage() {
                                                     <PaginationLink
                                                         href="#"
                                                         isActive={i + 1 === currentPage}
+                                                        className={`font-mono border ${i + 1 === currentPage
+                                                                ? 'border-cyan-400 bg-cyan-500/20 text-cyan-400'
+                                                                : 'border-cyan-500/30 bg-[#0a0a0f] text-cyan-300 hover:bg-cyan-500/10'
+                                                            } transition-all`}
                                                         onClick={(e) => { e.preventDefault(); handlePageChange(i + 1); }}
                                                     >
                                                         {i + 1}
@@ -216,6 +255,7 @@ export default function BlogPage() {
                                             <PaginationItem>
                                                 <PaginationNext
                                                     href="#"
+                                                    className="font-mono border border-cyan-500/30 bg-[#0a0a0f] text-cyan-300 hover:bg-cyan-500/10 hover:text-cyan-400 transition-all"
                                                     onClick={(e) => { e.preventDefault(); handlePageChange(Math.min(totalPages, currentPage + 1)); }}
                                                 />
                                             </PaginationItem>

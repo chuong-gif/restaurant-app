@@ -27,46 +27,79 @@ export default function TeamSection() {
     };
 
     return (
-        <div className="bg-gray-50/50">
-            <div className="container mx-auto max-w-7xl px-4 py-20">
-                <div className="text-center mb-12">
-                    <h5 className="font-secondary text-2xl text-primary">Thành Viên</h5>
-                    <h2 className="text-4xl font-semibold">Đội Ngũ Đầu Bếp</h2>
+        <div className="bg-[#0a0a0f] relative overflow-hidden">
+            {/* Background Effects */}
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-purple-500/10 to-cyan-500/10"></div>
+            <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
+
+            <div className="container mx-auto max-w-7xl px-4 py-20 relative z-10">
+                <div className="text-center mb-16">
+                    <h5 className="font-mono text-cyan-400 text-lg tracking-wider mb-4">NEURAL_CHEF_NETWORK</h5>
+                    <h2 className="text-5xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent mb-4">
+                        Cyber Culinary Team
+                    </h2>
+                    <p className="text-cyan-200/60 max-w-2xl mx-auto">
+                        Our team of neural-enhanced chefs operates in perfect synchronization to deliver optimal flavor matrices
+                    </p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {teamMembers.map((member, i) => (
                         <motion.div
                             key={member.name}
                             custom={i}
                             initial="hidden"
                             whileInView="visible"
-                            viewport={{ once: true, amount: 0.5 }}
+                            viewport={{ once: true, amount: 0.3 }}
                             variants={cardVariants}
+                            className="relative"
                         >
-                            <Card className="text-center overflow-hidden shadow-lg hover:shadow-xl transition-shadow group">
-                                <div className="overflow-hidden">
-                                    {/* === ẢNH GIỮ CHỖ ===
-                      Vui lòng thêm 4 ảnh của bạn vào:
-                      /public/images/team/team-1.jpg (đến 4)
-                  ====================== */}
+                            {/* Holographic effect */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10 blur-md group-hover:blur-xl"></div>
+
+                            <Card className="text-center overflow-hidden bg-[#0a0a0f] border border-cyan-500/30 shadow-lg shadow-cyan-500/10 hover:shadow-cyan-500/30 hover:border-cyan-400/50 transition-all duration-500 group backdrop-blur-sm h-full">
+                                <div className="overflow-hidden relative">
+                                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-transparent to-transparent z-10"></div>
                                     <Image
                                         src={member.img}
                                         alt={member.name}
                                         width={300}
                                         height={300}
-                                        className="w-full h-64 object-cover group-hover:scale-105 transition-transform"
+                                        className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-700"
                                     />
+
+                                    {/* Scanning line effect */}
+                                    <div className="absolute top-0 left-0 w-full h-1 bg-cyan-400/50 shadow-lg shadow-cyan-400/50 animate-scan rounded-full z-20"></div>
                                 </div>
-                                <CardContent className="p-4">
-                                    <h5 className="text-lg font-semibold">{member.name}</h5>
-                                    <small className="text-muted-foreground">{member.role}</small>
-                                    {/* Social media icons (nếu cần) */}
+                                <CardContent className="p-6 relative z-20 bg-[#0a0a0f]/90">
+                                    <h5 className="text-lg font-bold text-cyan-100 group-hover:text-white transition-colors mb-2">
+                                        {member.name}
+                                    </h5>
+                                    <small className="text-cyan-400/80 font-mono tracking-wider group-hover:text-cyan-300 transition-colors">
+                                        {member.role}
+                                    </small>
+
+                                    {/* Status indicator */}
+                                    <div className="flex justify-center items-center mt-4 space-x-2">
+                                        <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+                                        <span className="text-xs text-cyan-400/70 font-mono">ONLINE</span>
+                                    </div>
                                 </CardContent>
                             </Card>
                         </motion.div>
                     ))}
                 </div>
             </div>
+
+            <style jsx>{`
+                @keyframes scan {
+                    0% { transform: translateY(-100%); }
+                    100% { transform: translateY(400%); }
+                }
+                .animate-scan {
+                    animation: scan 3s ease-in-out infinite;
+                }
+            `}</style>
         </div>
     );
 }

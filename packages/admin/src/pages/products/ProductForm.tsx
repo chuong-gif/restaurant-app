@@ -1,4 +1,4 @@
-// packages/admin/src/pages/products/ProductForm.tsx
+// ProductForm.tsx
 import React, { useEffect } from 'react';
 import {
     useNavigate,
@@ -15,12 +15,11 @@ import {
     Select,
     InputNumber,
     Spin,
-    message, // Sửa: Dùng message từ App.useApp()
     Row,
     Col,
     Switch,
     Card,
-    App // <-- THÊM DÒNG NÀY
+    App
 } from 'antd';
 import {
     ArrowLeftOutlined
@@ -30,11 +29,9 @@ import {
     useCreateProductMutation,
     useUpdateProductMutation
 } from '../../features/products/productApi';
-// === SỬA DÒNG DƯỚI ===
 import {
-    useGetPublicProductCategoriesQuery // <-- Sửa tên hook
+    useGetPublicProductCategoriesQuery
 } from '../../features/products/categoryApi';
-// ====================
 import ImageUpload from '../../components/common/ImageUpload';
 import {
     Product
@@ -62,7 +59,7 @@ const ProductForm = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
     const isEditMode = !!id;
-    const { message } = App.useApp(); // <-- THÊM DÒNG NÀY: Lấy context
+    const { message } = App.useApp();
 
     // Lấy dữ liệu cho form
     const {
@@ -73,12 +70,10 @@ const ProductForm = () => {
         skip: !isEditMode,
     });
 
-    // === SỬA DÒNG DƯỚI ===
     const {
-        data: categories, // Hook này giờ trả về mảng, code sẽ chạy đúng
+        data: categories,
         isLoading: isLoadingCategories
-    } = useGetPublicProductCategoriesQuery(); // <-- Sửa tên hook
-    // ====================
+    } = useGetPublicProductCategoriesQuery();
 
     // Mutations
     const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
@@ -137,149 +132,211 @@ const ProductForm = () => {
     const gia_ban = watch('gia_ban');
 
     if (isLoadingProduct || isFetchingProduct) {
-        return <Spin size="large" className="flex justify-center items-center h-full" />;
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex justify-center items-center">
+                <Spin size="large" />
+            </div>
+        );
     }
 
     return (
-        <Card>
-            <Button
-                icon={<ArrowLeftOutlined />}
-                onClick={() => navigate('/products')}
-                className="mb-4"
-            >
-                Quay lại danh sách
-            </Button>
-            <h2 className="text-2xl font-bold mb-4">
-                {isEditMode ? 'Cập nhật sản phẩm' : 'Thêm mới sản phẩm'}
-            </h2>
-            <Form layout="vertical" onFinish={handleSubmit(onSubmit)}>
-                <Row gutter={24}>
-                    {/* Cột trái: Thông tin chính */}
-                    <Col xs={24} md={16}>
-                        {isEditMode && (
-                            <Form.Item label="Mã sản phẩm">
-                                <Controller
-                                    name="ma_san_pham"
-                                    control={control}
-                                    render={({ field }) => <Input {...field} disabled />}
-                                />
-                            </Form.Item>
-                        )}
-                        <Form.Item label="Tên sản phẩm" required validateStatus={errors.ten_san_pham ? 'error' : ''} help={errors.ten_san_pham?.message}>
-                            <Controller
-                                name="ten_san_pham"
-                                control={control}
-                                rules={{ required: 'Tên sản phẩm là bắt buộc' }}
-                                render={({ field }) => <Input {...field} placeholder="Nhập tên sản phẩm" />}
-                            />
-                        </Form.Item>
-                        <Form.Item label="Mô tả">
-                            <Controller
-                                name="mo_ta"
-                                control={control}
-                                render={({ field }) => <TextArea {...field} rows={4} placeholder="Mô tả chi tiết sản phẩm" />}
-                            />
-                        </Form.Item>
-                        <Row gutter={16}>
-                            <Col xs={24} sm={12}>
-                                <Form.Item label="Giá bán (VND)" required validateStatus={errors.gia_ban ? 'error' : ''} help={errors.gia_ban?.message}>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-6">
+            <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl p-6 transition-all duration-300 animate-fade-in">
+                <Button
+                    icon={<ArrowLeftOutlined />}
+                    onClick={() => navigate('/products')}
+                    className="mb-6 rounded-xl border-white/30 bg-white/20 hover:bg-white/30 transition-all"
+                >
+                    Quay lại danh sách
+                </Button>
+
+                <h2 className="text-2xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                    {isEditMode ? 'Cập nhật sản phẩm' : 'Thêm mới sản phẩm'}
+                </h2>
+
+                <Form layout="vertical" onFinish={handleSubmit(onSubmit)}>
+                    <Row gutter={24}>
+                        {/* Cột trái: Thông tin chính */}
+                        <Col xs={24} md={16}>
+                            <div className="bg-white/20 backdrop-blur-lg border border-white/30 rounded-2xl p-6 mb-6">
+                                {isEditMode && (
+                                    <Form.Item label={<span className="text-gray-700 font-medium">Mã sản phẩm</span>}>
+                                        <Controller
+                                            name="ma_san_pham"
+                                            control={control}
+                                            render={({ field }) => <Input {...field} disabled className="rounded-xl border-white/30 bg-white/50" />}
+                                        />
+                                    </Form.Item>
+                                )}
+                                <Form.Item
+                                    label={<span className="text-gray-700 font-medium">Tên sản phẩm</span>}
+                                    required
+                                    validateStatus={errors.ten_san_pham ? 'error' : ''}
+                                    help={errors.ten_san_pham?.message}
+                                >
                                     <Controller
-                                        name="gia_ban"
+                                        name="ten_san_pham"
                                         control={control}
-                                        rules={{
-                                            required: 'Giá bán là bắt buộc',
-                                            min: { value: 0, message: 'Giá không thể âm' },
-                                        }}
+                                        rules={{ required: 'Tên sản phẩm là bắt buộc' }}
+                                        render={({ field }) => <Input {...field} placeholder="Nhập tên sản phẩm" className="rounded-xl border-white/30 bg-white/50" />}
+                                    />
+                                </Form.Item>
+                                <Form.Item label={<span className="text-gray-700 font-medium">Mô tả</span>}>
+                                    <Controller
+                                        name="mo_ta"
+                                        control={control}
+                                        render={({ field }) => <TextArea {...field} rows={4} placeholder="Mô tả chi tiết sản phẩm" className="rounded-xl border-white/30 bg-white/50" />}
+                                    />
+                                </Form.Item>
+                                <Row gutter={16}>
+                                    <Col xs={24} sm={12}>
+                                        <Form.Item
+                                            label={<span className="text-gray-700 font-medium">Giá bán (VND)</span>}
+                                            required
+                                            validateStatus={errors.gia_ban ? 'error' : ''}
+                                            help={errors.gia_ban?.message}
+                                        >
+                                            <Controller
+                                                name="gia_ban"
+                                                control={control}
+                                                rules={{
+                                                    required: 'Giá bán là bắt buộc',
+                                                    min: { value: 0, message: 'Giá không thể âm' },
+                                                }}
+                                                render={({ field }) => (
+                                                    <InputNumber
+                                                        {...field}
+                                                        min={0}
+                                                        className="w-full rounded-xl border-white/30 bg-white/50"
+                                                        formatter={(value) =>
+                                                            `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                                                        }
+                                                        parser={(value) => Number(value?.replace(/,/g, '') || 0)}
+                                                    />
+                                                )}
+                                            />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col xs={24} sm={12}>
+                                        <Form.Item
+                                            label={<span className="text-gray-700 font-medium">Giá khuyến mãi (VND)</span>}
+                                            validateStatus={errors.gia_khuyen_mai ? 'error' : ''}
+                                            help={errors.gia_khuyen_mai?.message}
+                                        >
+                                            <Controller
+                                                name="gia_khuyen_mai"
+                                                control={control}
+                                                rules={{
+                                                    min: { value: 0, message: 'Giá không thể âm' },
+                                                    validate: (value) =>
+                                                        value ? value <= gia_ban : true || 'Giá KM phải nhỏ hơn giá gốc',
+                                                }}
+                                                render={({ field }) => (
+                                                    <InputNumber
+                                                        {...field}
+                                                        min={0}
+                                                        className="w-full rounded-xl border-white/30 bg-white/50"
+                                                        formatter={(value) =>
+                                                            `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                                                        }
+                                                        parser={(value) => Number(value?.replace(/,/g, '') || 0)}
+                                                    />
+                                                )}
+                                            />
+                                        </Form.Item>
+                                    </Col>
+                                </Row>
+                            </div>
+                        </Col>
+
+                        {/* Cột phải: Thuộc tính */}
+                        <Col xs={24} md={8}>
+                            <div className="bg-white/20 backdrop-blur-lg border border-white/30 rounded-2xl p-6 space-y-6">
+                                <Form.Item label={<span className="text-gray-700 font-medium">Trạng thái</span>}>
+                                    <Controller
+                                        name="trang_thai"
+                                        control={control}
                                         render={({ field }) => (
-                                            <InputNumber
+                                            <div className="flex items-center space-x-3">
+                                                <Switch
+                                                    {...field}
+                                                    checked={field.value}
+                                                    checkedChildren="Hoạt động"
+                                                    unCheckedChildren="Ngưng"
+                                                    className="bg-blue-500"
+                                                />
+                                                <span className="text-gray-600">{field.value ? 'Hoạt động' : 'Ngưng'}</span>
+                                            </div>
+                                        )}
+                                    />
+                                </Form.Item>
+                                <Form.Item
+                                    label={<span className="text-gray-700 font-medium">Danh mục sản phẩm</span>}
+                                    required
+                                    validateStatus={errors.danh_muc_id ? 'error' : ''}
+                                    help={errors.danh_muc_id?.message}
+                                >
+                                    <Controller
+                                        name="danh_muc_id"
+                                        control={control}
+                                        rules={{ required: 'Vui lòng chọn danh mục' }}
+                                        render={({ field }) => (
+                                            <Select
                                                 {...field}
-                                                min={0}
-                                                style={{ width: '100%' }}
-                                                formatter={(value) =>
-                                                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-                                                }
-                                                parser={(value) => Number(value?.replace(/,/g, '') || 0)} // ✅ Sửa dòng này
+                                                placeholder="Chọn danh mục"
+                                                loading={isLoadingCategories}
+                                                className="rounded-xl border-white/30"
+                                            >
+                                                {categories?.map(cat => (
+                                                    <Option key={cat.id} value={cat.id}>{cat.ten_danh_muc}</Option>
+                                                ))}
+                                            </Select>
+                                        )}
+                                    />
+                                </Form.Item>
+                                <Form.Item
+                                    label={<span className="text-gray-700 font-medium">Ảnh sản phẩm</span>}
+                                    required
+                                    validateStatus={errors.hinh_anh_id ? 'error' : ''}
+                                    help={errors.hinh_anh_id?.message}
+                                >
+                                    <Controller
+                                        name="hinh_anh_id"
+                                        control={control}
+                                        rules={{ required: 'Ảnh sản phẩm là bắt buộc' }}
+                                        render={({ field }) => (
+                                            <ImageUpload
+                                                value={field.value}
+                                                onChange={field.onChange}
+                                                initialImageUrl={productData?.media_files?.file_url}
                                             />
                                         )}
                                     />
-
                                 </Form.Item>
-                            </Col>
-                            <Col xs={24} sm={12}>
-                                <Form.Item label="Giá khuyến mãi (VND)" validateStatus={errors.gia_khuyen_mai ? 'error' : ''} help={errors.gia_khuyen_mai?.message}>
-                                    <Controller
-                                        name="gia_khuyen_mai"
-                                        control={control}
-                                        rules={{
-                                            min: { value: 0, message: 'Giá không thể âm' },
-                                            validate: (value) =>
-                                                value ? value <= gia_ban : true || 'Giá KM phải nhỏ hơn giá gốc', // ✅ sửa dấu so sánh
-                                        }}
-                                        render={({ field }) => (
-                                            <InputNumber
-                                                {...field}
-                                                min={0}
-                                                style={{ width: '100%' }}
-                                                formatter={(value) =>
-                                                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-                                                }
-                                                parser={(value) => Number(value?.replace(/,/g, '') || 0)} // ✅ Sửa dòng này
-                                            />
-                                        )}
-                                    />
+                            </div>
+                        </Col>
+                    </Row>
+                    <Form.Item className="mt-8">
+                        <Button
+                            type="primary"
+                            htmlType="submit"
+                            loading={isCreating || isUpdating}
+                            className="h-12 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-500 border-0 shadow-lg hover:shadow-xl transition-all text-lg font-medium px-8"
+                        >
+                            {isEditMode ? 'Cập nhật' : 'Lưu sản phẩm'}
+                        </Button>
+                    </Form.Item>
+                </Form>
+            </div>
 
-                                </Form.Item>
-                            </Col>
-                        </Row>
-                    </Col>
-
-                    {/* Cột phải: Thuộc tính */}
-                    <Col xs={24} md={8}>
-                        <Form.Item label="Trạng thái">
-                            <Controller
-                                name="trang_thai"
-                                control={control}
-                                render={({ field }) => <Switch {...field} checked={field.value} checkedChildren="Hoạt động" unCheckedChildren="Ngưng" />}
-                            />
-                        </Form.Item>
-                        <Form.Item label="Danh mục sản phẩm" required validateStatus={errors.danh_muc_id ? 'error' : ''} help={errors.danh_muc_id?.message}>
-                            <Controller
-                                name="danh_muc_id"
-                                control={control}
-                                rules={{ required: 'Vui lòng chọn danh mục' }}
-                                render={({ field }) => (
-                                    <Select {...field} placeholder="Chọn danh mục" loading={isLoadingCategories}>
-                                        {/* Code này giờ sẽ chạy đúng */}
-                                        {categories?.map(cat => (
-                                            <Option key={cat.id} value={cat.id}>{cat.ten_danh_muc}</Option>
-                                        ))}
-                                    </Select>
-                                )}
-                            />
-                        </Form.Item>
-                        <Form.Item label="Ảnh sản phẩm" required validateStatus={errors.hinh_anh_id ? 'error' : ''} help={errors.hinh_anh_id?.message}>
-                            <Controller
-                                name="hinh_anh_id"
-                                control={control}
-                                rules={{ required: 'Ảnh sản phẩm là bắt buộc' }}
-                                render={({ field }) => (
-                                    <ImageUpload
-                                        value={field.value}
-                                        onChange={field.onChange}
-                                        initialImageUrl={productData?.media_files?.file_url}
-                                    />
-                                )}
-                            />
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <Form.Item>
-                    <Button type="primary" htmlType="submit" loading={isCreating || isUpdating}>
-                        {isEditMode ? 'Cập nhật' : 'Lưu sản phẩm'}
-                    </Button>
-                </Form.Item>
-            </Form>
-        </Card>
+            <style>{`
+                @keyframes fade-in {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .animate-fade-in { animation: fade-in 0.6s ease-out; }
+            `}</style>
+        </div>
     );
 };
 

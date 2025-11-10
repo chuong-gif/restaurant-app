@@ -9,7 +9,7 @@ import { z } from 'zod';
 
 import api from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
-import { User } from '@/types/user'; // Import kiểu User
+import { User } from '@/types/user';
 import { useAuthStore } from '@/store/useAuthStore';
 
 import ProtectedRoute from '@/components/common/ProtectedRoute';
@@ -30,7 +30,7 @@ const profileSchema = z.object({
     email: z.string().email("Email không hợp lệ"),
     dien_thoai: z.string().min(1, "Số điện thoại là bắt buộc"),
     dia_chi: z.string().min(1, "Địa chỉ là bắt buộc"),
-    anh_dai_dien_id: z.number().optional(), // Lưu ID của ảnh
+    anh_dai_dien_id: z.number().optional(),
 });
 type ProfileSchema = z.infer<typeof profileSchema>;
 
@@ -59,18 +59,15 @@ function UpdateInfoForm({ user, onProfileUpdate }: { user: User, onProfileUpdate
         },
     });
 
-    // Mutation cập nhật profile
     const mutation = useMutation({
         mutationFn: (data: ProfileSchema) => api.patch('/user/me', data),
         onSuccess: (response) => {
-            toast({ title: "Thành công", description: "Cập nhật thông tin thành công." });
-            // Cập nhật lại cache của 'me'
+            toast({ title: "SYSTEM_UPDATE_SUCCESS", description: "User profile synchronized successfully." });
             queryClient.invalidateQueries({ queryKey: ['me'] });
-            // Cập nhật state toàn cục
             onProfileUpdate(response.data.data);
         },
         onError: (error: any) => {
-            toast({ variant: "destructive", title: "Lỗi", description: error.response?.data?.message || "Cập nhật thất bại." });
+            toast({ variant: "destructive", title: "SYSTEM_ERROR", description: error.response?.data?.message || "Update failed." });
         },
     });
 
@@ -82,19 +79,22 @@ function UpdateInfoForm({ user, onProfileUpdate }: { user: User, onProfileUpdate
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <div className="flex justify-center">
-                    <Avatar className="h-24 w-24 border-2 border-primary">
-                        <AvatarImage src={(user.media_files as any)?.file_url || ''} />
-                        <AvatarFallback className="text-3xl bg-muted">
-                            {user.ho_ten.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                    </Avatar>
+                    <div className="relative group">
+                        <div className="absolute inset-0 bg-cyan-400 rounded-full blur group-hover:blur-md transition-all duration-300"></div>
+                        <Avatar className="h-24 w-24 border-2 border-cyan-400/50 relative z-10 group-hover:border-cyan-400 group-hover:scale-105 transition-all">
+                            <AvatarImage src={(user.media_files as any)?.file_url || ''} />
+                            <AvatarFallback className="text-3xl bg-gradient-to-br from-cyan-400 to-purple-400 text-[#0a0a0f] font-bold">
+                                {user.ho_ten.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                        </Avatar>
+                    </div>
                 </div>
                 <FormField
                     control={form.control}
                     name="anh_dai_dien_id"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Thay đổi ảnh đại diện</FormLabel>
+                            <FormLabel className="font-mono text-cyan-300">AVATAR_UPLOAD</FormLabel>
                             <FormControl>
                                 <ImageUpload onImageUpload={(id) => field.onChange(id)} />
                             </FormControl>
@@ -108,8 +108,13 @@ function UpdateInfoForm({ user, onProfileUpdate }: { user: User, onProfileUpdate
                         name="ho_ten"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Họ và Tên</FormLabel>
-                                <FormControl><Input {...field} /></FormControl>
+                                <FormLabel className="font-mono text-cyan-300">USER_NAME</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        {...field}
+                                        className="bg-[#0a0a0f] border-cyan-500/30 text-cyan-100 font-mono focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-500/20"
+                                    />
+                                </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -119,8 +124,15 @@ function UpdateInfoForm({ user, onProfileUpdate }: { user: User, onProfileUpdate
                         name="email"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Email (Không thể thay đổi)</FormLabel>
-                                <FormControl><Input {...field} readOnly disabled /></FormControl>
+                                <FormLabel className="font-mono text-cyan-300">EMAIL_ID</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        {...field}
+                                        readOnly
+                                        disabled
+                                        className="bg-[#0a0a0f]/50 border-cyan-500/20 text-cyan-100/70 font-mono"
+                                    />
+                                </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -131,8 +143,13 @@ function UpdateInfoForm({ user, onProfileUpdate }: { user: User, onProfileUpdate
                     name="dien_thoai"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Số điện thoại</FormLabel>
-                            <FormControl><Input {...field} /></FormControl>
+                            <FormLabel className="font-mono text-cyan-300">CONTACT_NUMBER</FormLabel>
+                            <FormControl>
+                                <Input
+                                    {...field}
+                                    className="bg-[#0a0a0f] border-cyan-500/30 text-cyan-100 font-mono focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-500/20"
+                                />
+                            </FormControl>
                             <FormMessage />
                         </FormItem>
                     )}
@@ -142,16 +159,23 @@ function UpdateInfoForm({ user, onProfileUpdate }: { user: User, onProfileUpdate
                     name="dia_chi"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Địa chỉ</FormLabel>
+                            <FormLabel className="font-mono text-cyan-300">LOCATION_DATA</FormLabel>
                             <FormControl>
-                                <AddressSelector value={field.value || ''} onChange={field.onChange} />
+                                <AddressSelector
+                                    value={field.value || ''}
+                                    onChange={field.onChange}
+                                />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
-                <Button type="submit" className="w-full" disabled={mutation.isPending} style={{ color: 'black' }}>
-                    {mutation.isPending ? "Đang cập nhật..." : "Lưu thay đổi"}
+                <Button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white border-0 shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 font-mono tracking-wider transition-all duration-300"
+                    disabled={mutation.isPending}
+                >
+                    {mutation.isPending ? "SYNC_IN_PROGRESS..." : "UPDATE_PROFILE"}
                 </Button>
             </form>
         </Form>
@@ -168,11 +192,11 @@ function ChangePasswordForm() {
     const mutation = useMutation({
         mutationFn: (data: PasswordSchema) => api.post('/user/change-password', data),
         onSuccess: () => {
-            toast({ title: "Thành công", description: "Đổi mật khẩu thành công." });
+            toast({ title: "SECURITY_UPDATE", description: "Password matrix updated successfully." });
             form.reset({ currentPassword: '', newPassword: '' });
         },
         onError: (error: any) => {
-            toast({ variant: "destructive", title: "Lỗi", description: error.response?.data?.message || "Đổi mật khẩu thất bại." });
+            toast({ variant: "destructive", title: "SECURITY_BREACH", description: error.response?.data?.message || "Password update failed." });
         },
     });
 
@@ -188,8 +212,14 @@ function ChangePasswordForm() {
                     name="currentPassword"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Mật khẩu cũ</FormLabel>
-                            <FormControl><Input type="password" {...field} /></FormControl>
+                            <FormLabel className="font-mono text-cyan-300">CURRENT_PASSWORD</FormLabel>
+                            <FormControl>
+                                <Input
+                                    type="password"
+                                    {...field}
+                                    className="bg-[#0a0a0f] border-cyan-500/30 text-cyan-100 font-mono focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-500/20"
+                                />
+                            </FormControl>
                             <FormMessage />
                         </FormItem>
                     )}
@@ -199,14 +229,24 @@ function ChangePasswordForm() {
                     name="newPassword"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Mật khẩu mới</FormLabel>
-                            <FormControl><Input type="password" {...field} /></FormControl>
+                            <FormLabel className="font-mono text-cyan-300">NEW_PASSWORD</FormLabel>
+                            <FormControl>
+                                <Input
+                                    type="password"
+                                    {...field}
+                                    className="bg-[#0a0a0f] border-cyan-500/30 text-cyan-100 font-mono focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-500/20"
+                                />
+                            </FormControl>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
-                <Button type="submit" className="w-full" disabled={mutation.isPending} style={{ color: 'black' }}>
-                    {mutation.isPending ? "Đang đổi..." : "Đổi mật khẩu"}
+                <Button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white border-0 shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 font-mono tracking-wider transition-all duration-300"
+                    disabled={mutation.isPending}
+                >
+                    {mutation.isPending ? "ENCRYPTING..." : "UPDATE_SECURITY"}
                 </Button>
             </form>
         </Form>
@@ -217,63 +257,109 @@ function ChangePasswordForm() {
 function AccountPageContent() {
     const { setUser } = useAuthStore();
 
-    // 1. Fetch thông tin "me"
     const { data: user, isLoading, error } = useQuery<User>({
         queryKey: ['me'],
         queryFn: async () => {
             const response = await api.get('/user/me');
-            return response.data; // Server trả về thông tin user
+            return response.data;
         },
-        staleTime: 1000 * 60 * 5, // Cache 5 phút
+        staleTime: 1000 * 60 * 5,
     });
 
-    // 2. Xử lý logic cập nhật state toàn cục
     const handleProfileUpdate = (updatedUser: User) => {
-        // Cập nhật Zustand (và localStorage)
         setUser(updatedUser);
     };
 
     if (isLoading) return <GlobalSpinner />;
-    if (error || !user) return <p>Không thể tải thông tin tài khoản.</p>;
+    if (error || !user) return <p className="text-cyan-100 text-center py-20">USER_DATA_UNAVAILABLE</p>;
 
     return (
-        <div className="w-full">
-            <div className="w-full py-20 bg-dark flex items-center justify-center mb-12">
-                <h1 className="text-4xl font-secondary text-white">Tài khoản của tôi</h1>
+        <div className="w-full bg-[#0a0a0f] min-h-screen">
+            {/* Hero Header */}
+            <div className="w-full py-28 bg-[#0a0a0f] relative overflow-hidden flex items-center justify-center mb-16">
+                {/* Background Effects */}
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-purple-500/10 to-cyan-500/10"></div>
+                <div className="absolute top-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
+
+                {/* Grid Pattern */}
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,255,0.03)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black,transparent)]"></div>
+
+                <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent relative z-10">
+                    USER_PORTAL
+                </h1>
+
+                {/* Scanning line */}
+                <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-lg shadow-cyan-400/50 animate-pulse"></div>
             </div>
 
-            <div className="container mx-auto max-w-4xl px-4 pb-12">
+            <div className="container mx-auto max-w-4xl px-4 pb-20">
                 <Tabs defaultValue="profile" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="profile">Thông tin cá nhân</TabsTrigger>
-                        <TabsTrigger value="password">Đổi mật khẩu</TabsTrigger>
-                        <TabsTrigger value="membership">Thẻ thành viên</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-3 bg-[#0a0a0f] border border-cyan-500/30 rounded-lg p-1">
+                        <TabsTrigger
+                            value="profile"
+                            className="font-mono text-sm tracking-wider data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-cyan-400 data-[state=active]:border data-[state=active]:border-cyan-500/50 transition-all"
+                        >
+                            PROFILE_DATA
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="password"
+                            className="font-mono text-sm tracking-wider data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-cyan-400 data-[state=active]:border data-[state=active]:border-cyan-500/50 transition-all"
+                        >
+                            SECURITY_MATRIX
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="membership"
+                            className="font-mono text-sm tracking-wider data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-cyan-400 data-[state=active]:border data-[state=active]:border-cyan-500/50 transition-all"
+                        >
+                            MEMBERSHIP_CARD
+                        </TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="profile">
-                        <Card>
-                            <CardHeader><CardTitle>Cập nhật thông tin</CardTitle></CardHeader>
-                            <CardContent>
+                        <Card className="bg-[#0a0a0f] border border-cyan-500/30 shadow-2xl shadow-cyan-500/10 backdrop-blur-sm">
+                            <CardHeader className="border-b border-cyan-500/20">
+                                <CardTitle className="font-mono text-2xl text-cyan-400 tracking-wider">
+                                    USER_PROFILE_EDITOR
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-6">
                                 <UpdateInfoForm user={user} onProfileUpdate={handleProfileUpdate} />
                             </CardContent>
                         </Card>
                     </TabsContent>
 
                     <TabsContent value="password">
-                        <Card>
-                            <CardHeader><CardTitle>Đổi mật khẩu</CardTitle></CardHeader>
-                            <CardContent>
+                        <Card className="bg-[#0a0a0f] border border-cyan-500/30 shadow-2xl shadow-cyan-500/10 backdrop-blur-sm">
+                            <CardHeader className="border-b border-cyan-500/20">
+                                <CardTitle className="font-mono text-2xl text-cyan-400 tracking-wider">
+                                    PASSWORD_MATRIX
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-6">
                                 <ChangePasswordForm />
                             </CardContent>
                         </Card>
                     </TabsContent>
 
                     <TabsContent value="membership">
-                        <Card>
-                            <CardHeader><CardTitle>Thẻ thành viên</CardTitle></CardHeader>
-                            <CardContent>
-                                {/* Logic thẻ thành viên (từ Account.js [cite: 83-113]) sẽ được thêm vào đây sau */}
-                                <p>Chức năng thẻ thành viên đang được phát triển.</p>
+                        <Card className="bg-[#0a0a0f] border border-cyan-500/30 shadow-2xl shadow-cyan-500/10 backdrop-blur-sm">
+                            <CardHeader className="border-b border-cyan-500/20">
+                                <CardTitle className="font-mono text-2xl text-cyan-400 tracking-wider">
+                                    MEMBERSHIP_PROTOCOL
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-6">
+                                <div className="text-center py-12">
+                                    <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-2xl flex items-center justify-center border border-cyan-500/30">
+                                        <div className="w-16 h-16 bg-gradient-to-br from-cyan-400 to-purple-400 rounded-full animate-pulse"></div>
+                                    </div>
+                                    <p className="font-mono text-cyan-300/70 tracking-wider">
+                                        MEMBERSHIP_SYSTEM_ACTIVATION_PENDING
+                                    </p>
+                                    <p className="font-mono text-cyan-100/50 text-sm mt-2">
+                                        SYSTEM_UNDER_DEVELOPMENT
+                                    </p>
+                                </div>
                             </CardContent>
                         </Card>
                     </TabsContent>
@@ -283,7 +369,6 @@ function AccountPageContent() {
     );
 }
 
-// Bọc component chính bằng ProtectedRoute
 export default function AccountPage() {
     return (
         <ProtectedRoute>

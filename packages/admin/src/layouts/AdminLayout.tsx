@@ -3,35 +3,34 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '../features/auth/authSlice';
-import { useAuth } from '../hooks/useAuth'; // <-- Đã có
+import { useAuth } from '../hooks/useAuth';
 import {
     DashboardOutlined, AppstoreOutlined, FileTextOutlined, SettingOutlined, UserOutlined,
     CalendarOutlined, TeamOutlined, DownOutlined, GiftOutlined, ShopOutlined, ReadOutlined,
-    MessageOutlined, SafetyCertificateOutlined, SolutionOutlined, RightOutlined, DeleteOutlined
+    MessageOutlined, SafetyCertificateOutlined, SolutionOutlined, RightOutlined, DeleteOutlined,
+    LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined
 } from '@ant-design/icons';
 
-// --- Cấu trúc Menu Mới (Thêm requiredPermission) ---
 interface MenuItem {
     key: string;
     icon: React.ReactNode;
     label: React.ReactNode;
     path?: string;
     children?: MenuItem[];
-    requiredPermission?: string; // <-- THÊM DÒNG NÀY
+    requiredPermission?: string;
 }
 
-// Bổ sung quyền yêu cầu cho từng mục
 const menuItems: MenuItem[] = [
-    { key: 'dashboard', icon: <DashboardOutlined />, label: 'Dashboard', path: '/dashboard' }, // Dashboard không cần quyền
+    { key: 'dashboard', icon: <DashboardOutlined />, label: 'Dashboard', path: '/dashboard' },
     {
-        key: 'food', icon: <ShopOutlined />, label: 'Quản Lý Món Ăn', requiredPermission: 'view_product_category', children: [ // Quyền 'view_product_category' hoặc 'view_product'
+        key: 'food', icon: <ShopOutlined />, label: 'Quản Lý Món Ăn', requiredPermission: 'view_product_category', children: [
             { key: 'categories', icon: <AppstoreOutlined />, label: 'Danh mục', path: '/categories', requiredPermission: 'view_product_category' },
             { key: 'products', icon: <AppstoreOutlined />, label: 'Sản phẩm', path: '/products', requiredPermission: 'view_product' },
             { key: 'products-trash', icon: <DeleteOutlined />, label: 'Thùng rác SP', path: '/products/trash', requiredPermission: 'view_product_trash' },
         ]
     },
     {
-        key: 'blog', icon: <ReadOutlined />, label: 'Quản Lý Bài Viết', children: [ // Blog chưa có quyền
+        key: 'blog', icon: <ReadOutlined />, label: 'Quản Lý Bài Viết', children: [
             { key: 'blog-categories', icon: <AppstoreOutlined />, label: 'Danh mục bài viết', path: '/blog-categories' },
             { key: 'blog-posts', icon: <FileTextOutlined />, label: 'Bài viết', path: '/blogs' },
         ]
@@ -49,13 +48,12 @@ const menuItems: MenuItem[] = [
                 icon: <DeleteOutlined />,
                 label: 'Thùng rác TK',
                 path: '/users/trash',
-                // === SỬA TÊN QUYỀN Ở ĐÂY ===
-                requiredPermission: 'view_user' // Sửa từ 'view_user_trash'
+                requiredPermission: 'view_user'
             },
         ]
     },
     {
-        key: 'booking', icon: <CalendarOutlined />, label: 'Quản Lý Đặt Bàn', requiredPermission: 'view_table', children: [ // Quyền 'view_table' hoặc 'view_reservation'
+        key: 'booking', icon: <CalendarOutlined />, label: 'Quản Lý Đặt Bàn', requiredPermission: 'view_table', children: [
             { key: 'tables', icon: <AppstoreOutlined />, label: 'Quản lý bàn ăn', path: '/tables', requiredPermission: 'view_table' },
             { key: 'reservations', icon: <SolutionOutlined />, label: 'Quản lý đặt bàn', path: '/reservations', requiredPermission: 'view_reservation' },
             { key: 'reservations-trash', icon: <DeleteOutlined />, label: 'Đơn đã hủy', path: '/reservations/trash', requiredPermission: 'view_reservation_trash' },
@@ -68,26 +66,24 @@ const menuItems: MenuItem[] = [
                 icon: <SolutionOutlined />,
                 label: 'Phân quyền',
                 path: '/roles/permissions',
-                // === SỬA TÊN QUYỀN Ở ĐÂY ===
-                requiredPermission: 'assign_permission_to_role' // Sửa từ 'assign_permission'
+                requiredPermission: 'assign_permission_to_role'
             },
             { key: 'role-list', icon: <TeamOutlined />, label: 'Vai trò', path: '/roles', requiredPermission: 'view_role' },
         ]
     },
-    // { key: 'chat', icon: <MessageOutlined />, label: 'Tư vấn với khách hàng', path: '/chat' }, // Tạm ẩn nếu chưa có quyền
 ];
 
 const AdminLayout = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();
-    const { user } = useAuth(); // Lấy user từ hook
+    const { user } = useAuth();
     const [openKeys, setOpenKeys] = useState<string[]>([]);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-    // === HÀM KIỂM TRA QUYỀN ===
     const hasPermission = (permission?: string): boolean => {
-        if (!permission) return true; // Nếu mục không yêu cầu quyền, cho phép
-        return user?.permissions?.includes(permission) ?? false; // Kiểm tra quyền
+        if (!permission) return true;
+        return user?.permissions?.includes(permission) ?? false;
     };
 
     useEffect(() => {
@@ -116,84 +112,228 @@ const AdminLayout = () => {
         setOpenKeys(keys);
     };
 
-    // === SỬA HÀM RENDER MENU ===
     const renderMenuItems = (items: MenuItem[]): React.ReactNode[] => {
         return items
-            .filter(item => hasPermission(item.requiredPermission)) // Lọc các mục người dùng có quyền
+            .filter(item => hasPermission(item.requiredPermission))
             .map(item => {
-                // Lọc tiếp các mục con
                 const visibleChildren = item.children?.filter(child => hasPermission(child.requiredPermission));
 
-                // Nếu có mục con, nhưng không mục con nào hiển thị -> ẩn luôn cha
                 if (item.children && visibleChildren?.length === 0) {
                     return null;
                 }
 
-                // Nếu có mục con
                 if (item.children && visibleChildren && visibleChildren.length > 0) {
                     return (
-                        <li key={item.key} className={`px-2 py-1 ${openKeys.includes(item.key) ? 'bg-gray-700 rounded' : ''}`}>
+                        <li key={item.key} className={`mb-1 ${openKeys.includes(item.key) ? 'bg-blue-700/30 rounded-xl' : ''}`}>
                             <div
-                                className="flex items-center justify-between px-2 py-2 rounded hover:bg-gray-700 cursor-pointer"
+                                className="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-blue-700/20 cursor-pointer transition-all duration-300 group"
                                 onClick={() => onOpenChange(openKeys.includes(item.key) ? openKeys.filter(k => k !== item.key) : [...openKeys, item.key])}
                             >
                                 <span className="flex items-center">
-                                    {item.icon}
-                                    <span className="ml-3">{item.label}</span>
+                                    <span className="text-lg text-blue-100 group-hover:text-white transition-colors">
+                                        {item.icon}
+                                    </span>
+                                    {!sidebarCollapsed && (
+                                        <span className="ml-3 text-blue-100 group-hover:text-white transition-colors">
+                                            {item.label}
+                                        </span>
+                                    )}
                                 </span>
-                                {openKeys.includes(item.key) ? <DownOutlined className="text-xs" /> : <RightOutlined className="text-xs" />}
+                                {!sidebarCollapsed && (
+                                    openKeys.includes(item.key) ?
+                                        <DownOutlined className="text-xs text-blue-200" /> :
+                                        <RightOutlined className="text-xs text-blue-200" />
+                                )}
                             </div>
-                            {openKeys.includes(item.key) && (
-                                <ul className="pl-4 mt-1 border-l border-gray-600">
-                                    {renderMenuItems(visibleChildren)} {/* Chỉ render con có quyền */}
+                            {openKeys.includes(item.key) && !sidebarCollapsed && (
+                                <ul className="pl-6 mt-2 border-l border-blue-400/30 ml-4">
+                                    {renderMenuItems(visibleChildren)}
                                 </ul>
                             )}
                         </li>
                     );
                 }
 
-                // Nếu là mục cha (không có con)
                 return (
-                    <li key={item.key} className="px-2 py-1">
-                        <Link to={item.path || '#'}
-                            className={`flex items-center px-2 py-2 rounded hover:bg-gray-700 ${location.pathname === item.path ? 'bg-gray-600 font-semibold' : ''}`}
+                    <li key={item.key} className="mb-1">
+                        <Link
+                            to={item.path || '#'}
+                            className={`flex items-center px-4 py-3 rounded-xl transition-all duration-300 group ${location.pathname === item.path ?
+                                    'bg-blue-600 border border-blue-400/50 shadow-lg' :
+                                    'hover:bg-blue-700/20'
+                                }`}
                         >
-                            {item.icon}
-                            <span className="ml-3">{item.label}</span>
+                            <span className={`text-lg transition-colors ${location.pathname === item.path ?
+                                    'text-white' :
+                                    'text-blue-100 group-hover:text-white'
+                                }`}>
+                                {item.icon}
+                            </span>
+                            {!sidebarCollapsed && (
+                                <span className={`ml-3 transition-colors ${location.pathname === item.path ?
+                                        'text-white font-medium' :
+                                        'text-blue-100 group-hover:text-white'
+                                    }`}>
+                                    {item.label}
+                                </span>
+                            )}
                         </Link>
                     </li>
                 );
             })
-            .filter(Boolean); // Lọc bỏ các giá trị null
+            .filter(Boolean);
     };
 
     return (
-        <div className="flex h-screen bg-gray-100">
+        <div className="flex h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">
             {/* Sidebar */}
-            <aside className="w-64 bg-gray-800 text-white flex flex-col overflow-y-auto">
-                <div className="p-4 text-xl font-bold border-b border-gray-700">Trang Quản Lý</div>
-                <nav className="flex-1 px-2 py-4">
+            <aside className={`${sidebarCollapsed ? 'w-20' : 'w-64'} glass-sidebar flex flex-col transition-all duration-300 relative z-10`}>
+                <div className="p-6 border-b border-blue-500/30">
+                    <div className="flex items-center justify-between">
+                        {!sidebarCollapsed && (
+                            <div className="flex items-center">
+                                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center mr-3 shadow-lg">
+                                    <span className="text-blue-700 font-bold text-sm">A</span>
+                                </div>
+                                <h1 className="text-xl font-bold text-white">
+                                    Admin Panel
+                                </h1>
+                            </div>
+                        )}
+                        {sidebarCollapsed && (
+                            <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center mx-auto shadow-lg">
+                                <span className="text-blue-700 font-bold text-sm">A</span>
+                            </div>
+                        )}
+                        <button
+                            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                            className="glass-button-icon rounded-lg p-2 hover:bg-blue-600 transition-all"
+                        >
+                            {sidebarCollapsed ?
+                                <MenuUnfoldOutlined className="text-blue-100" /> :
+                                <MenuFoldOutlined className="text-blue-100" />
+                            }
+                        </button>
+                    </div>
+                </div>
+
+                <nav className="flex-1 px-3 py-6 overflow-y-auto">
                     <ul className="space-y-1">
                         {renderMenuItems(menuItems)}
                     </ul>
                 </nav>
+
+                {/* User Info & Logout */}
+                <div className="p-4 border-t border-blue-500/30">
+                    <div className="flex items-center mb-4">
+                        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-blue-700 font-semibold shadow-lg">
+                            {user?.ho_ten?.charAt(0) || 'U'}
+                        </div>
+                        {!sidebarCollapsed && (
+                            <div className="ml-3 flex-1 min-w-0">
+                                <p className="text-white font-medium truncate">{user?.ho_ten}</p>
+                                <p className="text-blue-200 text-sm truncate">{user?.email}</p>
+                            </div>
+                        )}
+                    </div>
+                    <button
+                        onClick={handleLogout}
+                        className="glass-button-logout w-full flex items-center justify-center px-4 py-2 rounded-xl hover:bg-red-600/30 transition-all duration-300 group border border-red-400/30"
+                    >
+                        <LogoutOutlined className="text-red-200 group-hover:text-red-100 transition-colors" />
+                        {!sidebarCollapsed && (
+                            <span className="ml-2 text-red-200 group-hover:text-red-100 transition-colors">
+                                Đăng xuất
+                            </span>
+                        )}
+                    </button>
+                </div>
             </aside>
 
             {/* Main Content */}
-            <div className="flex-1 flex flex-col">
-                <header className="flex items-center justify-between p-4 bg-white border-b">
-                    <div></div>
-                    <div className="flex items-center">
-                        <span className="mr-4">Chào, {user?.ho_ten}</span>
-                        <button onClick={handleLogout} className="px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600">
-                            Đăng xuất
-                        </button>
+            <div className="flex-1 flex flex-col overflow-hidden">
+                <header className="glass-header px-6 py-4 border-b border-blue-200">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                            <h2 className="text-2xl font-bold text-gray-800">
+                                {menuItems.find(item =>
+                                    item.path === location.pathname ||
+                                    item.children?.some(child => child.path === location.pathname)
+                                )?.label || 'Dashboard'}
+                            </h2>
+                        </div>
+                        <div className="flex items-center space-x-4">
+                            <div className="text-right">
+                                <p className="text-gray-700 font-medium">{user?.ho_ten}</p>
+                                <p className="text-gray-500 text-sm">{user?.vai_tro?.ten_vai_tro || 'Người dùng'}</p>
+                            </div>
+                            <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold shadow-lg">
+                                {user?.ho_ten?.charAt(0) || 'U'}
+                            </div>
+                        </div>
                     </div>
                 </header>
-                <main className="flex-1 p-6 overflow-y-auto bg-gray-50">
-                    <Outlet />
+
+                <main className="flex-1 p-6 overflow-y-auto bg-blue-50/30">
+                    <div className="animate-fade-in">
+                        <Outlet />
+                    </div>
                 </main>
             </div>
+
+            <style>{`
+                .glass-sidebar {
+                    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+                    backdrop-filter: blur(20px);
+                    border-right: 1px solid rgba(59, 130, 246, 0.3);
+                    box-shadow: 0 8px 32px 0 rgba(30, 58, 138, 0.2);
+                }
+
+                .glass-header {
+                    background: rgba(255, 255, 255, 0.9);
+                    backdrop-filter: blur(20px);
+                    border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+                }
+
+                .glass-button-icon {
+                    background: rgba(255, 255, 255, 0.1);
+                    backdrop-filter: blur(10px);
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                }
+
+                .glass-button-logout {
+                    background: rgba(239, 68, 68, 0.1);
+                    backdrop-filter: blur(10px);
+                }
+
+                /* Custom scrollbar for sidebar */
+                .glass-sidebar nav::-webkit-scrollbar {
+                    width: 6px;
+                }
+
+                .glass-sidebar nav::-webkit-scrollbar-track {
+                    background: rgba(255, 255, 255, 0.1);
+                    border-radius: 10px;
+                }
+
+                .glass-sidebar nav::-webkit-scrollbar-thumb {
+                    background: rgba(255, 255, 255, 0.3);
+                    border-radius: 10px;
+                }
+
+                .glass-sidebar nav::-webkit-scrollbar-thumb:hover {
+                    background: rgba(255, 255, 255, 0.5);
+                }
+
+                @keyframes fade-in {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+
+                .animate-fade-in {
+                    animation: fade-in 0.6s ease-out;
+                }
+            `}</style>
         </div>
     );
 };
