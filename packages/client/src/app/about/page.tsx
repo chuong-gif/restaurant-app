@@ -19,18 +19,18 @@ export default function AboutPage() {
 
                 <div className="text-center text-white relative z-10">
                     <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent mb-6">
-                        SYSTEM_ABOUT
+                        VỀ CHÚNG TÔI
                     </h1>
                     <nav aria-label="breadcrumb" className="mt-4">
                         <ol className="flex justify-center items-center space-x-4 font-mono text-sm tracking-wider">
                             <li className="flex items-center">
                                 <Link href="/" className="text-cyan-300/70 hover:text-cyan-400 transition-colors hover:tracking-widest">
-                                    HOME_NODE
+                                    TRANG CHỦ
                                 </Link>
                                 <span className="mx-2 text-cyan-400/50">/</span>
                             </li>
                             <li className="text-cyan-400 font-semibold" aria-current="page">
-                                ABOUT_SYSTEM
+                                VỀ CHÚNG TÔI
                             </li>
                         </ol>
                     </nav>

@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 
 // Dữ liệu từ About.js 
 const teamMembers = [
-    { name: 'Ngô Văn Chương', role: 'Nhóm Trưởng', img: '/images/team/team-1.jpg' },
+    { name: 'Ngô Văn Chương', role: 'Đội Trưởng', img: '/images/team/team-1.jpg' },
     { name: 'Nguyễn Văn An', role: 'Thành Viên', img: '/images/team/team-2.jpg' },
     { name: 'Hồ Sĩ Tuấn Đạt', role: 'Thành Viên', img: '/images/team/team-3.jpg' },
     { name: 'Đình Anh lộc', role: 'Thành Viên', img: '/images/team/team-4.jpg' },
@@ -34,12 +34,12 @@ export default function TeamSection() {
 
             <div className="container mx-auto max-w-7xl px-4 py-20 relative z-10">
                 <div className="text-center mb-16">
-                    <h5 className="font-mono text-cyan-400 text-lg tracking-wider mb-4">NEURAL_CHEF_NETWORK</h5>
+                    <h5 className="font-mono text-cyan-400 text-lg tracking-wider mb-4">NHÀ HÀNG ENVISI</h5>
                     <h2 className="text-5xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent mb-4">
-                        Cyber Culinary Team
+                        Đội ngũ tạo ra trang web này
                     </h2>
                     <p className="text-cyan-200/60 max-w-2xl mx-auto">
-                        Our team of neural-enhanced chefs operates in perfect synchronization to deliver optimal flavor matrices
+                        Những con người đằng sau trải nghiệm ẩm thực kỹ thuật số của bạn
                     </p>
                 </div>
 

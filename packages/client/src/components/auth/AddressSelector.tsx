@@ -1,3 +1,4 @@
+// AddressSelector.tsx
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useProvinces, useDistricts, useWards } from '@/lib/location';
@@ -15,7 +16,6 @@ type AddressSelectorProps = {
     onChange: (fullAddress: string) => void;
 };
 
-// Hàm phân tích địa chỉ
 const parseAddress = (fullAddress: string) => {
     const parts = fullAddress.split(',').map(s => s.trim());
     return {
@@ -27,7 +27,6 @@ const parseAddress = (fullAddress: string) => {
 };
 
 export default function AddressSelector({ value, onChange }: AddressSelectorProps) {
-    // Tách state cho Tên và Code
     const [street, setStreet] = useState(parseAddress(value).street);
     const [selectedProvinceName, setSelectedProvinceName] = useState(parseAddress(value).province);
     const [selectedDistrictName, setSelectedDistrictName] = useState(parseAddress(value).district);
@@ -36,12 +35,10 @@ export default function AddressSelector({ value, onChange }: AddressSelectorProp
     const [selectedProvinceCode, setSelectedProvinceCode] = useState<string | undefined>();
     const [selectedDistrictCode, setSelectedDistrictCode] = useState<string | undefined>();
 
-    // Tải dữ liệu
     const { data: provinces, isLoading: isLoadingProvinces } = useProvinces();
     const { data: districts, isLoading: isLoadingDistricts } = useDistricts(selectedProvinceCode || '');
     const { data: wards, isLoading: isLoadingWards } = useWards(selectedDistrictCode || '');
 
-    // Effect để tìm code khi Tên thay đổi (dùng cho việc load `initialAddress` trên trang Account)
     useEffect(() => {
         if (provinces && selectedProvinceName && !selectedProvinceCode) {
             const p = provinces.find(p => p.name === selectedProvinceName);
@@ -56,98 +53,112 @@ export default function AddressSelector({ value, onChange }: AddressSelectorProp
         }
     }, [districts, selectedDistrictName, selectedDistrictCode]);
 
-    // Effect để cập nhật output `fullAddress` khi bất kỳ phần nào thay đổi
     useEffect(() => {
         const fullAddress = [street, selectedWardName, selectedDistrictName, selectedProvinceName]
-            .filter(Boolean) // Loại bỏ các giá trị rỗng
+            .filter(Boolean)
             .join(", ")
             .trim();
         onChange(fullAddress);
     }, [street, selectedWardName, selectedDistrictName, selectedProvinceName, onChange]);
 
-    // Xử lý khi chọn Tỉnh
     const handleProvinceChange = (code: string) => {
         const province = provinces?.find(p => p.code.toString() === code);
         setSelectedProvinceCode(code);
         setSelectedProvinceName(province?.name || '');
-        // Reset quận/huyện/phường
         setSelectedDistrictCode(undefined);
         setSelectedDistrictName('');
         setSelectedWardName('');
     };
 
-    // Xử lý khi chọn Quận
     const handleDistrictChange = (code: string) => {
         const district = districts?.find(d => d.code.toString() === code);
         setSelectedDistrictCode(code);
         setSelectedDistrictName(district?.name || '');
-        // Reset phường
         setSelectedWardName('');
     };
 
-    // Xử lý khi chọn Phường
     const handleWardChange = (code: string) => {
-        const ward = wards?.find(w => w.code.toString() === code);
-        setSelectedWardName(ward?.name || '');
+        const ward = wards?.find(w => w.name === selectedWardName)?.code.toString();
+        setSelectedWardName(ward || '');
     };
 
     return (
-        <div className="space-y-3">
-            <Select
-                value={selectedProvinceCode}
-                onValueChange={handleProvinceChange}
-            >
-                <SelectTrigger>
-                    <SelectValue placeholder="Chọn Tỉnh/Thành phố" />
-                </SelectTrigger>
-                {/* === THÊM `position="popper"` VÀO ĐÂY === */}
-                <SelectContent position="popper">
-                    {isLoadingProvinces && <SelectItem value="loading" disabled>Đang tải...</SelectItem>}
-                    {provinces?.map(p => (
-                        <SelectItem key={p.code} value={p.code.toString()}>{p.name}</SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
+        <div className="space-y-4">
+            <div className="space-y-2">
+                <label className="text-cyan-300 font-mono text-sm">COORDINATE SYSTEM</label>
+                <Select
+                    value={selectedProvinceCode}
+                    onValueChange={handleProvinceChange}
+                >
+                    <SelectTrigger className="bg-[#0a0a0f]/60 border border-cyan-500/30 text-cyan-100 backdrop-blur-lg hover:border-cyan-400/50 transition-all duration-300">
+                        <SelectValue placeholder="🛸 Select Primary Sector" />
+                    </SelectTrigger>
+                    <SelectContent position="popper" className="bg-[#0a0a0f] border border-cyan-500/30 text-cyan-100">
+                        {isLoadingProvinces && <SelectItem value="loading" disabled>🌀 Scanning sectors...</SelectItem>}
+                        {provinces?.map(p => (
+                            <SelectItem key={p.code} value={p.code.toString()} className="hover:bg-cyan-500/20 focus:bg-cyan-500/20">
+                                {p.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
 
-            <Select
-                value={selectedDistrictCode}
-                onValueChange={handleDistrictChange}
-                disabled={!selectedProvinceCode || isLoadingDistricts || districts?.length === 0}
-            >
-                <SelectTrigger>
-                    <SelectValue placeholder="Chọn Quận/Huyện" />
-                </SelectTrigger>
-                {/* === THÊM `position="popper"` VÀO ĐÂY === */}
-                <SelectContent position="popper">
-                    {isLoadingDistricts && <SelectItem value="loading" disabled>Đang tải...</SelectItem>}
-                    {districts?.map(d => (
-                        <SelectItem key={d.code} value={d.code.toString()}>{d.name}</SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
+            <div className="space-y-2">
+                <label className="text-cyan-300 font-mono text-sm">DISTRICT GRID</label>
+                <Select
+                    value={selectedDistrictCode}
+                    onValueChange={handleDistrictChange}
+                    disabled={!selectedProvinceCode || isLoadingDistricts || districts?.length === 0}
+                >
+                    <SelectTrigger className="bg-[#0a0a0f]/60 border border-cyan-500/30 text-cyan-100 backdrop-blur-lg hover:border-cyan-400/50 transition-all duration-300">
+                        <SelectValue placeholder="📡 Select District Zone" />
+                    </SelectTrigger>
+                    <SelectContent position="popper" className="bg-[#0a0a0f] border border-cyan-500/30 text-cyan-100">
+                        {isLoadingDistricts && <SelectItem value="loading" disabled>⚡ Loading grid data...</SelectItem>}
+                        {districts?.map(d => (
+                            <SelectItem key={d.code} value={d.code.toString()} className="hover:bg-cyan-500/20 focus:bg-cyan-500/20">
+                                {d.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
 
-            <Select
-                value={wards?.find(w => w.name === selectedWardName)?.code.toString()}
-                onValueChange={handleWardChange}
-                disabled={!selectedDistrictCode || isLoadingWards || wards?.length === 0}
-            >
-                <SelectTrigger>
-                    <SelectValue placeholder="Chọn Phường/Xã" />
-                </SelectTrigger>
-                {/* === THÊM `position="popper"` VÀO ĐÂY === */}
-                <SelectContent position="popper">
-                    {isLoadingWards && <SelectItem value="loading" disabled>Đang tải...</SelectItem>}
-                    {wards?.map(w => (
-                        <SelectItem key={w.code} value={w.code.toString()}>{w.name}</SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
+            <div className="space-y-2">
+                <label className="text-cyan-300 font-mono text-sm">WARD SECTOR</label>
+                <Select
+                    value={wards?.find(w => w.name === selectedWardName)?.code.toString()}
+                    onValueChange={handleWardChange}
+                    disabled={!selectedDistrictCode || isLoadingWards || wards?.length === 0}
+                >
+                    <SelectTrigger className="bg-[#0a0a0f]/60 border border-cyan-500/30 text-cyan-100 backdrop-blur-lg hover:border-cyan-400/50 transition-all duration-300">
+                        <SelectValue placeholder="📍 Select Ward Sector" />
+                    </SelectTrigger>
+                    <SelectContent position="popper" className="bg-[#0a0a0f] border border-cyan-500/30 text-cyan-100">
+                        {isLoadingWards && <SelectItem value="loading" disabled>🔍 Mapping coordinates...</SelectItem>}
+                        {wards?.map(w => (
+                            <SelectItem key={w.code} value={w.code.toString()} className="hover:bg-cyan-500/20 focus:bg-cyan-500/20">
+                                {w.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
 
-            <Input
-                placeholder="Số nhà, tên đường"
-                value={street}
-                onChange={(e) => setStreet(e.target.value)}
-            />
+            <div className="space-y-2">
+                <label className="text-cyan-300 font-mono text-sm">STREET COORDINATES</label>
+                <Input
+                    placeholder="Enter street coordinates..."
+                    value={street}
+                    onChange={(e) => setStreet(e.target.value)}
+                    className="bg-[#0a0a0f]/60 border border-cyan-500/30 text-cyan-100 placeholder-cyan-300/50 backdrop-blur-lg focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/50 transition-all duration-300"
+                />
+            </div>
+
+            <div className="pt-2 border-t border-cyan-500/20">
+                <p className="text-cyan-400/60 text-xs font-mono">📍 Location matrix synchronized</p>
+            </div>
         </div>
     );
 }

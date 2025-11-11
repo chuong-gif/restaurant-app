@@ -1,3 +1,4 @@
+// ImageUpload.tsx
 'use client';
 import React, { useState } from 'react';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
@@ -6,23 +7,19 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useMutation } from '@tanstack/react-query';
-import api from '@/lib/api'; // Import api client
+import api from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 
 type ImageUploadProps = {
-    // Callback này giờ sẽ trả về number (ID của media file)
     onImageUpload: (mediaId: number) => void;
 };
 
-// Định nghĩa API call để lưu media
 const saveMediaFile = async (fileUrl: string, filePath: string, fileType: string) => {
-    // === SỬA TÊN BIẾN GỬI ĐI ===
     const response = await api.post('/public/media', {
-        file_url: fileUrl,   // Gửi đi snake_case
-        file_path: filePath, // Gửi đi snake_case
-        file_type: fileType, // Gửi đi snake_case
+        file_url: fileUrl,
+        file_path: filePath,
+        file_type: fileType,
     });
-    // ========================
     return response.data;
 };
 
@@ -32,18 +29,17 @@ export default function ImageUpload({ onImageUpload }: ImageUploadProps) {
     const [fileName, setFileName] = useState("");
     const { toast } = useToast();
 
-    // Mutation để lưu file URL về server
     const mutation = useMutation({
         mutationFn: (variables: { fileUrl: string, filePath: string, fileType: string }) =>
             saveMediaFile(variables.fileUrl, variables.filePath, variables.fileType),
         onSuccess: (response) => {
             onImageUpload(response.data.id);
-            toast({ title: "Tải ảnh lên thành công!" });
+            toast({ title: "🌀 Upload complete" });
             setUploading(false);
         },
         onError: (error) => {
             console.error('Failed to save media file:', error);
-            toast({ variant: "destructive", title: "Lỗi", description: "Không thể lưu file về server." });
+            toast({ variant: "destructive", title: "Upload failed", description: "Neural transfer interrupted" });
             setUploading(false);
         },
     });
@@ -69,12 +65,10 @@ export default function ImageUpload({ onImageUpload }: ImageUploadProps) {
             (error) => {
                 console.error('Upload to Firebase failed:', error);
                 setUploading(false);
-                toast({ variant: "destructive", title: "Lỗi", description: "Tải file lên Firebase thất bại." });
+                toast({ variant: "destructive", title: "Firebase error", description: "Quantum transfer failed" });
             },
             () => {
-                // Upload lên Firebase thành công, lấy URL
                 getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-                    // BƯỚC 2: Gửi URL này về server
                     mutation.mutate({
                         fileUrl: downloadURL,
                         filePath: filePath,
@@ -86,23 +80,43 @@ export default function ImageUpload({ onImageUpload }: ImageUploadProps) {
     };
 
     return (
-        // ... (giữ nguyên phần JSX return)
-        <div className="w-full space-y-2">
-            <Label htmlFor="avatar-upload" className="sr-only">Chọn ảnh</Label>
-            <Input
-                id="avatar-upload"
-                type="file"
-                accept="image/*"
-                onChange={onFileChange}
-                disabled={uploading}
-                className="cursor-pointer file:text-sm file:font-medium file:text-primary-foreground file:bg-primary hover:file:bg-primary/90"
-            />
+        <div className="w-full space-y-4">
+            <div className="space-y-2">
+                <Label htmlFor="avatar-upload" className="text-cyan-300 font-mono text-sm">NEURAL IMAGE UPLOAD</Label>
+                <Input
+                    id="avatar-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={onFileChange}
+                    disabled={uploading}
+                    className="cursor-pointer bg-[#0a0a0f]/60 border border-cyan-500/30 text-cyan-100 backdrop-blur-lg file:bg-gradient-to-r file:from-cyan-600 file:to-purple-600 file:border-0 file:text-white file:font-mono file:text-sm hover:file:from-cyan-500 hover:file:to-purple-500 transition-all duration-300"
+                />
+            </div>
+
             {uploading && (
-                <div className='mt-2 space-y-1'>
-                    <p className="text-sm text-muted-foreground">
-                        {mutation.isPending ? 'Đang lưu về server...' : `Đang tải ${fileName}: ${Math.round(uploadProgress)}%`}
-                    </p>
-                    <Progress value={uploadProgress} className="h-2" />
+                <div className='space-y-3 p-4 bg-[#0a0a0f]/40 border border-cyan-500/20 rounded-lg'>
+                    <div className="flex justify-between items-center">
+                        <p className="text-cyan-300 font-mono text-sm">
+                            {mutation.isPending ? '🔁 Syncing with core...' : `⚡ Uploading: ${Math.round(uploadProgress)}%`}
+                        </p>
+                        <span className="text-cyan-400/60 text-xs font-mono">{fileName}</span>
+                    </div>
+                    <div className="space-y-2">
+                        <Progress
+                            value={uploadProgress}
+                            className="h-2 bg-[#0a0a0f] border border-cyan-500/20"
+                        />
+                        <div className="flex justify-between text-xs text-cyan-400/60 font-mono">
+                            <span>Quantum Transfer</span>
+                            <span>{Math.round(uploadProgress)}%</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {!uploading && (
+                <div className="text-center p-4 border border-cyan-500/20 rounded-lg bg-[#0a0a0f]/20">
+                    <p className="text-cyan-400/60 text-xs font-mono">Ready for neural image transfer</p>
                 </div>
             )}
         </div>

@@ -1,48 +1,37 @@
+// ChatPopup.placeholder.tsx
 'use client';
 import React, { useState } from 'react';
 
-// Đây là component giữ chỗ.
-// Logic thật (từ ChatPopup.js) sẽ được tái cấu trúc sau.
 export default function ChatPopupPlaceholder() {
     const [isOpen, setIsOpen] = useState(false);
 
     if (isOpen) {
         return (
             <div
+                className="fixed bottom-0 right-5 w-80 h-96 bg-[#0a0a0f]/90 backdrop-blur-xl border border-cyan-500/30 rounded-t-lg shadow-2xl shadow-cyan-500/20 z-50 flex flex-col"
                 style={{
-                    position: 'fixed',
-                    bottom: 0,
-                    right: '20px',
-                    width: '350px',
-                    height: '500px',
-                    backgroundColor: 'white',
-                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-                    borderRadius: '8px 8px 0 0',
-                    zIndex: 1000,
-                    display: 'flex',
-                    flexDirection: 'column',
+                    borderRadius: '12px 12px 0 0',
                 }}
             >
                 <div
-                    style={{
-                        background: '#FEA115',
-                        color: 'black',
-                        padding: '10px',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                    }}
+                    className="bg-gradient-to-r from-cyan-600 to-purple-600 text-white p-4 flex justify-between items-center rounded-t-lg border-b border-cyan-400/30"
                 >
-                    <span>Chat với EnViSi</span>
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-cyan-400 rounded-full animate-pulse"></div>
+                        <span className="font-mono font-bold">NEURAL CHAT INTERFACE</span>
+                    </div>
                     <button
                         onClick={() => setIsOpen(false)}
-                        style={{ background: 'none', border: 'none', color: 'black', fontSize: '20px', cursor: 'pointer' }}
+                        className="bg-none border-none text-white text-xl cursor-pointer hover:text-cyan-300 transition-colors"
                     >
-                        &times;
+                        ╳
                     </button>
                 </div>
-                <div style={{ padding: '20px', textAlign: 'center', flexGrow: 1 }}>
-                    <p>Chức năng chat đang được tái cấu trúc.</p>
+                <div className="flex-1 p-6 text-center flex flex-col items-center justify-center bg-gradient-to-b from-cyan-500/5 to-transparent">
+                    <div className="text-4xl mb-4">🌀</div>
+                    <p className="text-cyan-300 font-mono text-sm mb-2">SYSTEM INITIALIZING</p>
+                    <p className="text-cyan-400/60 text-xs font-mono">Chat protocols under development</p>
+                    <div className="mt-4 w-20 h-1 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full"></div>
                 </div>
             </div>
         );
@@ -51,23 +40,13 @@ export default function ChatPopupPlaceholder() {
     return (
         <div
             onClick={() => setIsOpen(true)}
-            style={{
-                position: 'fixed',
-                bottom: '20px',
-                right: '20px',
-                backgroundColor: '#FEA115',
-                color: 'black',
-                padding: '12px 20px',
-                borderRadius: '25px',
-                cursor: 'pointer',
-                boxShadow: '0 2px 4px #8a8a8a',
-                zIndex: 1000,
-                display: 'flex',
-                alignItems: 'center',
-            }}
+            className="fixed bottom-6 right-6 bg-gradient-to-r from-cyan-600 to-purple-600 text-white py-3 px-5 rounded-full cursor-pointer shadow-2xl shadow-cyan-500/30 z-50 flex items-center gap-2 border border-cyan-400/50 hover:scale-105 transition-all duration-300 group"
         >
-            <i className="fa fa-comments me-2"></i>
-            <span>Chat với chúng tôi</span>
+            <div className="relative">
+                <div className="text-lg">💬</div>
+                <div className="absolute -inset-1 bg-cyan-400/20 blur-sm rounded-full group-hover:bg-cyan-400/30 transition-all"></div>
+            </div>
+            <span className="font-mono text-sm font-bold">NEURAL CHAT</span>
         </div>
     );
 }

@@ -1,4 +1,4 @@
-// packages/client/src/components/blog/CommentSection.tsx
+// CommentSection.tsx
 'use client';
 
 import React, { useState } from 'react';
@@ -26,7 +26,6 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from '@/components/ui/separator';
 
-// Hàm format thời gian (từ DetailBlog.js [cite: 147-172])
 const formatCommentTime = (isoString: string) => {
     const date = new Date(isoString);
     return date.toLocaleString('vi-VN', {
@@ -38,7 +37,6 @@ const formatCommentTime = (isoString: string) => {
     });
 };
 
-// Component con: Form đăng bình luận
 function CommentForm({ blogId }: { blogId: number }) {
     const [content, setContent] = useState('');
     const { toast } = useToast();
@@ -46,17 +44,15 @@ function CommentForm({ blogId }: { blogId: number }) {
 
     const mutation = useMutation({
         mutationFn: (newComment: { blog_id: number; content: string }) => {
-            // Gọi API POST /user/comments (đã có authenticateToken)
             return api.post('/user/comments', newComment);
         },
         onSuccess: () => {
-            toast({ title: "Đã gửi bình luận" });
+            toast({ title: "Neural Sync Complete" });
             setContent('');
-            // Tải lại danh sách bình luận
             queryClient.invalidateQueries({ queryKey: ['comments', blogId] });
         },
         onError: (error: any) => {
-            toast({ variant: "destructive", title: "Lỗi", description: error.response?.data?.message });
+            toast({ variant: "destructive", title: "System Error", description: error.response?.data?.message });
         }
     });
 
@@ -67,21 +63,30 @@ function CommentForm({ blogId }: { blogId: number }) {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-3">
-            <Textarea
-                placeholder="Viết bình luận của bạn..."
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                rows={3}
-            />
-            <Button type="submit" disabled={mutation.isPending} style={{ color: 'black' }}>
-                {mutation.isPending ? "Đang gửi..." : "Gửi Bình Luận"}
+        <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="relative">
+                <Textarea
+                    placeholder="Initiate neural comment stream..."
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    rows={3}
+                    className="bg-[#0a0a0f]/40 border border-cyan-500/30 text-cyan-100 placeholder-cyan-300/50 backdrop-blur-lg focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/50 transition-all duration-300"
+                />
+                <div className="absolute bottom-2 right-2 text-xs text-cyan-400/60 font-mono">
+                    {content.length}/500
+                </div>
+            </div>
+            <Button
+                type="submit"
+                disabled={mutation.isPending}
+                className="w-full bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 border border-cyan-400/50 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/25"
+            >
+                {mutation.isPending ? "⚡ Uploading..." : "🚀 Transmit Comment"}
             </Button>
         </form>
     );
 }
 
-// Component con: Một bình luận
 function CommentItem({ comment, user }: { comment: BlogComment; user: User | null }) {
     const { toast } = useToast();
     const queryClient = useQueryClient();
@@ -89,95 +94,118 @@ function CommentItem({ comment, user }: { comment: BlogComment; user: User | nul
     const [isEditing, setIsEditing] = useState(false);
     const [editContent, setEditContent] = useState(comment.noi_dung);
 
-    // Kiểm tra quyền (giống logic DetailBlog.js [cite: 317-347])
     const canModify = user?.id === comment.nguoi_dung_id;
 
-    // Mutation Xóa
     const deleteMutation = useMutation({
-        mutationFn: () => api.delete(`/user/comments/${comment.id}`), // Gọi API DELETE
+        mutationFn: () => api.delete(`/user/comments/${comment.id}`),
         onSuccess: () => {
-            toast({ title: "Đã xóa bình luận" });
+            toast({ title: "Data Stream Deleted" });
             queryClient.invalidateQueries({ queryKey: ['comments', comment.bai_viet_id] });
             setIsDeleting(false);
         },
         onError: (error: any) => {
-            toast({ variant: "destructive", title: "Lỗi", description: error.response?.data?.message });
+            toast({ variant: "destructive", title: "System Error", description: error.response?.data?.message });
             setIsDeleting(false);
         }
     });
 
-    // Mutation Sửa
     const editMutation = useMutation({
-        mutationFn: (content: string) => api.patch(`/user/comments/${comment.id}`, { content }), // Gọi API PATCH
+        mutationFn: (content: string) => api.patch(`/user/comments/${comment.id}`, { content }),
         onSuccess: () => {
-            toast({ title: "Đã cập nhật bình luận" });
+            toast({ title: "Stream Updated" });
             queryClient.invalidateQueries({ queryKey: ['comments', comment.bai_viet_id] });
             setIsEditing(false);
         },
         onError: (error: any) => {
-            toast({ variant: "destructive", title: "Lỗi", description: error.response?.data?.message });
+            toast({ variant: "destructive", title: "System Error", description: error.response?.data?.message });
         }
     });
 
     return (
-        <div className="flex items-start gap-3">
-            <Avatar className="h-10 w-10">
+        <div className="flex items-start gap-4 p-4 bg-[#0a0a0f]/40 backdrop-blur-lg border border-cyan-500/20 rounded-lg hover:border-cyan-400/30 transition-all duration-300">
+            <Avatar className="h-10 w-10 border border-cyan-500/30">
                 <AvatarImage src={(comment.nguoi_dung.media_files as any)?.file_url || '/images/default-avatar.png'} />
-                <AvatarFallback>{comment.nguoi_dung.ho_ten.charAt(0)}</AvatarFallback>
+                <AvatarFallback className="bg-gradient-to-br from-cyan-600 to-purple-600 text-white">
+                    {comment.nguoi_dung.ho_ten.charAt(0)}
+                </AvatarFallback>
             </Avatar>
             <div className="flex-1">
                 <div className="flex items-center justify-between">
-                    <span className="font-semibold text-sm">{comment.nguoi_dung.ho_ten}</span>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="font-bold text-cyan-300 text-sm">{comment.nguoi_dung.ho_ten}</span>
+                    <span className="text-xs text-cyan-400/60 font-mono">
                         {formatCommentTime(comment.created_at)}
                     </span>
                 </div>
 
                 {isEditing ? (
-                    // Form Sửa [cite: 350-357]
-                    <div className="space-y-2 mt-1">
+                    <div className="space-y-3 mt-2">
                         <Textarea
                             value={editContent}
                             onChange={(e) => setEditContent(e.target.value)}
+                            className="bg-[#0a0a0f]/60 border border-cyan-500/30 text-cyan-100"
                         />
                         <div className="flex gap-2">
-                            <Button size="sm" onClick={() => editMutation.mutate(editContent)} disabled={editMutation.isPending} style={{ color: 'black' }}>
-                                Lưu
+                            <Button
+                                size="sm"
+                                onClick={() => editMutation.mutate(editContent)}
+                                disabled={editMutation.isPending}
+                                className="bg-cyan-600 hover:bg-cyan-500 text-white border border-cyan-400/50"
+                            >
+                                ⚡ Save
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={() => setIsEditing(false)}>Hủy</Button>
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setIsEditing(false)}
+                                className="text-cyan-300 hover:text-cyan-100 border border-cyan-500/30"
+                            >
+                                Cancel
+                            </Button>
                         </div>
                     </div>
                 ) : (
-                    // Hiển thị nội dung
-                    <p className="text-sm mt-1">{comment.noi_dung}</p>
+                    <p className="text-cyan-100 text-sm mt-2 leading-relaxed">{comment.noi_dung}</p>
                 )}
 
-                {/* Nút Sửa/Xóa [cite: 326-347] */}
                 {canModify && !isEditing && (
-                    <div className="flex gap-2 mt-1">
-                        <Button variant="link" size="sm" className="h-auto p-0 text-muted-foreground" onClick={() => setIsEditing(true)}>
-                            Sửa
+                    <div className="flex gap-3 mt-2">
+                        <Button
+                            variant="link"
+                            size="sm"
+                            className="h-auto p-0 text-cyan-400 hover:text-cyan-300 font-mono text-xs"
+                            onClick={() => setIsEditing(true)}
+                        >
+                            [EDIT STREAM]
                         </Button>
-                        <Button variant="link" size="sm" className="h-auto p-0 text-destructive" onClick={() => setIsDeleting(true)}>
-                            Xóa
+                        <Button
+                            variant="link"
+                            size="sm"
+                            className="h-auto p-0 text-red-400 hover:text-red-300 font-mono text-xs"
+                            onClick={() => setIsDeleting(true)}
+                        >
+                            [DELETE NODE]
                         </Button>
                     </div>
                 )}
             </div>
 
-            {/* Dialog Xác nhận Xóa [cite: 349-354] */}
             <Dialog open={isDeleting} onOpenChange={setIsDeleting}>
-                <DialogContent>
+                <DialogContent className="bg-[#0a0a0f] border border-cyan-500/30 text-cyan-100">
                     <DialogHeader>
-                        <DialogTitle>Xác nhận xóa bình luận?</DialogTitle>
+                        <DialogTitle className="text-cyan-300 font-mono">CONFIRM DATA PURGE?</DialogTitle>
                     </DialogHeader>
-                    <p>Bạn có chắc chắn muốn xóa bình luận này không? Hành động này không thể hoàn tác.</p>
+                    <p className="text-cyan-200/80">This neural stream will be permanently erased from the core system.</p>
                     <DialogFooter>
                         <DialogClose asChild>
-                            <Button variant="ghost">Hủy</Button>
+                            <Button variant="ghost" className="text-cyan-300 border border-cyan-500/30">ABORT</Button>
                         </DialogClose>
-                        <Button variant="destructive" onClick={() => deleteMutation.mutate()} disabled={deleteMutation.isPending}>
-                            {deleteMutation.isPending ? "Đang xóa..." : "Xóa"}
+                        <Button
+                            variant="destructive"
+                            onClick={() => deleteMutation.mutate()}
+                            disabled={deleteMutation.isPending}
+                            className="bg-red-600 hover:bg-red-500 text-white border border-red-400/50"
+                        >
+                            {deleteMutation.isPending ? "PURGING..." : "CONFIRM PURGE"}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -186,7 +214,6 @@ function CommentItem({ comment, user }: { comment: BlogComment; user: User | nul
     );
 }
 
-// === COMPONENT CHÍNH: Phần Bình luận ===
 export default function CommentSection({ blogId }: { blogId: number }) {
     const { user } = useAuthStore();
     const [page, setPage] = useState(1);
@@ -194,7 +221,6 @@ export default function CommentSection({ blogId }: { blogId: number }) {
     const { data, isLoading, error } = useQuery<CommentsApiResponse>({
         queryKey: ['comments', blogId, page],
         queryFn: async () => {
-            // Gọi API GET /public/comments/blog/:blog_id
             const res = await api.get(`/public/comments/blog/${blogId}`, {
                 params: { page, limit: 10 }
             });
@@ -204,36 +230,42 @@ export default function CommentSection({ blogId }: { blogId: number }) {
     });
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Bình luận ({data?.total || 0})</CardTitle>
+        <Card className="bg-[#0a0a0f]/60 backdrop-blur-lg border border-cyan-500/20 shadow-2xl">
+            <CardHeader className="border-b border-cyan-500/20">
+                <CardTitle className="text-cyan-300 font-mono text-xl">
+                    NEURAL COMMENTS [{data?.total || 0}]
+                </CardTitle>
+                <p className="text-cyan-400/60 text-sm font-mono">Active thought streams detected</p>
             </CardHeader>
-            <CardContent className="space-y-6">
-                {/* Form Đăng [cite: 366-383] */}
+            <CardContent className="space-y-6 p-6">
                 {user ? (
                     <CommentForm blogId={blogId} />
                 ) : (
-                    <div className="text-center text-muted-foreground p-4 border rounded-md">
-                        Vui lòng <Link href="/login" className="text-primary underline">đăng nhập</Link> để bình luận.
+                    <div className="text-center text-cyan-300/80 p-6 border border-cyan-500/30 rounded-lg bg-[#0a0a0f]/40">
+                        <p className="font-mono">SYSTEM AUTHENTICATION REQUIRED</p>
+                        <Link href="/login" className="text-cyan-400 hover:text-cyan-300 underline font-mono text-sm">
+                            INITIATE LOGIN SEQUENCE
+                        </Link>
                     </div>
                 )}
 
-                <Separator />
+                <Separator className="bg-cyan-500/20" />
 
-                {/* Danh sách bình luận [cite: 279-348] */}
-                <div className="space-y-6">
-                    {isLoading && <p>Đang tải bình luận...</p>}
-                    {error && <p className="text-destructive">Lỗi tải bình luận.</p>}
+                <div className="space-y-4">
+                    {isLoading && (
+                        <div className="text-center py-8">
+                            <div className="animate-pulse text-cyan-400 font-mono">🌀 Loading neural streams...</div>
+                        </div>
+                    )}
+                    {error && <p className="text-red-400 font-mono text-center">⚠️ Stream connection failed</p>}
 
                     {data?.data.map((comment) => (
                         <CommentItem key={comment.id} comment={comment} user={user} />
                     ))}
 
                     {data?.data.length === 0 && !isLoading && (
-                        <p className="text-muted-foreground text-center">Chưa có bình luận nào.</p>
+                        <p className="text-cyan-400/60 text-center font-mono py-8">No active neural streams detected</p>
                     )}
-
-                    {/* TODO: Thêm phân trang cho bình luận nếu cần */}
                 </div>
             </CardContent>
         </Card>

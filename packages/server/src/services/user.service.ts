@@ -87,7 +87,7 @@ export const getUserById = async (id: number) => {
  */
 export const createUser = async (data: any) => {
     // Tách các trường đặc biệt
-    const { password, anh_dai_dien_id, loai_nguoi_dung, ...userData } = data;
+    const { password, anh_dai_dien_id, loai_nguoi_dung, permissions, ...userData } = data;
 
     // === SỬA LỖI 1: Chuyển đổi String sang Enum ===
     let prismaUserType: UserType;
@@ -138,7 +138,7 @@ export const updateUser = async (id: number, data: any) => {
 
     // === SỬA LỖI 1: Tách 'vai_tro_id' ra khỏi ...updates ===
     //
-    const { password, loai_nguoi_dung, anh_dai_dien_id, vai_tro_id, ...updates } = data;
+    const { password, loai_nguoi_dung, anh_dai_dien_id, vai_tro_id, permissions, ...updates } = data;
 
     const existing = await prisma.nguoi_dung.findUnique({ where: { id } });
     if (!existing) {

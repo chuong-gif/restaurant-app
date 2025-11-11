@@ -2,8 +2,8 @@
 
 // Dựa trên enum nguoi_dung_loai_nguoi_dung trong schema.prisma
 export const UserType = {
-    KHACH_HANG: 'Khách Hàng',
-    NHAN_VIEN: 'Nhân Viên',
+    KHACH_HANG: 'Khach_Hang',
+    NHAN_VIEN: 'Nhan_Vien',
 } as const;
 
 export type UserType = typeof UserType[keyof typeof UserType];

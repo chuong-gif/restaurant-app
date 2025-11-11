@@ -38,13 +38,13 @@ export default function HeroSection() {
                             variants={variants}
                             className="text-4xl md:text-6xl font-bold leading-tight bg-gradient-to-r from-cyan-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent bg-size-200 animate-gradient"
                         >
-                            NEURAL_CUISINE_ACTIVATED
+                            Tinh Hoa Ẩm Thực
                         </motion.h1>
                         <motion.p
                             variants={variants}
                             className="mt-6 text-lg text-cyan-100/80 leading-relaxed"
                         >
-                            <span className="text-cyan-400 font-mono">SYSTEM_READY</span> - Khám phá hành trình ẩm thực châu Á đầy màu sắc. Với menu phong phú, từ những món ăn truyền thống đến những biến tấu mới lạ, chúng tôi mang đến cho thực khách những trải nghiệm ẩm thực độc đáo.
+                            <span className="text-cyan-400 font-mono">EnViSi</span> - Đến với hành trình khám phá ẩm thực châu Á đầy màu sắc. Với menu phong phú, từ những món ăn truyền thống đến những biến tấu mới lạ, chúng tôi mang đến cho thực khách những trải nghiệm ẩm thực độc đáo.
                         </motion.p>
                         <motion.div variants={variants} className="mt-8">
                             <Button
@@ -56,7 +56,7 @@ export default function HeroSection() {
                                     className={cn(navigationMenuTriggerStyle(), navLinkClass)}
                                     data-active={pathname === '/booking'}
                                 >
-                                    INITIATE_BOOKING_PROTOCOL
+                                    Đặt Bàn Ngay
                                 </Link>
                             </Button>
                         </motion.div>

@@ -77,7 +77,7 @@ export default function Header() {
                                     )}
                                     data-active={pathname === '/'}
                                 >
-                                    HOME_SYSTEM
+                                    Trang Chủ
                                 </Link>
                             </NavigationMenuLink>
                         </NavigationMenuItem>
@@ -93,7 +93,7 @@ export default function Header() {
                                     )}
                                     data-active={pathname === '/menu'}
                                 >
-                                    MENU_MATRIX
+                                    Thực Đơn
                                 </Link>
                             </NavigationMenuLink>
                         </NavigationMenuItem>
@@ -109,7 +109,7 @@ export default function Header() {
                                     )}
                                     data-active={pathname === '/service'}
                                 >
-                                    SERVICE_GRID
+                                    Dịch Vụ
                                 </Link>
                             </NavigationMenuLink>
                         </NavigationMenuItem>
@@ -125,7 +125,7 @@ export default function Header() {
                                     )}
                                     data-active={pathname === '/blog'}
                                 >
-                                    DATA_STREAM
+                                    Tin Tức & Mẹo Vặt
                                 </Link>
                             </NavigationMenuLink>
                         </NavigationMenuItem>
@@ -142,15 +142,15 @@ export default function Header() {
                                 "hidden lg:inline-flex font-mono text-sm tracking-wider hover:bg-cyan-500/10 hover:shadow-lg hover:shadow-cyan-500/20 border border-cyan-500/30 rounded-lg transition-all duration-300"
                             )}
                         >
-                            SYSTEM_MENU <i className="fa fa-chevron-down ml-2 h-3 w-3 text-xs"></i>
+                            Khác <i className="fa fa-chevron-down ml-2 h-3 w-3 text-xs"></i>
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="bg-[#0a0a0f] border border-cyan-500/30 backdrop-blur-xl shadow-2xl shadow-cyan-500/20">
                         <DropdownMenuItem asChild className="font-mono text-cyan-100 hover:text-cyan-400 hover:bg-cyan-500/10 focus:bg-cyan-500/10 focus:text-cyan-400">
-                            <Link href="/about">ABOUT_NODE</Link>
+                            <Link href="/about">Về Chúng Tôi</Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild className="font-mono text-cyan-100 hover:text-cyan-400 hover:bg-cyan-500/10 focus:bg-cyan-500/10 focus:text-cyan-400">
-                            <Link href="/contact">CONTACT_PROTOCOL</Link>
+                            <Link href="/contact">Liên Hệ</Link>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -158,7 +158,7 @@ export default function Header() {
                 {/* Actions (Booking & Auth) */}
                 <div className="flex items-center gap-4">
                     <Button asChild className="hidden sm:flex bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white border-0 shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 font-mono text-sm tracking-wider transition-all duration-300">
-                        <Link href="/booking">BOOKING_SYNC</Link>
+                        <Link href="/booking">Đặt Bàn Ngay</Link>
                     </Button>
 
                     {user ? (
@@ -180,22 +180,22 @@ export default function Header() {
                                 <DropdownMenuLabel className="font-mono text-cyan-400">
                                     <div className="flex items-center gap-2">
                                         <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
-                                        USER: {truncateName(user.ho_ten, 15)}
+                                        Người Dùng: {truncateName(user.ho_ten, 15)}
                                     </div>
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator className="bg-cyan-500/30" />
                                 <DropdownMenuItem asChild className="font-mono text-cyan-100 hover:text-cyan-400 hover:bg-cyan-500/10 focus:bg-cyan-500/10 focus:text-cyan-400">
-                                    <Link href="/account">ACCOUNT_PORTAL</Link>
+                                    <Link href="/account">Tài Khoản</Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild className="font-mono text-cyan-100 hover:text-cyan-400 hover:bg-cyan-500/10 focus:bg-cyan-500/10 focus:text-cyan-400">
-                                    <Link href="/my-bookings">BOOKING_LOG</Link>
+                                    <Link href="/my-bookings">Lịch Sử Đặt Bàn</Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator className="bg-cyan-500/30" />
                                 <DropdownMenuItem
                                     onClick={handleLogout}
                                     className="font-mono text-red-400 hover:text-red-300 hover:bg-red-500/10 focus:bg-red-500/10 focus:text-red-300"
                                 >
-                                    LOGOUT_SYSTEM
+                                    Đăng Xuất
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -207,7 +207,7 @@ export default function Header() {
                         >
                             <Link href="/login">
                                 <i className="fa-solid fa-terminal me-2 text-xs"></i>
-                                LOGIN_ACCESS
+                                Đăng Nhập
                             </Link>
                         </Button>
                     )}

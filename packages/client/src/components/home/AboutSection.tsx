@@ -40,7 +40,7 @@ export default function AboutSection() {
                         transition={{ duration: 0.7 }}
                         className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-cyan-500/20 shadow-2xl shadow-cyan-500/10"
                     >
-                        <h5 className="font-mono text-cyan-400 text-lg tracking-wider mb-2">SYSTEM_CORE_ONLINE</h5>
+                        <h5 className="font-mono text-cyan-400 text-lg tracking-wider mb-2">Nhà hàng số 1 Việt Nam</h5>
                         <h2 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent mb-6">
                             Chào mừng đến với EnViSi
                         </h2>
@@ -67,7 +67,7 @@ export default function AboutSection() {
 
                         <Button asChild size="lg" className="bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white border-0 shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all">
                             <Link href="/about">
-                                ACCESS_SYSTEM →
+                                Thông tin thêm
                             </Link>
                         </Button>
                     </motion.div>

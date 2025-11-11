@@ -1,15 +1,15 @@
 // packages/admin/src/pages/users/UserFormPage.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import {
-    Form, Input, Button, Select, Spin, message, Row, Col, Switch, Card, App
+    Form, Input, Button, Select, Spin, Row, Col, Switch, App
 } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useGetUserByIdQuery, useCreateUserMutation, useUpdateUserMutation } from '../../features/users/userApi';
 import { useGetRolesQuery } from '../../features/roles/roleApi';
 import ImageUpload from '../../components/common/ImageUpload';
-import { User, UserType, Role } from '../../types/user';
+import { UserType } from '../../types/user';
 
 const { Option } = Select;
 
@@ -82,31 +82,35 @@ const UserFormPage: React.FC = () => {
     }, [selectedUserType, setValue]);
 
     const onSubmit = async (data: FormData) => {
-        const { confirmPassword, ...submitData } = data;
+        const { confirmPassword, vai_tro_id, ...submitData } = data;
 
+        // ... (logic kiểm tra mật khẩu, vai trò) ...
         if (!isEditMode && submitData.loai_nguoi_dung === UserType.NHAN_VIEN && !submitData.password) {
             message.error('Mật khẩu là bắt buộc khi tạo Nhân viên.');
             return;
         }
-        if (submitData.loai_nguoi_dung === UserType.NHAN_VIEN && !submitData.vai_tro_id) {
+        if (submitData.loai_nguoi_dung === UserType.NHAN_VIEN && !vai_tro_id) {
             message.error('Vai trò là bắt buộc đối với Nhân viên.');
             return;
         }
-        if (submitData.loai_nguoi_dung === UserType.KHACH_HANG) {
-            setValue('vai_tro_id', undefined);
-        }
-
         if (!submitData.password) {
             delete submitData.password;
         }
 
         try {
-            const payload = { ...submitData, permissions: (submitData as any).permissions ?? [] };
+            // === SỬA LỖI Ở ĐÂY ===
+            const payload = {
+                ...submitData,
+                vai_tro_id: (submitData.loai_nguoi_dung === UserType.KHACH_HANG) ? undefined : vai_tro_id,
+                permissions: [] // <-- Thêm dòng này để thỏa mãn kiểu UserFormInput
+            };
+            // ======================
+
             if (isEditMode) {
                 await updateUser({ id: Number(id), data: payload }).unwrap();
                 message.success('Cập nhật người dùng thành công!');
             } else {
-                await createUser(payload).unwrap();
+                await createUser(payload).unwrap(); // Dòng 118
                 message.success('Thêm người dùng thành công!');
             }
             navigate('/users');

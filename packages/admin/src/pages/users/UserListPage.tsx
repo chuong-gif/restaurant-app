@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useDebounce } from 'use-debounce';
 
 import { useGetUsersQuery, useDeleteUserMutation } from '../../features/users/userApi';
-import { useGetRolesQuery } from '../../features/roles/roleApi';
+import { useGetAllRolesForDropdownQuery } from '../../features/roles/roleApi';
 import { setUserFilters, setUserPage } from '../../features/users/userSlice';
 import { RootState } from '../../app/store';
 import { User, UserType } from '../../types/user';
@@ -32,7 +32,7 @@ const UserListPage: React.FC = () => {
         search: debouncedSearchTerm,
         trang_thai: true,
     });
-    const { data: roles, isLoading: isLoadingRoles } = useGetRolesQuery({ page: 1, limit: 100 });
+    const { data: roles, isLoading: isLoadingRoles } = useGetAllRolesForDropdownQuery();
     const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
 
     const hasPermission = useCallback((permission: string): boolean => {
@@ -41,9 +41,11 @@ const UserListPage: React.FC = () => {
 
     const handleTabChange = useCallback((key: string) => {
         let userType: UserType | undefined;
-        if (key === 'customers') userType = UserType.KHACH_HANG;
-        else if (key === 'employees') userType = UserType.NHAN_VIEN;
-        dispatch(setUserFilters({ searchUserType: userType, page: 1 }));
+        if (key === 'customers') userType = UserType.KHACH_HANG; // Gửi 'KHACH_HANG'
+        else if (key === 'employees') userType = UserType.NHAN_VIEN; // Gửi 'NHAN_VIEN'
+
+        // Sửa: Tự động xóa lọc vai trò nếu chuyển tab
+        dispatch(setUserFilters({ searchUserType: userType, page: 1, searchRoleId: undefined }));
     }, [dispatch]);
 
     const handleSearch = useCallback((value: string) => {
@@ -52,7 +54,17 @@ const UserListPage: React.FC = () => {
     }, [dispatch]);
 
     const handleRoleChange = useCallback((value: number | undefined) => {
-        dispatch(setUserFilters({ searchRoleId: value, page: 1 }));
+        if (value !== undefined) {
+            // Nếu người dùng chọn 1 vai trò, TỰ ĐỘNG chuyển sang tab "Nhân Viên"
+            dispatch(setUserFilters({
+                searchRoleId: value,
+                searchUserType: UserType.NHAN_VIEN, // Tự động lọc Nhân Viên
+                page: 1
+            }));
+        } else {
+            // Nếu người dùng xóa lọc vai trò
+            dispatch(setUserFilters({ searchRoleId: value, page: 1 }));
+        }
     }, [dispatch]);
 
     const handlePageChange = useCallback((page: number) => {
@@ -119,7 +131,7 @@ const UserListPage: React.FC = () => {
             title: 'Loại TK',
             dataIndex: 'loai_nguoi_dung',
             key: 'loai_nguoi_dung',
-            render: (type: UserType) => (
+            render: (type: string) => ( // Thay đổi từ UserType sang string
                 <Tag
                     color={type === UserType.NHAN_VIEN ? 'blue' : 'purple'}
                     className="rounded-full px-3 py-1 font-medium shadow-soft"
@@ -214,7 +226,7 @@ const UserListPage: React.FC = () => {
                                 disabled={filters.searchUserType === UserType.KHACH_HANG}
                                 className="glass-select rounded-xl"
                             >
-                                {Array.isArray(roles) && roles.map((role) => (
+                                {roles?.map((role) => (
                                     <Option key={role.id} value={role.id}>{role.ten_vai_tro}</Option>
                                 ))}
                             </Select>
