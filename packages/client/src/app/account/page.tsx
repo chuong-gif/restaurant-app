@@ -94,7 +94,7 @@ function UpdateInfoForm({ user, onProfileUpdate }: { user: User, onProfileUpdate
                     name="anh_dai_dien_id"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="font-mono text-cyan-300">AVATAR_UPLOAD</FormLabel>
+                            <FormLabel className="font-mono text-cyan-300">Tải lên ảnh đại diện</FormLabel>
                             <FormControl>
                                 <ImageUpload onImageUpload={(id) => field.onChange(id)} />
                             </FormControl>
@@ -108,7 +108,7 @@ function UpdateInfoForm({ user, onProfileUpdate }: { user: User, onProfileUpdate
                         name="ho_ten"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel className="font-mono text-cyan-300">USER_NAME</FormLabel>
+                                <FormLabel className="font-mono text-cyan-300">Họ và tên</FormLabel>
                                 <FormControl>
                                     <Input
                                         {...field}
@@ -124,7 +124,7 @@ function UpdateInfoForm({ user, onProfileUpdate }: { user: User, onProfileUpdate
                         name="email"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel className="font-mono text-cyan-300">EMAIL_ID</FormLabel>
+                                <FormLabel className="font-mono text-cyan-300">Email</FormLabel>
                                 <FormControl>
                                     <Input
                                         {...field}
@@ -143,7 +143,7 @@ function UpdateInfoForm({ user, onProfileUpdate }: { user: User, onProfileUpdate
                     name="dien_thoai"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="font-mono text-cyan-300">CONTACT_NUMBER</FormLabel>
+                            <FormLabel className="font-mono text-cyan-300">Số điện thoại</FormLabel>
                             <FormControl>
                                 <Input
                                     {...field}
@@ -159,7 +159,7 @@ function UpdateInfoForm({ user, onProfileUpdate }: { user: User, onProfileUpdate
                     name="dia_chi"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="font-mono text-cyan-300">LOCATION_DATA</FormLabel>
+                            <FormLabel className="font-mono text-cyan-300">Địa chỉ</FormLabel>
                             <FormControl>
                                 <AddressSelector
                                     value={field.value || ''}
@@ -212,7 +212,7 @@ function ChangePasswordForm() {
                     name="currentPassword"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="font-mono text-cyan-300">CURRENT_PASSWORD</FormLabel>
+                            <FormLabel className="font-mono text-cyan-300">Mật khẩu hiện tại</FormLabel>
                             <FormControl>
                                 <Input
                                     type="password"
@@ -229,7 +229,7 @@ function ChangePasswordForm() {
                     name="newPassword"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="font-mono text-cyan-300">NEW_PASSWORD</FormLabel>
+                            <FormLabel className="font-mono text-cyan-300">Mật khẩu mới</FormLabel>
                             <FormControl>
                                 <Input
                                     type="password"
@@ -271,7 +271,7 @@ function AccountPageContent() {
     };
 
     if (isLoading) return <GlobalSpinner />;
-    if (error || !user) return <p className="text-cyan-100 text-center py-20">USER_DATA_UNAVAILABLE</p>;
+    if (error || !user) return <p className="text-cyan-100 text-center py-20">Dữ liệu người dùng không khả dụng</p>;
 
     return (
         <div className="w-full bg-[#0a0a0f] min-h-screen">
@@ -285,7 +285,7 @@ function AccountPageContent() {
                 <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,255,0.03)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black,transparent)]"></div>
 
                 <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent relative z-10">
-                    USER_PORTAL
+                    CỔNG NGƯỜI DÙNG
                 </h1>
 
                 {/* Scanning line */}
@@ -299,19 +299,19 @@ function AccountPageContent() {
                             value="profile"
                             className="font-mono text-sm tracking-wider data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-cyan-400 data-[state=active]:border data-[state=active]:border-cyan-500/50 transition-all"
                         >
-                            PROFILE_DATA
+                            THÔNG TIN CÁ NHÂN
                         </TabsTrigger>
                         <TabsTrigger
                             value="password"
                             className="font-mono text-sm tracking-wider data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-cyan-400 data-[state=active]:border data-[state=active]:border-cyan-500/50 transition-all"
                         >
-                            SECURITY_MATRIX
+                            MẬT KHẨU
                         </TabsTrigger>
                         <TabsTrigger
                             value="membership"
                             className="font-mono text-sm tracking-wider data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-cyan-400 data-[state=active]:border data-[state=active]:border-cyan-500/50 transition-all"
                         >
-                            MEMBERSHIP_CARD
+                            THẺ THÀNH VIÊN
                         </TabsTrigger>
                     </TabsList>
 
@@ -319,7 +319,7 @@ function AccountPageContent() {
                         <Card className="bg-[#0a0a0f] border border-cyan-500/30 shadow-2xl shadow-cyan-500/10 backdrop-blur-sm">
                             <CardHeader className="border-b border-cyan-500/20">
                                 <CardTitle className="font-mono text-2xl text-cyan-400 tracking-wider">
-                                    USER_PROFILE_EDITOR
+                                    CHỈNH SỬA THÔNG TIN CÁ NHÂN
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="p-6">
@@ -332,7 +332,7 @@ function AccountPageContent() {
                         <Card className="bg-[#0a0a0f] border border-cyan-500/30 shadow-2xl shadow-cyan-500/10 backdrop-blur-sm">
                             <CardHeader className="border-b border-cyan-500/20">
                                 <CardTitle className="font-mono text-2xl text-cyan-400 tracking-wider">
-                                    PASSWORD_MATRIX
+                                    MẬT KHẨU
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="p-6">
@@ -345,7 +345,7 @@ function AccountPageContent() {
                         <Card className="bg-[#0a0a0f] border border-cyan-500/30 shadow-2xl shadow-cyan-500/10 backdrop-blur-sm">
                             <CardHeader className="border-b border-cyan-500/20">
                                 <CardTitle className="font-mono text-2xl text-cyan-400 tracking-wider">
-                                    MEMBERSHIP_PROTOCOL
+                                    THẺ THÀNH VIÊN
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="p-6">
@@ -354,10 +354,10 @@ function AccountPageContent() {
                                         <div className="w-16 h-16 bg-gradient-to-br from-cyan-400 to-purple-400 rounded-full animate-pulse"></div>
                                     </div>
                                     <p className="font-mono text-cyan-300/70 tracking-wider">
-                                        MEMBERSHIP_SYSTEM_ACTIVATION_PENDING
+                                        KÍCH HOẠT HỆ THỐNG THẺ THÀNH VIÊN ĐANG CHỜ XỬ LÝ
                                     </p>
                                     <p className="font-mono text-cyan-100/50 text-sm mt-2">
-                                        SYSTEM_UNDER_DEVELOPMENT
+                                        Hệ thống đang được phát triển
                                     </p>
                                 </div>
                             </CardContent>

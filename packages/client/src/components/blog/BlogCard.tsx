@@ -38,7 +38,7 @@ export default function BlogCard({ blog }: { blog: Blog }) {
                         <h3 className="text-lg font-bold leading-snug bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent group-hover:from-cyan-300 group-hover:to-purple-300 transition-all duration-300">
                             {blog.tieu_de.length > 50 ? `${blog.tieu_de.slice(0, 50)}...` : blog.tieu_de}
                         </h3>
-                        <p className="text-xs text-cyan-400/60 font-mono">Neural Data Stream</p>
+                        <p className="text-xs text-cyan-400/60 font-mono">Luồng dữ liệu</p>
                     </div>
                 </CardContent>
             </Card>

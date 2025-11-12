@@ -29,7 +29,7 @@ async function RelatedProducts({ categoryId, currentProductId }: { categoryId: n
     return (
         <div className="lg:col-span-1 space-y-6">
             <h2 className="font-mono text-2xl text-cyan-400 border-b border-cyan-500/30 pb-3">
-                RELATED DATA STREAMS
+                Các luồng dữ liệu liên quan
             </h2>
             {relatedProducts.map(product => (
                 <div key={product.id} className="relative group">
@@ -86,10 +86,10 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                         <div className="absolute -inset-1 bg-gradient-to-r from-red-600 to-pink-600 rounded-2xl blur opacity-30"></div>
                         <Card className="relative bg-[#0f0f1a] border border-red-500/30 backdrop-blur-lg p-8">
                             <CardContent>
-                                <h1 className="text-2xl font-mono text-red-400 mb-4">404 - DATA STREAM NOT FOUND</h1>
-                                <p className="text-red-300 font-mono mb-6">REQUESTED PRODUCT DATA DOES NOT EXIST IN NEURAL DATABASE.</p>
+                                <h1 className="text-2xl font-mono text-red-400 mb-4">404 - DỮ LIỆU LUỒNG KHÔNG TÌM THẤY</h1>
+                                <p className="text-red-300 font-mono mb-6">DỮ LIỆU SẢN PHẨM YÊU CẦU KHÔNG TỒN TẠI TRONG CƠ SỞ DỮ LIỆU.</p>
                                 <Button asChild className="font-mono bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white border border-cyan-400/50 hover:border-cyan-300/50 transition-all duration-300">
-                                    <Link href="/menu">RETURN TO DATA STREAM</Link>
+                                    <Link href="/menu">QUAY LẠI DANH MỤC</Link>
                                 </Button>
                             </CardContent>
                         </Card>
@@ -122,10 +122,10 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                 <div className="text-center text-white relative z-10">
                     <h1 className="text-5xl font-bold mb-4">
                         <span className="bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
-                            DATA STREAM ANALYSIS
+                            PHÂN TÍCH LUỒNG DỮ LIỆU
                         </span>
                     </h1>
-                    <p className="text-cyan-300 text-lg mb-4 font-mono">NEURAL PRODUCT INTERFACE</p>
+                    <p className="text-cyan-300 text-lg mb-4 font-mono">GIAO DIỆN SẢN PHẨM</p>
                 </div>
             </div>
 
@@ -169,7 +169,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                                         </div>
                                         <Separator className="bg-cyan-500/30" />
                                         <Button asChild size="lg" className="w-full font-mono bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white border border-cyan-400/50 hover:border-cyan-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/25">
-                                            <Link href="/booking">INITIATE BOOKING PROTOCOL</Link>
+                                            <Link href="/booking">KHỞI TẠO GIAO THỨC ĐẶT CHỖ</Link>
                                         </Button>
                                     </div>
                                 </CardContent>
@@ -177,13 +177,13 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                                 <Separator className="bg-cyan-500/30" />
                                 <CardContent className="p-6 md:p-8">
                                     <h3 className="text-xl font-mono text-cyan-400 mb-4 border-b border-cyan-500/30 pb-2">
-                                        DATA ANALYSIS
+                                        PHÂN TÍCH LUỒNG DỮ LIỆU
                                     </h3>
                                     <div className="prose prose-sm max-w-none">
                                         {product.mo_ta ? (
                                             <p className="text-cyan-200 font-mono leading-relaxed">{product.mo_ta}</p>
                                         ) : (
-                                            <p className="text-cyan-200/70 font-mono">NO DATA STREAM AVAILABLE FOR ANALYSIS.</p>
+                                            <p className="text-cyan-200/70 font-mono">KHÔNG CÓ LUỒNG DỮ LIỆU NÀO ĐỂ PHÂN TÍCH.</p>
                                         )}
                                     </div>
                                 </CardContent>

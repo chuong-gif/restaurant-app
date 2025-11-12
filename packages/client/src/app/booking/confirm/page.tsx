@@ -98,49 +98,49 @@ export default function BookingConfirmPage() {
             <Card className="bg-[#0a0a0f] border border-cyan-500/30 shadow-2xl shadow-cyan-500/10 backdrop-blur-sm">
                 <CardHeader className="border-b border-cyan-500/20">
                     <CardTitle className="text-2xl font-mono text-cyan-400 text-center tracking-wider">
-                        CONFIRMATION_PROTOCOL
+                        Giao thức xác nhận
                     </CardTitle>
                     <CardDescription className="text-center font-mono text-cyan-400/70">
-                        VERIFY_ALL_DATA_BEFORE_CONFIRMATION
+                        Vui lòng kiểm tra tất cả dữ liệu trước khi xác nhận
                     </CardDescription>
                 </CardHeader>
-                // packages/client/src/app/booking/confirm/page.tsx (sửa phần CardContent)
+
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6">
                     {/* Column 1: Booking Information */}
                     <div className="space-y-6">
                         <div>
-                            <h3 className="font-mono text-cyan-300 text-lg mb-4 tracking-wider">USER_DATA</h3>
+                            <h3 className="font-mono text-cyan-300 text-lg mb-4 tracking-wider">Dữ liệu người dùng</h3>
                             <div className="space-y-3 font-mono text-sm">
                                 {/* SỬA: Đổi màu chữ thành sáng hơn */}
-                                <p className="text-cyan-100"><span className="text-cyan-400/70">NAME:</span> {info.fullname}</p>
+                                <p className="text-cyan-100"><span className="text-cyan-400/70">HỌ TÊN:</span> {info.fullname}</p>
                                 <p className="text-cyan-100"><span className="text-cyan-400/70">EMAIL:</span> {info.email}</p>
-                                <p className="text-cyan-100"><span className="text-cyan-400/70">CONTACT:</span> {info.tel}</p>
+                                <p className="text-cyan-100"><span className="text-cyan-400/70">LIÊN HỆ:</span> {info.tel}</p>
                             </div>
                         </div>
                         <Separator className="bg-cyan-500/30" />
                         <div>
-                            <h3 className="font-mono text-cyan-300 text-lg mb-4 tracking-wider">RESERVATION_DETAILS</h3>
+                            <h3 className="font-mono text-cyan-300 text-lg mb-4 tracking-wider">CHI TIẾT ĐẶT BÀN</h3>
                             <div className="space-y-3 font-mono text-sm">
                                 {/* SỬA: Đổi màu chữ thành sáng hơn */}
-                                <p className="text-cyan-100"><span className="text-cyan-400/70">TIMESTAMP:</span> {formatDateTime(info.reservation_date!)}</p>
-                                <p className="text-cyan-100"><span className="text-cyan-400/70">PARTY_SIZE:</span> {info.party_size}</p>
+                                <p className="text-cyan-100"><span className="text-cyan-400/70">THỜI GIAN:</span> {formatDateTime(info.reservation_date!)}</p>
+                                <p className="text-cyan-100"><span className="text-cyan-400/70">SỐ NGƯỜI:</span> {info.party_size}</p>
                                 <p className="text-cyan-100">
-                                    <span className="text-cyan-400/70">TABLES:</span>{' '}
+                                    <span className="text-cyan-400/70">Bàn:</span>{' '}
                                     {selectedTables.length > 0
                                         ? selectedTables.map(t => `TABLE_${t.so_ban}`).join(', ')
                                         : "AUTO_ASSIGN"}
                                 </p>
-                                <p className="text-cyan-100"><span className="text-cyan-400/70">NOTES:</span> {info.note || 'NONE'}</p>
+                                <p className="text-cyan-100"><span className="text-cyan-400/70">Ghi chú:</span> {info.note || 'NONE'}</p>
                             </div>
                         </div>
                     </div>
 
                     {/* Column 2: Selected Items */}
                     <div className="space-y-6">
-                        <h3 className="font-mono text-cyan-300 text-lg tracking-wider">SELECTED_ITEMS ({cart.length})</h3>
+                        <h3 className="font-mono text-cyan-300 text-lg tracking-wider">MÓN ĐÃ CHỌN ({cart.length})</h3>
                         <ScrollArea className="h-[250px] w-full pr-4 border border-cyan-500/30 rounded-md p-4">
                             {cart.length === 0 ? (
-                                <p className="font-mono text-cyan-400/70 text-center py-10">NO_ITEMS_SELECTED</p>
+                                <p className="font-mono text-cyan-400/70 text-center py-10">CHƯA CHỌN MÓN NÀO</p>
                             ) : (
                                 <div className="space-y-4">
                                     {cart.map((item) => (
@@ -174,12 +174,12 @@ export default function BookingConfirmPage() {
                         <div className="space-y-3">
                             <div className="flex justify-between font-mono font-medium">
                                 {/* SỬA: Đổi màu chữ thành sáng hơn */}
-                                <span className="text-cyan-100">SUBTOTAL</span>
+                                <span className="text-cyan-100">Tổng phụ</span>
                                 <span className="text-cyan-400">{formatCurrency(total)}</span>
                             </div>
                             <div className="flex justify-between font-mono font-semibold text-lg">
                                 {/* SỬA: Đổi màu chữ thành sáng hơn */}
-                                <span className="text-cyan-100">DEPOSIT (30%)</span>
+                                <span className="text-cyan-100">TIỀN ĐẶT CỌC (30%)</span>
                                 <span className="text-cyan-400 bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
                                     {formatCurrency(deposit)}
                                 </span>
@@ -202,7 +202,7 @@ export default function BookingConfirmPage() {
                         onClick={() => router.push('/booking/select')}
                         disabled={mutation.isPending}
                     >
-                        RETURN_TO_SELECTION
+                        QUAY LẠI CHỌN MÓN
                     </Button>
                 </CardFooter>
             </Card>

@@ -8,23 +8,23 @@ import { motion } from 'framer-motion';
 const services = [
     {
         icon: <UserCog className="h-12 w-12" />,
-        title: "AI Chef Network",
-        description: "Neural network-trained chefs with 5+ years of experience delivering optimal culinary solutions.",
+        title: "Hệ thống Đầu bếp",
+        description: "Các đầu bếp được đào tạo chuyên nghiệp, với hơn 5 năm kinh nghiệm, cung cấp các giải pháp ẩm thực tối ưu.",
     },
     {
         icon: <UtensilsCrossed className="h-12 w-12" />,
-        title: "Quantum Fresh Ingredients",
-        description: "Each dish is processed with quantum-preserved ingredients ensuring maximum flavor integrity.",
+        title: "Nguyên liệu tươi",
+        description: "Mỗi món ăn được chế biến với nguyên liệu tươi mới đảm bảo độ nguyên vẹn hương vị tối đa.",
     },
     {
         icon: <Armchair className="h-12 w-12" />,
-        title: "Instant Reservation Protocol",
-        description: "Secure your table through our neural booking system. Dishes are pre-optimized upon arrival.",
+        title: "Đặt chỗ Nhanh",
+        description: "Đặt bàn an toàn. Món ăn được tối ưu trước khi bạn đến.",
     },
     {
         icon: <Headset className="h-12 w-12" />,
-        title: "24/7 Support Matrix",
-        description: "Our support neural network is always online. Connect instantly for immediate assistance.",
+        title: "Hỗ trợ 24/7",
+        description: "Mạng lưới hỗ trợ của chúng tôi luôn trực tuyến. Kết nối ngay để được hỗ trợ tức thì.",
     },
 ];
 

@@ -80,22 +80,21 @@ function TableSelector() {
     if (isLoading) return (
         <div className="text-center py-8">
             <div className="inline-block w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
-            <p className="font-mono text-cyan-400/70 mt-2">SCANNING_AVAILABLE_TABLES...</p>
+            <p className="font-mono text-cyan-400/70 mt-2">Đang quét các bảng có sẵn...</p>
         </div>
     );
-    if (error) return <p className="font-mono text-red-400 text-center">SYSTEM_ERROR: {error.message}</p>;
-    if (!data || data.data.length === 0) return <p className="font-mono text-cyan-400/70 text-center">NO_AVAILABLE_TABLES_FOUND</p>;
-
+    if (error) return <p className="font-mono text-red-400 text-center">LỖI HỆ THỐNG: {error.message}</p>;
+    if (!data || data.data.length === 0) return <p className="font-mono text-cyan-400/70 text-center">KHÔNG TÌM THẤY BÀN TRỐNG</p>;
     return (
         <>
             <div className="space-y-6">
                 <p className="text-center font-mono text-cyan-400/70 text-sm tracking-wider">
-                    SELECT_ONE_OR_MULTIPLE_TABLES_FOR_OPTIMAL_CAPACITY
+                    VUI LÒNG CHỌN MỘT HOẶC NHIỀU BÀN ĐỂ TỐI ƯU SỨC CHỨA
                 </p>
 
                 {floors.length > 1 && (
                     <div className="flex flex-col items-center gap-3">
-                        <p className="font-mono text-cyan-300 text-sm">FILTER_BY_FLOOR</p>
+                        <p className="font-mono text-cyan-300 text-sm">LỌC THEO TẦNG</p>
                         <ToggleGroup
                             type="single"
                             value={selectedFloor || ""}
@@ -106,7 +105,7 @@ function TableSelector() {
                                 value=""
                                 className="font-mono text-xs data-[state=on]:bg-cyan-400 data-[state=on]:text-[#0a0a0f] text-cyan-200 hover:text-cyan-400 transition-all"
                             >
-                                ALL_FLOORS
+                                TẤT CẢ CÁC TẦNG
                             </ToggleGroupItem>
                             {floors.map(floor => (
                                 <ToggleGroupItem
@@ -114,7 +113,7 @@ function TableSelector() {
                                     value={floor}
                                     className="font-mono text-xs data-[state=on]:bg-cyan-400 data-[state=on]:text-[#0a0a0f] text-cyan-200 hover:text-cyan-400 transition-all"
                                 >
-                                    FLOOR_{floor}
+                                    TẦNG_{floor}
                                 </ToggleGroupItem>
                             ))}
                         </ToggleGroup>
@@ -131,8 +130,8 @@ function TableSelector() {
                             <Card
                                 key={table.id}
                                 className={`cursor-pointer transition-all duration-500 relative overflow-hidden backdrop-blur-sm ${isSelected
-                                        ? 'border-cyan-400 ring-2 ring-cyan-400/50 bg-cyan-500/10 shadow-lg shadow-cyan-500/20'
-                                        : 'border-cyan-500/30 bg-white/5 hover:border-cyan-400/50 hover:shadow-lg hover:shadow-cyan-500/10'
+                                    ? 'border-cyan-400 ring-2 ring-cyan-400/50 bg-cyan-500/10 shadow-lg shadow-cyan-500/20'
+                                    : 'border-cyan-500/30 bg-white/5 hover:border-cyan-400/50 hover:shadow-lg hover:shadow-cyan-500/10'
                                     }`}
                                 onClick={() => toggleTable(table)}
                             >
@@ -163,9 +162,9 @@ function TableSelector() {
                                             className="w-full h-32 object-cover rounded-md mb-3 relative z-10 group-hover:scale-105 transition-transform duration-300"
                                         />
                                     </div>
-                                    <h3 className="font-mono font-semibold text-cyan-100">TABLE_{table.so_ban}</h3>
-                                    <p className="font-mono text-cyan-400/70 text-xs">CAPACITY: {table.suc_chua}</p>
-                                    <p className="font-mono text-purple-400/70 text-xs">FLOOR: {table.tang}</p>
+                                    <h3 className="font-mono font-semibold text-cyan-100">Bàn ăn_{table.so_ban}</h3>
+                                    <p className="font-mono text-cyan-400/70 text-xs">SỨC CHỨA: {table.suc_chua}</p>
+                                    <p className="font-mono text-purple-400/70 text-xs">TẦNG: {table.tang}</p>
                                 </CardContent>
                             </Card>
                         );
@@ -179,7 +178,7 @@ function TableSelector() {
                     <DialogContent className="max-w-4xl bg-[#0a0a0f] border border-cyan-500/30 backdrop-blur-sm">
                         <DialogHeader>
                             <DialogTitle className="font-mono text-cyan-400 text-center text-xl">
-                                TABLE_PREVIEW - VIDEO_STREAM
+                                XEM TRƯỚC BÀN - PHÁT VIDEO
                             </DialogTitle>
                         </DialogHeader>
 
@@ -192,7 +191,7 @@ function TableSelector() {
                                 className="rounded-lg border border-cyan-500/50 shadow-2xl"
                             >
                                 <source src={viewingVideo} type="video/mp4" />
-                                BROWSER_VIDEO_SUPPORT_REQUIRED
+                                TRÌNH DUYỆT CẦN HỖ TRỢ PHÁT VIDEO
                             </video>
 
                             {/* Nút đóng rõ ràng */}
@@ -212,7 +211,7 @@ function TableSelector() {
                                 className="font-mono border-cyan-500/50 text-cyan-300 hover:bg-cyan-500/10"
                                 onClick={handleCloseVideo}
                             >
-                                CLOSE_PREVIEW
+                                ĐÓNG XEM TRƯỚC
                             </Button>
                         </div>
                     </DialogContent>
@@ -238,11 +237,11 @@ function ProductSelector() {
     if (isLoading) return (
         <div className="text-center py-8">
             <div className="inline-block w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
-            <p className="font-mono text-cyan-400/70 mt-2">LOADING_FOOD_MATRIX...</p>
+            <p className="font-mono text-cyan-400/70 mt-2">ĐANG TẢI THỰC ĐƠN...</p>
         </div>
     );
-    if (error) return <p className="font-mono text-red-400 text-center">SYSTEM_ERROR: {error.message}</p>;
-    if (!data || data.data.length === 0) return <p className="font-mono text-cyan-400/70 text-center">NO_PRODUCTS_AVAILABLE</p>;
+    if (error) return <p className="font-mono text-red-400 text-center">Lỗi hệ thống: {error.message}</p>;
+    if (!data || data.data.length === 0) return <p className="font-mono text-cyan-400/70 text-center">KHÔNG CÓ SẢN PHẨM NÀO</p>;
 
     const groupedProducts = data.data.reduce((acc, product) => {
         const categoryName = product.danh_muc_san_pham?.ten_danh_muc || 'OTHER';
@@ -306,7 +305,7 @@ function ProductSelector() {
                                                 onClick={() => addToCart(product)}
                                                 className="bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white border-0 shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 font-mono text-xs transition-all"
                                             >
-                                                ADD_TO_CART
+                                                Thêm vào giỏ hàng
                                             </Button>
                                         </div>
                                     </CardContent>
@@ -353,32 +352,32 @@ function BookingCart() {
     return (
         <Card className="sticky top-24 bg-[#0a0a0f] border border-cyan-500/30 shadow-2xl shadow-cyan-500/10 backdrop-blur-sm">
             <CardHeader className="border-b border-cyan-500/20">
-                <CardTitle className="font-mono text-cyan-400 tracking-wider">BOOKING_SUMMARY</CardTitle>
+                <CardTitle className="font-mono text-cyan-400 tracking-wider">TÓM TẮT ĐẶT BÀN</CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-6">
                 <div>
-                    <h4 className="font-mono text-cyan-300 text-sm mb-3">BASIC_INFO</h4>
+                    <h4 className="font-mono text-cyan-300 text-sm mb-3">THÔNG TIN CƠ BẢN</h4>
                     <div className="space-y-2 font-mono text-xs">
-                        <p><span className="text-cyan-400/70">TIME:</span> {new Date(info.reservation_date || '').toLocaleString('vi-VN')}</p>
-                        <p><span className="text-cyan-400/70">GUESTS:</span> {partySize}</p>
+                        <p><span className="text-cyan-400/70">THỜI GIAN:</span> {new Date(info.reservation_date || '').toLocaleString('vi-VN')}</p>
+                        <p><span className="text-cyan-400/70">SỐ NGƯỜI:</span> {partySize}</p>
                     </div>
                 </div>
                 <Separator className="bg-cyan-500/30" />
                 <div>
-                    <h4 className="font-mono text-cyan-300 text-sm mb-3">SELECTED_TABLES ({selectedTables.length})</h4>
+                    <h4 className="font-mono text-cyan-300 text-sm mb-3">BÀN ĐÃ CHỌN ({selectedTables.length})</h4>
                     <div className="flex justify-between items-center font-mono text-xs mb-3">
-                        <span className="text-cyan-400/70">TOTAL_CAPACITY:</span>
+                        <span className="text-cyan-400/70">TỔNG SỨC CHỨA:</span>
                         <span className={hasEnoughCapacity ? 'text-cyan-400' : 'text-red-400'}>
                             {totalCapacity} / {partySize}
                         </span>
                     </div>
                     <ScrollArea className="h-[80px] w-full pr-4">
                         {selectedTables.length === 0 ? (
-                            <p className="font-mono text-cyan-400/50 text-xs text-center py-4">NO_TABLES_SELECTED</p>
+                            <p className="font-mono text-cyan-400/50 text-xs text-center py-4">CHƯA CHỌN BÀN NÀO</p>
                         ) : (
                             selectedTables.map(table => (
                                 <p key={table.id} className="font-mono text-cyan-400/70 text-xs mb-1">
-                                    • TABLE_{table.so_ban} (F{table.tang}, CAP:{table.suc_chua})
+                                    • BÀN_{table.so_ban} (TẦNG {table.tang}, SỨC CHỨA: {table.suc_chua})
                                 </p>
                             ))
                         )}
@@ -386,9 +385,9 @@ function BookingCart() {
                 </div>
                 <Separator className="bg-cyan-500/30" />
                 <div>
-                    <h4 className="font-mono text-cyan-300 text-sm mb-3">SELECTED_ITEMS ({cart.length})</h4>
+                    <h4 className="font-mono text-cyan-300 text-sm mb-3">MÓN ĐÃ CHỌN ({cart.length})</h4>
                     {cart.length === 0 ? (
-                        <p className="font-mono text-cyan-400/50 text-xs text-center py-4">CART_EMPTY</p>
+                        <p className="font-mono text-cyan-400/50 text-xs text-center py-4">GIỎ HÀNG TRỐNG</p>
                     ) : (
                         <ScrollArea className="h-[200px] w-full pr-4">
                             <div className="space-y-3">
@@ -434,7 +433,7 @@ function BookingCart() {
                     onClick={handleNextStep}
                     disabled={!hasEnoughCapacity}
                 >
-                    PROCEED_TO_CONFIRMATION
+                    TIẾP TỤC XÁC NHẬN
                 </Button>
             </CardFooter>
         </Card>
@@ -461,7 +460,7 @@ export default function SelectPage() {
                 <div className="lg:col-span-2 space-y-8">
                     <section>
                         <h2 className="text-2xl font-mono font-semibold text-cyan-400 mb-6 tracking-wider">
-                            1. TABLE_SELECTION
+                            1. CHỌN BÀN
                         </h2>
                         <TableSelector />
                     </section>
@@ -470,7 +469,7 @@ export default function SelectPage() {
 
                     <section>
                         <h2 className="text-2xl font-mono font-semibold text-cyan-400 mb-6 tracking-wider">
-                            2. FOOD_SELECTION
+                            2. CHỌN MÓN ĂN
                         </h2>
                         <ScrollArea className="h-[600px] w-full rounded-lg border border-cyan-500/30 p-4">
                             <ProductSelector />

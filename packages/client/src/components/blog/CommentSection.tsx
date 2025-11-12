@@ -151,7 +151,7 @@ function CommentItem({ comment, user }: { comment: BlogComment; user: User | nul
                                 disabled={editMutation.isPending}
                                 className="bg-cyan-600 hover:bg-cyan-500 text-white border border-cyan-400/50"
                             >
-                                ⚡ Save
+                                ⚡ Lưu
                             </Button>
                             <Button
                                 size="sm"
@@ -159,7 +159,7 @@ function CommentItem({ comment, user }: { comment: BlogComment; user: User | nul
                                 onClick={() => setIsEditing(false)}
                                 className="text-cyan-300 hover:text-cyan-100 border border-cyan-500/30"
                             >
-                                Cancel
+                                Hủy
                             </Button>
                         </div>
                     </div>
@@ -175,7 +175,7 @@ function CommentItem({ comment, user }: { comment: BlogComment; user: User | nul
                             className="h-auto p-0 text-cyan-400 hover:text-cyan-300 font-mono text-xs"
                             onClick={() => setIsEditing(true)}
                         >
-                            [EDIT STREAM]
+                            [SỬA LUỒNG]
                         </Button>
                         <Button
                             variant="link"
@@ -183,7 +183,7 @@ function CommentItem({ comment, user }: { comment: BlogComment; user: User | nul
                             className="h-auto p-0 text-red-400 hover:text-red-300 font-mono text-xs"
                             onClick={() => setIsDeleting(true)}
                         >
-                            [DELETE NODE]
+                            [XÓA LUỒNG]
                         </Button>
                     </div>
                 )}
@@ -192,12 +192,12 @@ function CommentItem({ comment, user }: { comment: BlogComment; user: User | nul
             <Dialog open={isDeleting} onOpenChange={setIsDeleting}>
                 <DialogContent className="bg-[#0a0a0f] border border-cyan-500/30 text-cyan-100">
                     <DialogHeader>
-                        <DialogTitle className="text-cyan-300 font-mono">CONFIRM DATA PURGE?</DialogTitle>
+                        <DialogTitle className="text-cyan-300 font-mono">XÁC NHẬN XÓA DỮ LIỆU?</DialogTitle>
                     </DialogHeader>
-                    <p className="text-cyan-200/80">This neural stream will be permanently erased from the core system.</p>
+                    <p className="text-cyan-200/80">Luồng dữ liệu này sẽ bị xóa vĩnh viễn khỏi hệ thống.</p>
                     <DialogFooter>
                         <DialogClose asChild>
-                            <Button variant="ghost" className="text-cyan-300 border border-cyan-500/30">ABORT</Button>
+                            <Button variant="ghost" className="text-cyan-300 border border-cyan-500/30">HỦY</Button>
                         </DialogClose>
                         <Button
                             variant="destructive"
@@ -235,16 +235,16 @@ export default function CommentSection({ blogId }: { blogId: number }) {
                 <CardTitle className="text-cyan-300 font-mono text-xl">
                     NEURAL COMMENTS [{data?.total || 0}]
                 </CardTitle>
-                <p className="text-cyan-400/60 text-sm font-mono">Active thought streams detected</p>
+                <p className="text-cyan-400/60 text-sm font-mono">Phát hiện luồng suy nghĩ đang hoạt động</p>
             </CardHeader>
             <CardContent className="space-y-6 p-6">
                 {user ? (
                     <CommentForm blogId={blogId} />
                 ) : (
                     <div className="text-center text-cyan-300/80 p-6 border border-cyan-500/30 rounded-lg bg-[#0a0a0f]/40">
-                        <p className="font-mono">SYSTEM AUTHENTICATION REQUIRED</p>
+                        <p className="font-mono">YÊU CẦU XÁC THỰC HỆ THỐNG</p>
                         <Link href="/login" className="text-cyan-400 hover:text-cyan-300 underline font-mono text-sm">
-                            INITIATE LOGIN SEQUENCE
+                            KHỞI ĐỘNG TRÌNH TỰ ĐĂNG NHẬP
                         </Link>
                     </div>
                 )}
@@ -254,17 +254,17 @@ export default function CommentSection({ blogId }: { blogId: number }) {
                 <div className="space-y-4">
                     {isLoading && (
                         <div className="text-center py-8">
-                            <div className="animate-pulse text-cyan-400 font-mono">🌀 Loading neural streams...</div>
+                            <div className="animate-pulse text-cyan-400 font-mono">🌀 Đang tải luồng dữ liệu...</div>
                         </div>
                     )}
-                    {error && <p className="text-red-400 font-mono text-center">⚠️ Stream connection failed</p>}
+                    {error && <p className="text-red-400 font-mono text-center">⚠️ Kết nối luồng dữ liệu thất bại</p>}
 
                     {data?.data.map((comment) => (
                         <CommentItem key={comment.id} comment={comment} user={user} />
                     ))}
 
                     {data?.data.length === 0 && !isLoading && (
-                        <p className="text-cyan-400/60 text-center font-mono py-8">No active neural streams detected</p>
+                        <p className="text-cyan-400/60 text-center font-mono py-8">Không phát hiện luồng dữ liệu đang hoạt động</p>
                     )}
                 </div>
             </CardContent>

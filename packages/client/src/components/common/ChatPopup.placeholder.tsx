@@ -18,7 +18,7 @@ export default function ChatPopupPlaceholder() {
                 >
                     <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-cyan-400 rounded-full animate-pulse"></div>
-                        <span className="font-mono font-bold">NEURAL CHAT INTERFACE</span>
+                        <span className="font-mono font-bold">Giao diện trò chuyện</span>
                     </div>
                     <button
                         onClick={() => setIsOpen(false)}
@@ -29,8 +29,8 @@ export default function ChatPopupPlaceholder() {
                 </div>
                 <div className="flex-1 p-6 text-center flex flex-col items-center justify-center bg-gradient-to-b from-cyan-500/5 to-transparent">
                     <div className="text-4xl mb-4">🌀</div>
-                    <p className="text-cyan-300 font-mono text-sm mb-2">SYSTEM INITIALIZING</p>
-                    <p className="text-cyan-400/60 text-xs font-mono">Chat protocols under development</p>
+                    <p className="text-cyan-300 font-mono text-sm mb-2">HỆ THỐNG ĐANG KHỞI ĐỘNG</p>
+                    <p className="text-cyan-400/60 text-xs font-mono">Giao thức trò chuyện đang phát triển</p>
                     <div className="mt-4 w-20 h-1 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full"></div>
                 </div>
             </div>
@@ -46,7 +46,7 @@ export default function ChatPopupPlaceholder() {
                 <div className="text-lg">💬</div>
                 <div className="absolute -inset-1 bg-cyan-400/20 blur-sm rounded-full group-hover:bg-cyan-400/30 transition-all"></div>
             </div>
-            <span className="font-mono text-sm font-bold">NEURAL CHAT</span>
+            <span className="font-mono text-sm font-bold">GIAO DIỆN TRÒ CHUYỆN</span>
         </div>
     );
 }

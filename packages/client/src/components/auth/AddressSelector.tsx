@@ -85,7 +85,7 @@ export default function AddressSelector({ value, onChange }: AddressSelectorProp
     return (
         <div className="space-y-4">
             <div className="space-y-2">
-                <label className="text-cyan-300 font-mono text-sm">COORDINATE SYSTEM</label>
+                <label className="text-cyan-300 font-mono text-sm">Hệ tọa độ</label>
                 <Select
                     value={selectedProvinceCode}
                     onValueChange={handleProvinceChange}
@@ -105,7 +105,7 @@ export default function AddressSelector({ value, onChange }: AddressSelectorProp
             </div>
 
             <div className="space-y-2">
-                <label className="text-cyan-300 font-mono text-sm">DISTRICT GRID</label>
+                <label className="text-cyan-300 font-mono text-sm">LƯỚI QUẬN</label>
                 <Select
                     value={selectedDistrictCode}
                     onValueChange={handleDistrictChange}
@@ -126,7 +126,7 @@ export default function AddressSelector({ value, onChange }: AddressSelectorProp
             </div>
 
             <div className="space-y-2">
-                <label className="text-cyan-300 font-mono text-sm">WARD SECTOR</label>
+                <label className="text-cyan-300 font-mono text-sm">LƯỚI PHƯỜNG</label>
                 <Select
                     value={wards?.find(w => w.name === selectedWardName)?.code.toString()}
                     onValueChange={handleWardChange}
@@ -147,7 +147,7 @@ export default function AddressSelector({ value, onChange }: AddressSelectorProp
             </div>
 
             <div className="space-y-2">
-                <label className="text-cyan-300 font-mono text-sm">STREET COORDINATES</label>
+                <label className="text-cyan-300 font-mono text-sm">TỌA ĐỘ ĐƯỜNG PHỐ</label>
                 <Input
                     placeholder="Enter street coordinates..."
                     value={street}
@@ -157,7 +157,7 @@ export default function AddressSelector({ value, onChange }: AddressSelectorProp
             </div>
 
             <div className="pt-2 border-t border-cyan-500/20">
-                <p className="text-cyan-400/60 text-xs font-mono">📍 Location matrix synchronized</p>
+                <p className="text-cyan-400/60 text-xs font-mono">📍 Vị trí đã được đồng bộ</p>
             </div>
         </div>
     );

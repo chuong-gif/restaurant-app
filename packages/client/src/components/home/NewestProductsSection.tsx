@@ -77,7 +77,7 @@ export default async function NewestProductsSection() {
                 <div className="text-center mb-16">
                     <h5 className="font-mono text-cyan-400 text-lg tracking-wider mb-4">ĐÃ TẢI MENU KỸ THUẬT SỐ</h5>
                     <h2 className="text-5xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-                        Ẩm thực mạng lưới thần kinh
+                        Ẩm thực mạng lưới
                     </h2>
                     <p className="mt-4 text-cyan-200/60 max-w-2xl mx-auto">
                         Trải nghiệm tương lai của ẩm thực với các món ăn được tối ưu hóa theo thuật toán của chúng tôi

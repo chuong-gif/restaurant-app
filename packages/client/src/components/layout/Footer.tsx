@@ -29,7 +29,7 @@ export default function Footer() {
                                 <span className="group-hover:tracking-widest transition-all">Dịch Vụ</span>
                             </Link>
                             <Link href="/policy" className="hover:text-cyan-400 transition-all duration-300 font-mono text-sm tracking-wider group">
-                                <span className="group-hover:tracking-widest transition-all">SECURITY_PROTOCOL</span>
+                                <span className="group-hover:tracking-widest transition-all">Giao thức bảo mật</span>
                             </Link>
                         </div>
                     </div>

@@ -59,7 +59,7 @@ export default function MyBookingsPage() {
             <div className="flex justify-center items-center h-64">
                 <div className="text-center">
                     <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-cyan-400 font-mono">LOADING RESERVATION DATA...</p>
+                    <p className="text-cyan-400 font-mono">Đang tải dữ liệu đặt chỗ...</p>
                 </div>
             </div>
         );
@@ -70,9 +70,9 @@ export default function MyBookingsPage() {
             <div className="relative group">
                 <div className="absolute -inset-1 bg-gradient-to-r from-red-600 to-pink-600 rounded-2xl blur opacity-30"></div>
                 <Card className="relative bg-[#0f0f1a] border border-red-500/30 backdrop-blur-lg">
-                    <CardHeader><CardTitle className="text-red-400 font-mono">SYSTEM ERROR</CardTitle></CardHeader>
+                    <CardHeader><CardTitle className="text-red-400 font-mono">LỖI HỆ THỐNG</CardTitle></CardHeader>
                     <CardContent>
-                        <p className="text-red-300 font-mono">DATA STREAM CORRUPTED. PLEASE RETRY.</p>
+                        <p className="text-red-300 font-mono">DỮ LIỆU LUỒNG BỊ HỎNG. VUI LÒNG THỬ LẠI.</p>
                     </CardContent>
                 </Card>
             </div>
@@ -85,12 +85,12 @@ export default function MyBookingsPage() {
                 <div className="absolute -inset-1 bg-gradient-to-r from-cyan-600 to-purple-600 rounded-2xl blur opacity-30"></div>
                 <Card className="relative bg-[#0f0f1a] border border-cyan-500/30 backdrop-blur-lg text-center">
                     <CardHeader>
-                        <CardTitle className="text-cyan-400 font-mono">NO ACTIVE RESERVATIONS</CardTitle>
+                        <CardTitle className="text-cyan-400 font-mono">KHÔNG CÓ ĐẶT CHỖ NÀO</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-cyan-300 font-mono mb-4">NEURAL DATABASE EMPTY. INITIATE NEW PROTOCOL.</p>
+                        <p className="text-cyan-300 font-mono mb-4">CƠ SỞ DỮ LIỆU TRỐNG. KHỞI TẠO GIAO THỨC MỚI.</p>
                         <Button asChild className="bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white font-mono border border-cyan-400/50 hover:border-cyan-300/50 transition-all duration-300">
-                            <Link href="/booking">INITIATE BOOKING PROTOCOL</Link>
+                            <Link href="/booking">KHỞI TẠO GIAO THỨC ĐẶT CHỖ</Link>
                         </Button>
                     </CardContent>
                 </Card>
@@ -102,8 +102,8 @@ export default function MyBookingsPage() {
         <div className="space-y-6">
             <div className="p-4 bg-black/50 border border-cyan-500/30 rounded-lg mb-4">
                 <div className="flex justify-between items-center text-sm font-mono">
-                    <span className="text-cyan-400">ACTIVE RESERVATIONS: {bookings.length}</span>
-                    <span className="text-purple-400">NEURAL INTERFACE: ONLINE</span>
+                    <span className="text-cyan-400">ĐẶT CHỖ ĐANG HOẠT ĐỘNG: {bookings.length}</span>
+                    <span className="text-purple-400">GIAO DIỆN: ONLINE</span>
                 </div>
             </div>
 
@@ -118,7 +118,7 @@ export default function MyBookingsPage() {
                         <Card className="relative bg-[#0f0f1a] border border-cyan-500/30 backdrop-blur-lg overflow-hidden">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-gradient-to-r from-cyan-900/20 to-purple-900/20">
                                 <CardTitle className="text-lg font-mono text-cyan-300">
-                                    RESERVATION: {booking.ma_dat_ban || `DB-${booking.id}`}
+                                    ĐẶT CHỖ: {booking.ma_dat_ban || `DB-${booking.id}`}
                                 </CardTitle>
                                 <span className={`px-3 py-1 rounded-full text-xs font-mono font-bold ${statusInfo.className}`}>
                                     {statusInfo.text}
@@ -127,27 +127,27 @@ export default function MyBookingsPage() {
                             <CardContent className="pt-6">
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div className="space-y-2">
-                                        <h4 className="font-mono text-cyan-400 text-sm">SYSTEM DATA</h4>
+                                        <h4 className="font-mono text-cyan-400 text-sm">DỮ LIỆU HỆ THỐNG</h4>
                                         <p className="text-sm text-cyan-200 font-mono">
-                                            TABLE: {booking.ban_an?.so_ban || 'AUTO-ASSIGN'}
+                                            Bàn: {booking.ban_an?.so_ban || 'AUTO-ASSIGN'}
                                         </p>
                                         <p className="text-sm text-cyan-200 font-mono">
-                                            GUESTS: {booking.so_luong_khach} UNITS
+                                            KHÁCH: {booking.so_luong_khach} ĐƠN VỊ
                                         </p>
                                     </div>
                                     <div className="space-y-2">
-                                        <h4 className="font-mono text-cyan-400 text-sm">TIME PROTOCOL</h4>
+                                        <h4 className="font-mono text-cyan-400 text-sm">THỜI GIAN</h4>
                                         <p className="text-sm text-cyan-200 font-mono">
                                             {formatDateTime(booking.ngay_dat_ban)}
                                         </p>
                                     </div>
                                     <div className="space-y-2">
-                                        <h4 className="font-mono text-cyan-400 text-sm">FINANCIAL DATA</h4>
+                                        <h4 className="font-mono text-cyan-400 text-sm">DỮ LIỆU TÀI CHÍNH</h4>
                                         <p className="text-sm text-cyan-200 font-mono">
-                                            TOTAL: {formatCurrency(total)}
+                                            TỔNG CỘNG: {formatCurrency(total)}
                                         </p>
                                         <p className="text-sm font-mono text-purple-300 font-bold">
-                                            DEPOSIT: {formatCurrency(deposit)}
+                                            TIỀN ĐẶT CỌC: {formatCurrency(deposit)}
                                         </p>
                                     </div>
                                 </div>
@@ -159,11 +159,11 @@ export default function MyBookingsPage() {
                                         disabled
                                         className="font-mono text-yellow-400 border-yellow-500/30 hover:bg-yellow-500/10 transition-all duration-300"
                                     >
-                                        PAYMENT PROTOCOL [COMING SOON]
+                                        Giao Diện Thanh Toán [SẮP RA MẮT]
                                     </Button>
                                 )}
                                 <Button asChild className="font-mono bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white border border-cyan-400/50 hover:border-cyan-300/50 transition-all duration-300">
-                                    <Link href={`/my-bookings/${booking.id}`}>ACCESS DETAILS</Link>
+                                    <Link href={`/my-bookings/${booking.id}`}>TRUY CẬP CHI TIẾT</Link>
                                 </Button>
                             </CardFooter>
                         </Card>

@@ -71,7 +71,7 @@ export default function ContactPage() {
                             LIÊN HỆ
                         </span>
                     </h1>
-                    <p className="text-cyan-300 text-lg mb-4 font-mono">SYSTEM CORE ONLINE</p>
+                    <p className="text-cyan-300 text-lg mb-4 font-mono">Lõi hệ thống trực tuyến</p>
                     <nav aria-label="breadcrumb" className="mt-2">
                         <ol className="flex justify-center items-center space-x-2 text-sm uppercase font-mono">
                             <li className="flex items-center">
@@ -91,14 +91,14 @@ export default function ContactPage() {
                 {/* Header Section */}
                 <div className="text-center mb-16 relative">
                     <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full"></div>
-                    <h5 className="font-mono text-lg text-cyan-400 mb-2 tracking-wider">NEURAL INTERFACE</h5>
+                    <h5 className="font-mono text-lg text-cyan-400 mb-2 tracking-wider">GIAO DIỆN </h5>
                     <h2 className="text-5xl font-bold text-white mb-4">
                         <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
                             KẾT NỐI HỆ THỐNG
                         </span>
                     </h2>
                     <p className="text-cyan-200 text-lg max-w-2xl mx-auto font-mono">
-                        Direct neural link established. All communication channels secure.
+                        Liên kết trực tiếp đã được thiết lập. Tất cả các kênh liên lạc đều an toàn.
                     </p>
                 </div>
 
@@ -156,7 +156,7 @@ export default function ContactPage() {
                                 tabIndex={0}
                             />
                             <div className="absolute bottom-4 left-4 bg-black/80 backdrop-blur-sm px-3 py-2 rounded-lg border border-cyan-500/50">
-                                <p className="text-cyan-400 font-mono text-sm">COORDINATES SYNCED</p>
+                                <p className="text-cyan-400 font-mono text-sm">Đã đồng bộ tọa độ</p>
                             </div>
                         </div>
                     </div>
@@ -168,10 +168,10 @@ export default function ContactPage() {
                             <CardContent className="p-8">
                                 <div className="mb-6">
                                     <h3 className="text-2xl font-bold text-white mb-2 font-mono">
-                                        NEURAL MESSAGE TRANSMITTER
+                                        BỘ TRUYỀN TIN
                                     </h3>
                                     <p className="text-cyan-300 text-sm font-mono">
-                                        Secure channel established. Ready for transmission.
+                                        Kênh an toàn đã được thiết lập. Sẵn sàng truyền tin.
                                     </p>
                                 </div>
 
@@ -184,7 +184,7 @@ export default function ContactPage() {
                                                 render={({ field }) => (
                                                     <FormItem>
                                                         <FormLabel className="text-cyan-300 font-mono text-sm">
-                                                            IDENTIFICATION
+                                                            NHẬN DẠNG
                                                         </FormLabel>
                                                         <FormControl>
                                                             <Input
@@ -203,7 +203,7 @@ export default function ContactPage() {
                                                 render={({ field }) => (
                                                     <FormItem>
                                                         <FormLabel className="text-cyan-300 font-mono text-sm">
-                                                            NEURAL LINK
+                                                            LIÊN KẾT
                                                         </FormLabel>
                                                         <FormControl>
                                                             <Input
@@ -224,7 +224,7 @@ export default function ContactPage() {
                                             render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel className="text-cyan-300 font-mono text-sm">
-                                                        TRANSMISSION PROTOCOL
+                                                        GIAO THỨC TRUYỀN TẢI
                                                     </FormLabel>
                                                     <FormControl>
                                                         <Input
@@ -243,7 +243,7 @@ export default function ContactPage() {
                                             render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel className="text-cyan-300 font-mono text-sm">
-                                                        MESSAGE DATA STREAM
+                                                        DÒNG DỮ LIỆU TIN NHẮN
                                                     </FormLabel>
                                                     <FormControl>
                                                         <Textarea
@@ -265,11 +265,11 @@ export default function ContactPage() {
                                             {mutation.isPending ? (
                                                 <span className="flex items-center justify-center">
                                                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                                                    TRANSMITTING...
+                                                    ĐANG TRUYỀN TẢI...
                                                 </span>
                                             ) : (
                                                 <span className="flex items-center justify-center">
-                                                    INITIATE TRANSMISSION
+                                                    BẮT ĐẦU TRUYỀN TẢI
                                                     <div className="ml-2 w-2 h-2 bg-cyan-400 rounded-full group-hover:animate-pulse"></div>
                                                 </span>
                                             )}

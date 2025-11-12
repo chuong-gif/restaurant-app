@@ -37,18 +37,18 @@ export default function BookingCart() {
         <Card className="sticky top-24 bg-[#0a0a0f]/80 backdrop-blur-xl border border-cyan-500/30 shadow-2xl shadow-cyan-500/20">
             <CardHeader className="border-b border-cyan-500/20 pb-4">
                 <CardTitle className="text-cyan-300 font-mono text-xl flex items-center gap-2">
-                    <span>🛸 ORDER MATRIX</span>
+                    <span>🛸 Ma trận đơn hàng</span>
                 </CardTitle>
-                <p className="text-cyan-400/60 text-sm font-mono">Active resource allocation</p>
+                <p className="text-cyan-400/60 text-sm font-mono">Phân bổ tài nguyên đang hoạt động</p>
             </CardHeader>
             <CardContent className="space-y-4 p-4">
                 {cart.length === 0 ? (
                     <div className="text-center py-8 space-y-3">
                         <div className="text-6xl">🌌</div>
                         <p className="text-cyan-400/60 font-mono text-sm">
-                            No resources allocated
+                            Không có tài nguyên được phân bổ
                         </p>
-                        <p className="text-cyan-300/40 text-xs font-mono">Awaiting selection protocol</p>
+                        <p className="text-cyan-300/40 text-xs font-mono">Đang chờ giao thức lựa chọn</p>
                     </div>
                 ) : (
                     <>
@@ -97,12 +97,12 @@ export default function BookingCart() {
                         <Separator className="bg-cyan-500/20" />
                         <div className="space-y-2">
                             <div className="flex justify-between items-center font-mono">
-                                <span className="text-cyan-300">Temporary Allocation</span>
+                                <span className="text-cyan-300">Phân bổ tạm thời</span>
                                 <span className="text-cyan-400 font-bold">{formatCurrency(total)}</span>
                             </div>
                             <div className="flex justify-between items-center text-xs text-cyan-400/60 font-mono">
-                                <span>Deposit protocol pending</span>
-                                <span>SYSTEM ONLINE</span>
+                                <span>Giao thức đặt cọc đang chờ xử lý</span>
+                                <span>HỆ THỐNG TRỰC TUYẾN</span>
                             </div>
                         </div>
                     </>

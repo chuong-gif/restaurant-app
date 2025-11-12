@@ -44,12 +44,12 @@ function CategorySidebar({
 
     if (isLoading) return (
         <div className="text-cyan-400 font-mono text-sm p-4 text-center">
-            LOADING CATEGORIES...
+            Đang tải danh mục...
         </div>
     );
     if (error) return (
         <div className="text-red-400 font-mono text-sm p-4 text-center">
-            SYSTEM ERROR: CATEGORY DATA CORRUPTED
+            LỖI HỆ THỐNG: DỮ LIỆU DANH MỤC BỊ HỎNG
         </div>
     );
 
@@ -59,15 +59,15 @@ function CategorySidebar({
             <Card className="relative bg-[#0f0f1a] border border-cyan-500/30 backdrop-blur-lg sticky top-24">
                 <CardContent className="p-6">
                     <h4 className="mb-6 font-mono text-xl text-cyan-400 text-center border-b border-cyan-500/30 pb-3">
-                        DATABASE QUERY
+                        TRUY VẤN CƠ SỞ DỮ LIỆU
                     </h4>
                     <ul className="space-y-3">
                         <li>
                             <Button
                                 variant={selectedId === null ? 'default' : 'ghost'}
                                 className={`w-full justify-start font-mono text-sm transition-all duration-300 ${selectedId === null
-                                        ? 'bg-gradient-to-r from-cyan-600 to-purple-600 text-white border-cyan-400/50'
-                                        : 'bg-transparent text-cyan-300 hover:text-white hover:bg-cyan-500/10 border border-transparent hover:border-cyan-500/30'
+                                    ? 'bg-gradient-to-r from-cyan-600 to-purple-600 text-white border-cyan-400/50'
+                                    : 'bg-transparent text-cyan-300 hover:text-white hover:bg-cyan-500/10 border border-transparent hover:border-cyan-500/30'
                                     }`}
                                 onClick={() => onSelectCategory(null)}
                             >
@@ -79,8 +79,8 @@ function CategorySidebar({
                                 <Button
                                     variant={selectedId === category.id ? 'default' : 'ghost'}
                                     className={`w-full justify-start font-mono text-sm transition-all duration-300 ${selectedId === category.id
-                                            ? 'bg-gradient-to-r from-cyan-600 to-purple-600 text-white border-cyan-400/50'
-                                            : 'bg-transparent text-cyan-300 hover:text-white hover:bg-cyan-500/10 border border-transparent hover:border-cyan-500/30'
+                                        ? 'bg-gradient-to-r from-cyan-600 to-purple-600 text-white border-cyan-400/50'
+                                        : 'bg-transparent text-cyan-300 hover:text-white hover:bg-cyan-500/10 border border-transparent hover:border-cyan-500/30'
                                         }`}
                                     onClick={() => onSelectCategory(category.id)}
                                 >
@@ -126,15 +126,15 @@ function ProductGrid({
     if (isLoading) return <GlobalSpinner />;
     if (error) return (
         <div className="text-center py-20">
-            <p className="text-red-400 font-mono">DATA STREAM INTERRUPTED</p>
+            <p className="text-red-400 font-mono">Luồng dữ liệu bị gián đoạn</p>
         </div>
     );
 
     if (!data || data.data.length === 0) {
         return (
             <div className="text-center py-20">
-                <p className="text-cyan-300 font-mono">NO DATA STREAMS DETECTED</p>
-                <p className="text-cyan-200/60 text-sm mt-2 font-mono">AWAITING SYSTEM UPDATE</p>
+                <p className="text-cyan-300 font-mono">KHÔNG PHÁT HIỆN LUỒNG DỮ LIỆU</p>
+                <p className="text-cyan-200/60 text-sm mt-2 font-mono">ĐANG CHỜ CẬP NHẬT HỆ THỐNG</p>
             </div>
         );
     }
@@ -146,8 +146,8 @@ function ProductGrid({
             {/* Status Bar */}
             <div className="mb-6 p-4 bg-black/50 border border-cyan-500/30 rounded-lg">
                 <div className="flex justify-between items-center text-sm font-mono">
-                    <span className="text-cyan-400">ACTIVE STREAMS: {data.data.length}</span>
-                    <span className="text-purple-400">PAGE {currentPage}/{totalPages}</span>
+                    <span className="text-cyan-400">LUỒNG DỮ LIỆU HOẠT ĐỘNG: {data.data.length}</span>
+                    <span className="text-purple-400">TRANG {currentPage}/{totalPages}</span>
                 </div>
             </div>
 
@@ -207,7 +207,7 @@ function ProductGrid({
                                         onPageChange(Math.max(1, currentPage - 1));
                                     }}
                                 >
-                                    PREV
+                                    Quay lại
                                 </PaginationPrevious>
                             </PaginationItem>
 
@@ -218,8 +218,8 @@ function ProductGrid({
                                             href="#"
                                             isActive={i + 1 === currentPage}
                                             className={`font-mono transition-all duration-300 ${i + 1 === currentPage
-                                                    ? 'bg-gradient-to-r from-cyan-600 to-purple-600 text-white border-cyan-400/50'
-                                                    : 'text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/10'
+                                                ? 'bg-gradient-to-r from-cyan-600 to-purple-600 text-white border-cyan-400/50'
+                                                : 'text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/10'
                                                 }`}
                                             onClick={(e) => {
                                                 e.preventDefault();
@@ -241,7 +241,7 @@ function ProductGrid({
                                         onPageChange(Math.min(totalPages, currentPage + 1));
                                     }}
                                 >
-                                    NEXT
+                                    Tiếp theo
                                 </PaginationNext>
                             </PaginationItem>
                         </PaginationContent>
@@ -281,19 +281,19 @@ export default function MenuPage() {
                 <div className="text-center text-white relative z-10">
                     <h1 className="text-5xl font-bold mb-4">
                         <span className="bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
-                            DATA STREAM
+                            LUỒNG DỮ LIỆU
                         </span>
                     </h1>
-                    <p className="text-cyan-300 text-lg mb-4 font-mono">NEURAL MENU INTERFACE</p>
+                    <p className="text-cyan-300 text-lg mb-4 font-mono">GIAO DIỆN THỰC ĐƠN </p>
                     <nav aria-label="breadcrumb" className="mt-2">
                         <ol className="flex justify-center items-center space-x-2 text-sm uppercase font-mono">
                             <li className="flex items-center">
                                 <Link href="/" className="text-cyan-300 hover:text-cyan-100 transition-colors duration-300">
-                                    HOME SYSTEM
+                                    HỆ THỐNG CHÍNH
                                 </Link>
                                 <span className="mx-2 text-cyan-500">/</span>
                             </li>
-                            <li className="text-cyan-100 font-semibold">DATA STREAM</li>
+                            <li className="text-cyan-100 font-semibold">LUỒNG DỮ LIỆU</li>
                         </ol>
                     </nav>
                 </div>

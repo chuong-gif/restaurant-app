@@ -19,43 +19,43 @@ import { motion } from 'framer-motion';
 const services = [
     {
         icon: <UserCog className="h-12 w-12 text-cyan-400" />,
-        title: "NEURAL CHEF NETWORK",
-        description: "Our cyber-enhanced chef network delivers unparalleled culinary experiences through advanced neural interfaces.",
+        title: "Hệ thống Đầu bếp",
+        description: "Mạng lưới đầu bếp được tăng cường, mang đến trải nghiệm ẩm thực vô song.",
     },
     {
         icon: <UtensilsCrossed className="h-12 w-12 text-cyan-400" />,
-        title: "QUANTUM INGREDIENTS",
-        description: "Molecular-level ingredient optimization ensures every dish achieves maximum flavor potential and nutritional efficiency.",
+        title: "Nguyên liệu tươi",
+        description: "Tối ưu hóa nguyên liệu ở cấp độ phân tử đảm bảo mỗi món ăn đạt được hương vị tối đa và hiệu quả dinh dưỡng.",
     },
     {
         icon: <Armchair className="h-12 w-12 text-cyan-400" />,
-        title: "HOLOGRAPHIC BOOKING",
-        description: "Advanced quantum reservation system with real-time neural interface compatibility for instant table allocation.",
+        title: "Đặt chỗ Nhanh",
+        description: "Hệ thống đặt chỗ lượng tử tiên tiến với khả năng tương thích giao diện thần kinh thời gian thực để phân bổ bàn ngay lập tức.",
     },
     {
         icon: <Headset className="h-12 w-12 text-cyan-400" />,
-        title: "24/7 CYBER SUPPORT",
-        description: "Round-the-clock AI-assisted support with neural link compatibility for instantaneous customer service resolution.",
+        title: "Hỗ trợ 24/7",
+        description: "Hỗ trợ AI 24/7 với khả năng tương thích liên kết để giải quyết dịch vụ khách hàng ngay lập tức.",
     },
     {
         icon: <ShieldCheck className="h-12 w-12 text-cyan-400" />,
-        title: "QUANTUM ENCRYPTION",
-        description: "Military-grade quantum encryption protects all neural data transactions and personal information streams.",
+        title: "Mã hóa Lượng tử",
+        description: "Mã hóa lượng tử cấp quân sự bảo vệ tất cả các giao dịch dữ liệu và luồng thông tin cá nhân.",
     },
     {
         icon: <Truck className="h-12 w-12 text-cyan-400" />,
-        title: "HYPER-LOGISTICS",
-        description: "Quantum-entangled delivery system ensures near-instantaneous food transportation across the neural network.",
+        title: "Giao hàng",
+        description: "Hệ thống giao hàng lượng tử đảm bảo vận chuyển thực phẩm gần như tức thời qua mạng.",
     },
     {
         icon: <HandHelping className="h-12 w-12 text-cyan-400" />,
-        title: "NEURAL ASSISTANCE",
-        description: "AI-powered neural support agents provide real-time assistance through direct cognitive interface protocols.",
+        title: "Hỗ trợ",
+        description: "Đại lý hỗ trợ AI được tăng cường mạng cung cấp trợ giúp thời gian thực thông qua các giao thức giao diện nhận thức trực tiếp.",
     },
     {
         icon: <Gem className="h-12 w-12 text-cyan-400" />,
-        title: "QUANTUM SERVICE",
-        description: "Premium quantum-enhanced service protocols deliver experiences beyond conventional space-time limitations.",
+        title: "DỊCH VỤ",
+        description: "Các giao thức dịch vụ cao cấp được tăng cường lượng tử mang lại trải nghiệm vượt ra ngoài giới hạn không gian-thời gian thông thường.",
     },
 ];
 
@@ -106,19 +106,19 @@ export default function ServicePage() {
                 <div className="text-center text-white relative z-10">
                     <h1 className="text-5xl font-bold mb-4">
                         <span className="bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
-                            QUANTUM SERVICES
+                            DỊCH VỤ
                         </span>
                     </h1>
-                    <p className="text-cyan-300 text-lg mb-4 font-mono">NEURAL SERVICE MATRIX</p>
+                    <p className="text-cyan-300 text-lg mb-4 font-mono">MẠNG LƯỚI DỊCH VỤ </p>
                     <nav aria-label="breadcrumb" className="mt-2">
                         <ol className="flex justify-center items-center space-x-2 text-sm uppercase font-mono">
                             <li className="flex items-center">
                                 <Link href="/" className="text-cyan-300 hover:text-cyan-100 transition-colors duration-300">
-                                    HOME SYSTEM
+                                    HỆ THỐNG CHÍNH
                                 </Link>
                                 <span className="mx-2 text-cyan-500">/</span>
                             </li>
-                            <li className="text-cyan-100 font-semibold">SERVICE MATRIX</li>
+                            <li className="text-cyan-100 font-semibold">MẠNG LƯỚI DỊCH VỤ</li>
                         </ol>
                     </nav>
                 </div>
@@ -128,14 +128,14 @@ export default function ServicePage() {
             <div className="container mx-auto max-w-7xl px-4 py-20">
                 <div className="text-center mb-16 relative">
                     <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full"></div>
-                    <h5 className="font-mono text-2xl text-cyan-400 mb-4 tracking-wider">QUANTUM PROTOCOLS</h5>
+                    <h5 className="font-mono text-2xl text-cyan-400 mb-4 tracking-wider">GIAO THỨC</h5>
                     <h2 className="text-5xl font-bold text-white mb-6">
                         <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-                            SERVICE MATRIX ONLINE
+                            MẠNG LƯỚI DỊCH VỤ TRỰC TUYẾN
                         </span>
                     </h2>
                     <p className="text-cyan-200 text-lg max-w-2xl mx-auto font-mono">
-                        Advanced quantum service protocols activated. All systems operational.
+                        Giao thức dịch vụ đã được kích hoạt. Tất cả hệ thống hoạt động bình thường.
                     </p>
                 </div>
 
@@ -180,19 +180,19 @@ export default function ServicePage() {
                 {/* Status Panel */}
                 <div className="mt-16 p-6 bg-black/50 border border-cyan-500/30 rounded-2xl backdrop-blur-lg">
                     <div className="text-center">
-                        <h3 className="font-mono text-cyan-400 text-xl mb-4">SYSTEM STATUS: ONLINE</h3>
+                        <h3 className="font-mono text-cyan-400 text-xl mb-4">Trạng thái hệ thống: Trực tuyến</h3>
                         <div className="flex justify-center items-center space-x-4 text-sm font-mono">
                             <div className="flex items-center">
                                 <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-                                <span className="text-cyan-300">QUANTUM CORE: ACTIVE</span>
+                                <span className="text-cyan-300">LÕI LƯỢNG TỬ: HOẠT ĐỘNG</span>
                             </div>
                             <div className="flex items-center">
                                 <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-                                <span className="text-cyan-300">NEURAL NET: STABLE</span>
+                                <span className="text-cyan-300">MẠNG: ỔN ĐỊNH</span>
                             </div>
                             <div className="flex items-center">
                                 <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-                                <span className="text-cyan-300">SERVICES: OPTIMAL</span>
+                                <span className="text-cyan-300">DỊCH VỤ: TỐI ƯU</span>
                             </div>
                         </div>
                     </div>

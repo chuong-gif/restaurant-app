@@ -54,7 +54,7 @@ function BlogSidebar({
         <div className="sticky top-24 space-y-8">
             {/* Tìm kiếm */}
             <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-cyan-500/20 shadow-lg shadow-cyan-500/10">
-                <h3 className="font-mono text-cyan-400 text-lg tracking-wider mb-4">SEARCH_MATRIX</h3>
+                <h3 className="font-mono text-cyan-400 text-lg tracking-wider mb-4">Ma trận tìm kiếm</h3>
                 <form onSubmit={handleSearchSubmit}>
                     <Input
                         placeholder="INPUT_SEARCH_QUERY..."
@@ -67,17 +67,17 @@ function BlogSidebar({
 
             {/* Danh mục */}
             <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-cyan-500/20 shadow-lg shadow-cyan-500/10">
-                <h3 className="font-mono text-cyan-400 text-lg tracking-wider mb-4">DATA_CATEGORIES</h3>
+                <h3 className="font-mono text-cyan-400 text-lg tracking-wider mb-4">Danh mục</h3>
                 <div className="flex flex-col space-y-3">
                     <Button
                         variant="ghost"
                         className="justify-start font-mono text-cyan-300/70 hover:text-cyan-400 hover:bg-cyan-500/10 transition-all"
                         onClick={() => onSelectCategory(null)}
                     >
-                        ALL_STREAMS
+                        TẤT CẢ BÀI VIẾT
                     </Button>
                     {isLoadingCategories ? (
-                        <p className="font-mono text-cyan-400/50">LOADING_CATEGORIES...</p>
+                        <p className="font-mono text-cyan-400/50">ĐANG TẢI DANH MỤC...</p>
                     ) : (
                         categories?.data.map((cat: BlogCategory) => (
                             <Button
@@ -95,10 +95,10 @@ function BlogSidebar({
 
             {/* Bài viết mới */}
             <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-cyan-500/20 shadow-lg shadow-cyan-500/10">
-                <h3 className="font-mono text-cyan-400 text-lg tracking-wider mb-4">RECENT_UPDATES</h3>
+                <h3 className="font-mono text-cyan-400 text-lg tracking-wider mb-4">CẬP NHẬT GẦN ĐÂY</h3>
                 <div className="space-y-4">
                     {isLoadingRecent ? (
-                        <p className="font-mono text-cyan-400/50">LOADING_STREAMS...</p>
+                        <p className="font-mono text-cyan-400/50">ĐANG TẢI BÀI VIẾT...</p>
                     ) : (
                         recentPosts?.data.map((post: Blog) => (
                             <Link href={`/blog/${post.slug}`} key={post.id} className="flex items-center gap-4 group p-3 rounded-lg hover:bg-cyan-500/10 transition-all">
@@ -176,18 +176,18 @@ export default function BlogPage() {
 
                 <div className="text-center text-white relative z-10">
                     <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent mb-6">
-                        DATA_FEED
+                        Nguồn dữ liệu
                     </h1>
                     <nav aria-label="breadcrumb" className="mt-4">
                         <ol className="flex justify-center items-center space-x-4 font-mono text-sm tracking-wider">
                             <li className="flex items-center">
                                 <Link href="/" className="text-cyan-300/70 hover:text-cyan-400 transition-colors hover:tracking-widest">
-                                    HOME_NODE
+                                    TRANG CHỦ
                                 </Link>
                                 <span className="mx-2 text-cyan-400/50">/</span>
                             </li>
                             <li className="text-cyan-400 font-semibold" aria-current="page">
-                                DATA_STREAMS
+                                NGUỒN DỮ LIỆU
                             </li>
                         </ol>
                     </nav>
@@ -205,7 +205,7 @@ export default function BlogPage() {
                         {isLoading && <GlobalSpinner />}
                         {error && (
                             <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-6 text-center">
-                                <p className="font-mono text-red-400 tracking-wider">DATA_STREAM_ERROR</p>
+                                <p className="font-mono text-red-400 tracking-wider">LỖI NGUỒN DỮ LIỆU</p>
                             </div>
                         )}
 
@@ -222,7 +222,7 @@ export default function BlogPage() {
                                         <div className="w-16 h-16 mx-auto mb-4 bg-cyan-500/20 rounded-full flex items-center justify-center">
                                             <div className="w-8 h-8 bg-cyan-400 rounded-full animate-pulse"></div>
                                         </div>
-                                        <p className="font-mono text-cyan-300/70 tracking-wider">NO_DATA_STREAMS_FOUND</p>
+                                        <p className="font-mono text-cyan-300/70 tracking-wider">KHÔNG TÌM THẤY BÀI VIẾT</p>
                                     </div>
                                 )}
 
@@ -243,8 +243,8 @@ export default function BlogPage() {
                                                         href="#"
                                                         isActive={i + 1 === currentPage}
                                                         className={`font-mono border ${i + 1 === currentPage
-                                                                ? 'border-cyan-400 bg-cyan-500/20 text-cyan-400'
-                                                                : 'border-cyan-500/30 bg-[#0a0a0f] text-cyan-300 hover:bg-cyan-500/10'
+                                                            ? 'border-cyan-400 bg-cyan-500/20 text-cyan-400'
+                                                            : 'border-cyan-500/30 bg-[#0a0a0f] text-cyan-300 hover:bg-cyan-500/10'
                                                             } transition-all`}
                                                         onClick={(e) => { e.preventDefault(); handlePageChange(i + 1); }}
                                                     >

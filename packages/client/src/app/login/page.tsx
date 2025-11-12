@@ -87,10 +87,10 @@ export default function LoginPage() {
                 <div className="text-center text-white relative z-10">
                     <h1 className="text-5xl font-bold mb-4">
                         <span className="bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
-                            SYSTEM ACCESS
+                            Truy cập hệ thống
                         </span>
                     </h1>
-                    <p className="text-cyan-300 text-lg mb-4 font-mono">NEURAL IDENTIFICATION REQUIRED</p>
+                    <p className="text-cyan-300 text-lg mb-4 font-mono">YÊU CẦU NHẬN DẠNG</p>
                 </div>
             </div>
 
@@ -114,10 +114,10 @@ export default function LoginPage() {
                                 </Link>
                             </div>
                             <CardTitle className="text-2xl font-bold text-white font-mono">
-                                NEURAL SYNC PROTOCOL
+                                GIAO THỨC ĐỒNG BỘ
                             </CardTitle>
                             <CardDescription className="text-cyan-300 font-mono text-sm mt-2">
-                                Authentication sequence initiated
+                                Chuỗi xác thực đã được khởi tạo
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="p-8 pt-0">
@@ -137,7 +137,7 @@ export default function LoginPage() {
 
                             <div className="flex items-center my-6">
                                 <Separator className="flex-1 bg-cyan-500/30" />
-                                <span className="mx-3 text-xs text-cyan-300 font-mono">NEURAL AUTH</span>
+                                <span className="mx-3 text-xs text-cyan-300 font-mono">XÁC THỰC</span>
                                 <Separator className="flex-1 bg-cyan-500/30" />
                             </div>
 
@@ -145,7 +145,7 @@ export default function LoginPage() {
                             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                                 <div className="space-y-3">
                                     <Label htmlFor="email" className="text-cyan-300 font-mono text-sm">
-                                        NEURAL LINK ID
+                                        ID LIÊN KẾT
                                     </Label>
                                     <Input
                                         id="email"
@@ -161,10 +161,10 @@ export default function LoginPage() {
                                 <div className="space-y-3">
                                     <div className="flex justify-between items-center">
                                         <Label htmlFor="password" className="text-cyan-300 font-mono text-sm">
-                                            ENCRYPTION KEY
+                                            KHÓA MÃ HÓA
                                         </Label>
                                         <Link href="/forgot-password" className="text-sm text-cyan-400 hover:text-cyan-200 font-mono transition-colors duration-300">
-                                            KEY RECOVERY?
+                                            KHÔI PHỤC KHÓA?
                                         </Link>
                                     </div>
                                     <Input
@@ -187,11 +187,11 @@ export default function LoginPage() {
                                     {mutation.isPending ? (
                                         <span className="flex items-center justify-center">
                                             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                                            SYNCING...
+                                            Đang đồng bộ...
                                         </span>
                                     ) : (
                                         <span className="flex items-center justify-center">
-                                            INITIATE SYNC
+                                            BẮT ĐẦU ĐỒNG BỘ
                                             <div className="ml-2 w-2 h-2 bg-cyan-400 rounded-full group-hover:animate-pulse"></div>
                                         </span>
                                     )}
@@ -200,13 +200,13 @@ export default function LoginPage() {
                         </CardContent>
                         <CardFooter className="flex-col gap-4 text-center text-sm p-8 pt-0">
                             <p className="text-cyan-200">
-                                New to the network?{' '}
+                                Mới tham gia mạng lưới?{' '}
                                 <Link href="/register" className="text-cyan-400 font-mono font-medium hover:text-cyan-200 transition-colors duration-300">
-                                    REQUEST ACCESS
+                                    YÊU CẦU TRUY CẬP
                                 </Link>
                             </p>
                             <Link href="/policy" className="text-cyan-300/80 hover:text-cyan-200 font-mono text-xs transition-colors duration-300">
-                                VIEW SYSTEM PROTOCOLS
+                                XEM GIAO THỨC HỆ THỐNG
                             </Link>
                         </CardFooter>
                     </Card>

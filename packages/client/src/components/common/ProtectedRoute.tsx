@@ -29,11 +29,11 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
                         <div className="absolute inset-3 h-14 w-14 animate-pulse rounded-full bg-cyan-500/10"></div>
                     </div>
                     <div className="space-y-3">
-                        <p className="text-cyan-300 font-mono text-lg">SECURITY PROTOCOL</p>
+                        <p className="text-cyan-300 font-mono text-lg">Giao thức bảo mật</p>
                         <div className="w-48 h-1.5 bg-cyan-500/20 rounded-full overflow-hidden">
                             <div className="h-full bg-gradient-to-r from-cyan-500 to-purple-500 animate-pulse w-3/4"></div>
                         </div>
-                        <p className="text-cyan-400/60 text-sm font-mono">Verifying neural identity...</p>
+                        <p className="text-cyan-400/60 text-sm font-mono">Xác minh danh tính...</p>
                     </div>
                 </div>
             </div>

@@ -82,7 +82,7 @@ export default function ImageUpload({ onImageUpload }: ImageUploadProps) {
     return (
         <div className="w-full space-y-4">
             <div className="space-y-2">
-                <Label htmlFor="avatar-upload" className="text-cyan-300 font-mono text-sm">NEURAL IMAGE UPLOAD</Label>
+                <Label htmlFor="avatar-upload" className="text-cyan-300 font-mono text-sm">Tải lên hình ảnh</Label>
                 <Input
                     id="avatar-upload"
                     type="file"
@@ -116,7 +116,7 @@ export default function ImageUpload({ onImageUpload }: ImageUploadProps) {
 
             {!uploading && (
                 <div className="text-center p-4 border border-cyan-500/20 rounded-lg bg-[#0a0a0f]/20">
-                    <p className="text-cyan-400/60 text-xs font-mono">Ready for neural image transfer</p>
+                    <p className="text-cyan-400/60 text-xs font-mono">Sẵn sàng cho truyền tải hình ảnh</p>
                 </div>
             )}
         </div>

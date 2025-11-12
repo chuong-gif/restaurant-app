@@ -29,19 +29,19 @@ export default function MyBookingsLayout({
                     <div className="text-center text-white relative z-10">
                         <h1 className="text-5xl font-bold mb-4">
                             <span className="bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
-                                SYSTEM RESERVATIONS
+                                Đặt chỗ hệ thống
                             </span>
                         </h1>
-                        <p className="text-cyan-300 text-lg mb-4 font-mono">NEURAL BOOKING INTERFACE</p>
+                        <p className="text-cyan-300 text-lg mb-4 font-mono">Giao diện đặt chỗ </p>
                         <nav aria-label="breadcrumb" className="mt-2">
                             <ol className="flex justify-center items-center space-x-2 text-sm uppercase font-mono">
                                 <li className="flex items-center">
                                     <Link href="/" className="text-cyan-300 hover:text-cyan-100 transition-colors duration-300">
-                                        HOME SYSTEM
+                                        HỆ THỐNG TRANG CHỦ
                                     </Link>
                                     <span className="mx-2 text-cyan-500">/</span>
                                 </li>
-                                <li className="text-cyan-100 font-semibold">RESERVATION DATA</li>
+                                <li className="text-cyan-100 font-semibold">DỮ LIỆU ĐẶT CHỖ</li>
                             </ol>
                         </nav>
                     </div>

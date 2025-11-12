@@ -34,7 +34,7 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
     if (!blog) {
         return (
             <div className="container mx-auto max-w-7xl px-4 py-20 text-center bg-[#0a0a0f] min-h-screen">
-                <h1 className="text-2xl font-semibold text-cyan-100">404 - DATA_STREAM_NOT_FOUND</h1>
+                <h1 className="text-2xl font-semibold text-cyan-100">404 - Không tìm thấy luồng dữ liệu</h1>
             </div>
         );
     }
@@ -54,24 +54,24 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
 
                 <div className="text-center text-white relative z-10">
                     <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent mb-6">
-                        DATA_STREAM
+                        LUỒNG DỮ LIỆU
                     </h1>
                     <nav aria-label="breadcrumb" className="mt-4">
                         <ol className="flex justify-center items-center space-x-4 font-mono text-sm tracking-wider">
                             <li className="flex items-center">
                                 <Link href="/" className="text-cyan-300/70 hover:text-cyan-400 transition-colors hover:tracking-widest">
-                                    HOME_NODE
+                                    TRANG CHỦ
                                 </Link>
                                 <span className="mx-2 text-cyan-400/50">/</span>
                             </li>
                             <li className="flex items-center">
                                 <Link href="/blog" className="text-cyan-300/70 hover:text-cyan-400 transition-colors hover:tracking-widest">
-                                    DATA_FEED
+                                    LUỒNG DỮ LIỆU
                                 </Link>
                                 <span className="mx-2 text-cyan-400/50">/</span>
                             </li>
                             <li className="text-cyan-400 font-semibold" aria-current="page">
-                                STREAM_ANALYSIS
+                                PHÂN TÍCH LUỒNG DỮ LIỆU
                             </li>
                         </ol>
                     </nav>
@@ -91,10 +91,10 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
                         </h1>
                         <div className="flex items-center space-x-4 mb-8 font-mono text-sm">
                             <span className="text-cyan-400/70 bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/30">
-                                TIMESTAMP: {formatDate(blog.created_at)}
+                                THỜI GIAN: {formatDate(blog.created_at)}
                             </span>
                             <span className="text-purple-400/70 bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/30">
-                                AUTHOR: {blog.nguoi_dung?.ho_ten || 'ENVISI_CORE'}
+                                TÁC GIẢ: {blog.nguoi_dung?.ho_ten || 'ENVISI_CORE'}
                             </span>
                         </div>
 

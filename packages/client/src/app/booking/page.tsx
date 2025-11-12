@@ -75,7 +75,7 @@ export default function BookingInfoPage() {
                 <Card className="bg-[#0a0a0f] border border-cyan-500/30 shadow-2xl shadow-cyan-500/10 backdrop-blur-sm">
                     <CardHeader className="border-b border-cyan-500/20">
                         <CardTitle className="text-center text-2xl font-mono text-cyan-400 tracking-wider">
-                            USER_DATA_INPUT
+                            Nhập dữ liệu người dùng
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-6">
@@ -87,7 +87,7 @@ export default function BookingInfoPage() {
                                         name="fullname"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel className="font-mono text-cyan-300 text-sm tracking-wider">USER_NAME</FormLabel>
+                                                <FormLabel className="font-mono text-cyan-300 text-sm tracking-wider">HỌ VÀ TÊN</FormLabel>
                                                 <FormControl>
                                                     <Input
                                                         placeholder="ENTER_USER_IDENTIFIER"
@@ -104,7 +104,7 @@ export default function BookingInfoPage() {
                                         name="email"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel className="font-mono text-cyan-300 text-sm tracking-wider">EMAIL_PROTOCOL</FormLabel>
+                                                <FormLabel className="font-mono text-cyan-300 text-sm tracking-wider">Giao thức email</FormLabel>
                                                 <FormControl>
                                                     <Input
                                                         type="email"
@@ -124,7 +124,7 @@ export default function BookingInfoPage() {
                                     name="tel"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="font-mono text-cyan-300 text-sm tracking-wider">CONTACT_CHANNEL</FormLabel>
+                                            <FormLabel className="font-mono text-cyan-300 text-sm tracking-wider">Kênh liên lạc</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     type="tel"
@@ -144,7 +144,7 @@ export default function BookingInfoPage() {
                                         name="reservation_date"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel className="font-mono text-cyan-300 text-sm tracking-wider">TIME_SLOT</FormLabel>
+                                                <FormLabel className="font-mono text-cyan-300 text-sm tracking-wider">Khung giờ</FormLabel>
                                                 <FormControl>
                                                     <Input
                                                         type="datetime-local"
@@ -163,7 +163,7 @@ export default function BookingInfoPage() {
                                         name="party_size"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel className="font-mono text-cyan-300 text-sm tracking-wider">PARTY_SIZE</FormLabel>
+                                                <FormLabel className="font-mono text-cyan-300 text-sm tracking-wider">SỐ LƯỢNG KHÁCH</FormLabel>
                                                 <FormControl>
                                                     <Input
                                                         type="number"
@@ -184,7 +184,7 @@ export default function BookingInfoPage() {
                                     name="note"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="font-mono text-cyan-300 text-sm tracking-wider">ADDITIONAL_INSTRUCTIONS</FormLabel>
+                                            <FormLabel className="font-mono text-cyan-300 text-sm tracking-wider">HƯỚNG DẪN BỔ SUNG</FormLabel>
                                             <FormControl>
                                                 <Textarea
                                                     placeholder="SPECIAL_REQUIREMENTS_OR_NOTES..."
@@ -203,7 +203,7 @@ export default function BookingInfoPage() {
                                         size="lg"
                                         className="w-full md:w-auto bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white border-0 shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 font-mono tracking-wider transition-all duration-300"
                                     >
-                                        PROCEED_TO_SELECTION →
+                                        Tiếp tục để chọn
                                     </Button>
                                 </div>
                             </form>

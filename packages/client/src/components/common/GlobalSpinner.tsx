@@ -18,11 +18,11 @@ export default function GlobalSpinner() {
                     <div className="absolute inset-2 h-12 w-12 animate-pulse rounded-full bg-cyan-500/20"></div>
                 </div>
                 <div className="space-y-2">
-                    <p className="text-cyan-300 font-mono text-sm">SYSTEM LOADING</p>
+                    <p className="text-cyan-300 font-mono text-sm">Hệ thống đang khởi động</p>
                     <div className="w-32 h-1 bg-cyan-500/30 rounded-full overflow-hidden">
                         <div className="h-full bg-gradient-to-r from-cyan-500 to-purple-500 animate-pulse"></div>
                     </div>
-                    <p className="text-cyan-400/60 text-xs font-mono">Initializing neural networks...</p>
+                    <p className="text-cyan-400/60 text-xs font-mono">Mạng nơ-ron đang khởi tạo...</p>
                 </div>
             </div>
         </div>

@@ -93,10 +93,10 @@ export default function RegisterPage() {
                 <div className="text-center text-white relative z-10">
                     <h1 className="text-5xl font-bold mb-4">
                         <span className="bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
-                            NEURAL PROFILE CREATION
+                            Tạo hồ sơ
                         </span>
                     </h1>
-                    <p className="text-cyan-300 text-lg mb-4 font-mono">SYSTEM ACCESS REQUEST</p>
+                    <p className="text-cyan-300 text-lg mb-4 font-mono">YÊU CẦU TRUY CẬP HỆ THỐNG</p>
                 </div>
             </div>
 
@@ -118,10 +118,10 @@ export default function RegisterPage() {
                                 </Link>
                             </div>
                             <CardTitle className="text-2xl font-mono text-cyan-400">
-                                CREATE NEURAL PROFILE
+                                Tạo hồ sơ
                             </CardTitle>
                             <CardDescription className="text-cyan-300 font-mono mt-2">
-                                ALL FIELDS REQUIRED FOR SYSTEM INTEGRATION
+                                Tất cả các trường bắt buộc để tích hợp hệ thống
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="p-8">
@@ -133,7 +133,7 @@ export default function RegisterPage() {
                                             name="fullname"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel className="font-mono text-cyan-300 text-sm">NEURAL IDENTIFICATION</FormLabel>
+                                                    <FormLabel className="font-mono text-cyan-300 text-sm">NHẬN DẠNG NEURAL</FormLabel>
                                                     <FormControl>
                                                         <Input
                                                             className="font-mono bg-black/50 border-cyan-500/30 text-white placeholder-cyan-900 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all duration-300"
@@ -150,7 +150,7 @@ export default function RegisterPage() {
                                             name="email"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel className="font-mono text-cyan-300 text-sm">NEURAL LINK</FormLabel>
+                                                    <FormLabel className="font-mono text-cyan-300 text-sm">Liên kết</FormLabel>
                                                     <FormControl>
                                                         <Input
                                                             type="email"
@@ -168,7 +168,7 @@ export default function RegisterPage() {
                                             name="tel"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel className="font-mono text-cyan-300 text-sm">COMMUNICATION PROTOCOL</FormLabel>
+                                                    <FormLabel className="font-mono text-cyan-300 text-sm">GIAO THỨC LIÊN LẠC</FormLabel>
                                                     <FormControl>
                                                         <Input
                                                             className="font-mono bg-black/50 border-cyan-500/30 text-white placeholder-cyan-900 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all duration-300"
@@ -185,7 +185,7 @@ export default function RegisterPage() {
                                             name="password"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel className="font-mono text-cyan-300 text-sm">ENCRYPTION KEY</FormLabel>
+                                                    <FormLabel className="font-mono text-cyan-300 text-sm">KHÓA MÃ HÓA</FormLabel>
                                                     <FormControl>
                                                         <Input
                                                             type="password"
@@ -203,7 +203,7 @@ export default function RegisterPage() {
                                             name="confirmPassword"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel className="font-mono text-cyan-300 text-sm">KEY VERIFICATION</FormLabel>
+                                                    <FormLabel className="font-mono text-cyan-300 text-sm">XÁC NHẬN KHÓA</FormLabel>
                                                     <FormControl>
                                                         <Input
                                                             type="password"
@@ -224,7 +224,7 @@ export default function RegisterPage() {
                                             name="anh_dai_dien_id"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel className="font-mono text-cyan-300 text-sm">NEURAL AVATAR (OPTIONAL)</FormLabel>
+                                                    <FormLabel className="font-mono text-cyan-300 text-sm">Avatar AI (OPTIONAL)</FormLabel>
                                                     <FormControl>
                                                         <ImageUpload
                                                             onImageUpload={(id) => field.onChange(id)}
@@ -239,7 +239,7 @@ export default function RegisterPage() {
                                             name="address"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel className="font-mono text-cyan-300 text-sm">LOCATION DATA</FormLabel>
+                                                    <FormLabel className="font-mono text-cyan-300 text-sm">DỮ LIỆU VỊ TRÍ</FormLabel>
                                                     <FormControl>
                                                         <AddressSelector
                                                             value={field.value || ''}
@@ -260,11 +260,11 @@ export default function RegisterPage() {
                                         {mutation.isPending ? (
                                             <span className="flex items-center justify-center">
                                                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                                                INITIALIZING PROFILE...
+                                                KHỞI TẠO HỒ SƠ...
                                             </span>
                                         ) : (
                                             <span className="flex items-center justify-center">
-                                                ACTIVATE NEURAL PROFILE
+                                                KÍCH HOẠT HỒ SƠ NEURAL
                                                 <div className="ml-2 w-2 h-2 bg-cyan-400 rounded-full group-hover:animate-pulse"></div>
                                             </span>
                                         )}
@@ -274,9 +274,9 @@ export default function RegisterPage() {
                         </CardContent>
                         <CardFooter className="flex-col gap-2 text-center text-sm p-8 pt-0">
                             <p className="text-cyan-200 font-mono">
-                                EXISTING NEURAL PROFILE DETECTED?{' '}
+                                PHÁT HIỆN HỒ SƠ NEURAL TỒN TẠI?{' '}
                                 <Link href="/login" className="text-cyan-400 font-bold hover:text-cyan-200 transition-colors duration-300">
-                                    INITIATE SYNC PROTOCOL
+                                    Khởi chạy giao thức đồng bộ
                                 </Link>
                             </p>
                         </CardFooter>
