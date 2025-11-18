@@ -26,6 +26,15 @@ async function getBlogDetail(slug: string): Promise<Blog | null> {
         return null;
     }
 }
+const cleanContent = (htmlContent: string) => {
+    if (!htmlContent) return "";
+    // Loại bỏ style color: black hoặc #000
+    let clean = htmlContent.replace(/color:\s*(black|#000000|rgb\(0,\s*0,\s*0\));?/gi, "");
+    // Loại bỏ background-color: white (nếu có)
+    clean = clean.replace(/background-color:\s*(white|#ffffff|rgb\(255,\s*255,\s*255\));?/gi, "");
+    return clean;
+};
+
 
 export default async function BlogDetailPage({ params }: { params: { slug: string } }) {
     const { slug } = await params;
@@ -112,9 +121,22 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
 
                         {/* Nội dung bài viết */}
                         <div
-                            className="prose prose-lg max-w-none prose-invert prose-headings:text-cyan-100 prose-p:text-cyan-200/80 prose-strong:text-cyan-300 prose-a:text-cyan-400 hover:prose-a:text-cyan-300 prose-code:text-purple-300 prose-pre:bg-[#0a0a0f] prose-pre:border prose-pre:border-cyan-500/30"
+                            className="prose prose-lg max-w-none prose-invert 
+                            prose-headings:text-cyan-100 
+                            prose-p:text-cyan-200/80 
+                            prose-strong:text-cyan-300 
+                            prose-a:text-cyan-400 hover:prose-a:text-cyan-300 
+                            prose-code:text-purple-300 
+                            prose-pre:bg-[#0a0a0f] prose-pre:border prose-pre:border-cyan-500/30
+                            
+                            /* Thêm class này để ép màu chữ các thẻ con về màu sáng */
+                            [&_span]:!text-cyan-100/90 
+                            [&_p]:!text-cyan-200/80
+                            [&_li]:!text-cyan-200/80"
+
                             dangerouslySetInnerHTML={{
-                                __html: blog.noi_dung,
+                                // Dùng hàm cleanContent bọc nội dung lại
+                                __html: cleanContent(blog.noi_dung),
                             }}
                         />
                     </CardContent>

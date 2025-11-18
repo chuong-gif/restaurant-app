@@ -71,7 +71,7 @@ function CategorySidebar({
                                     }`}
                                 onClick={() => onSelectCategory(null)}
                             >
-                                [ALL SYSTEMS]
+                                Tất cả Sản Phẩm
                             </Button>
                         </li>
                         {data?.data.map((category) => (

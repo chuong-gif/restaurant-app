@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 export default function Footer() {
     return (
-        <div className="bg-[#0a0a0f] text-cyan-100 pt-16 mt-16 relative overflow-hidden">
+        <div className="bg-[#0a0a0f] text-cyan-100 pt-8 relative overflow-hidden">
             {/* Background Effects */}
             <div className="absolute inset-0 bg-gradient-to-t from-cyan-500/5 to-purple-500/5"></div>
             <div className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>

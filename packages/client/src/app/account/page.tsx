@@ -175,7 +175,7 @@ function UpdateInfoForm({ user, onProfileUpdate }: { user: User, onProfileUpdate
                     className="w-full bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white border-0 shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 font-mono tracking-wider transition-all duration-300"
                     disabled={mutation.isPending}
                 >
-                    {mutation.isPending ? "SYNC_IN_PROGRESS..." : "UPDATE_PROFILE"}
+                    {mutation.isPending ? "SYNC_IN_PROGRESS..." : "Update Profile"}
                 </Button>
             </form>
         </Form>
@@ -299,7 +299,7 @@ function AccountPageContent() {
                             value="profile"
                             className="font-mono text-sm tracking-wider data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-cyan-400 data-[state=active]:border data-[state=active]:border-cyan-500/50 transition-all"
                         >
-                            THÔNG TIN CÁ NHÂN
+                            HỒ SƠ CÁ NHÂN
                         </TabsTrigger>
                         <TabsTrigger
                             value="password"
