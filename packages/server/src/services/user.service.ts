@@ -86,17 +86,22 @@ export const getUserById = async (id: number) => {
  * ✨ TẠO NGƯỜI DÙNG MỚI (Sửa: Xử lý Enum, Avatar, Password)
  */
 export const createUser = async (data: any) => {
+
     // Tách các trường đặc biệt
     const { password, anh_dai_dien_id, loai_nguoi_dung, permissions, ...userData } = data;
 
-    // === SỬA LỖI 1: Chuyển đổi String sang Enum ===
+    console.log('🔍 loai_nguoi_dung từ request:', loai_nguoi_dung);
+
+    // === SỬA: Logic chuyển đổi loai_nguoi_dung ===
     let prismaUserType: UserType;
-    if (loai_nguoi_dung === 'Khách Hàng') {
+
+    // Frontend gửi 'Khach_Hang' hoặc 'Nhan_Vien' (từ UserType enum)
+    if (loai_nguoi_dung === 'Khach_Hang' || loai_nguoi_dung === 'KHACH_HANG' || loai_nguoi_dung === 'Khách Hàng') {
         prismaUserType = UserType.Khach_Hang;
-    } else if (loai_nguoi_dung === 'Nhân Viên') {
+    } else if (loai_nguoi_dung === 'Nhan_Vien' || loai_nguoi_dung === 'NHAN_VIEN' || loai_nguoi_dung === 'Nhân Viên') {
         prismaUserType = UserType.Nhan_Vien;
     } else {
-        throw new Error('Loại người dùng không hợp lệ.');
+        throw new Error(`Loại người dùng không hợp lệ: ${loai_nguoi_dung}. Chỉ chấp nhận "Khach_Hang" hoặc "Nhan_Vien".`);
     }
     // ======================================
 
@@ -106,27 +111,27 @@ export const createUser = async (data: any) => {
 
     // Xử lý mật khẩu
     let hashedPassword = '';
-    if (prismaUserType === UserType.Nhan_Vien) {
-        if (!password || password.length < 6) {
-            throw new Error('Mật khẩu cho nhân viên là bắt buộc và tối thiểu 6 ký tự.');
+    if (password) {
+        if (password.length < 6) {
+            throw new Error('Mật khẩu phải có ít nhất 6 ký tự.');
         }
-        hashedPassword = await bcrypt.hash(password, saltRounds);
-    } else if (password) {
         hashedPassword = await bcrypt.hash(password, saltRounds);
     }
 
-    // --- Sửa: Dùng UncheckedCreateInput để gán ID trực tiếp ---
     const createData: Prisma.nguoi_dungUncheckedCreateInput = {
-        ...userData,
+        ho_ten: userData.ho_ten,
+        email: userData.email,
+        dien_thoai: userData.dien_thoai || null,
+        dia_chi: userData.dia_chi || null,
         loai_nguoi_dung: prismaUserType, // Gán Enum đã chuyển đổi
         mat_khau: hashedPassword,
-        anh_dai_dien_id: anh_dai_dien_id ? parseInt(anh_dai_dien_id, 10) : undefined, // Gán ID (number | undefined)
+        trang_thai: userData.trang_thai !== undefined ? userData.trang_thai : true,
+        anh_dai_dien_id: anh_dai_dien_id ? parseInt(anh_dai_dien_id, 10) : undefined,
     };
-    // -----------------------------------------------------
 
     return prisma.nguoi_dung.create({
         data: createData,
-        select: { id: true, email: true, ho_ten: true } // Chỉ trả về các trường an toàn
+        select: { id: true, email: true, ho_ten: true }
     });
 }
 

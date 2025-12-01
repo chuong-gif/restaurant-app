@@ -45,11 +45,11 @@ export const getRoleById = async (id: number) => {
 /**
  * ✨ Tạo vai trò mới
  */
-export const createRole = async (data: { name: string, description?: string }) => {
+export const createRole = async (data: { ten_vai_tro: string, mo_ta?: string }) => {
     return prisma.vai_tro.create({
         data: {
-            ten_vai_tro: data.name,     // 🏷️ Tên vai trò
-            mo_ta: data.description,    // 📝 Mô tả vai trò (nếu có)
+            ten_vai_tro: data.ten_vai_tro,
+            mo_ta: data.mo_ta || null,
         },
     });
 };

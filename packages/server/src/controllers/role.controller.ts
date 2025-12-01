@@ -35,11 +35,16 @@ export const handleGetRoleById = async (req: Request, res: Response) => {
 // 📘 Tạo mới một vai trò
 export const handleCreateRole = async (req: Request, res: Response) => {
     try {
-        // Gửi dữ liệu từ body sang service để tạo mới
-        const newRole = await roleService.createRole(req.body);
+        // Transform dữ liệu từ frontend sang đúng format service cần
+        const { ten_vai_tro, mo_ta } = req.body;
+
+        const newRole = await roleService.createRole({
+            ten_vai_tro,
+            mo_ta
+        });
+
         res.status(201).json({ message: 'Tạo vai trò thành công', data: newRole });
     } catch (error: any) {
-        // Lỗi dữ liệu đầu vào hoặc logic
         res.status(400).json({ message: error.message });
     }
 };

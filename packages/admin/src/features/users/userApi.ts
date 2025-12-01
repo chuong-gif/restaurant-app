@@ -18,6 +18,7 @@ interface UserResponse {
 
 type UserFormInput = Omit<User, 'id' | 'created_at' | 'vai_tro' | 'media_files'> & {
     password?: string;
+    permissions?: string[]; // Thêm trường này, optional
 };
 
 

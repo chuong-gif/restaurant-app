@@ -82,35 +82,40 @@ const UserFormPage: React.FC = () => {
     }, [selectedUserType, setValue]);
 
     const onSubmit = async (data: FormData) => {
-        const { confirmPassword, vai_tro_id, ...submitData } = data;
+        const { confirmPassword, ...submitData } = data;
 
-        // ... (logic kiểm tra mật khẩu, vai trò) ...
+        // Validate mật khẩu
         if (!isEditMode && submitData.loai_nguoi_dung === UserType.NHAN_VIEN && !submitData.password) {
             message.error('Mật khẩu là bắt buộc khi tạo Nhân viên.');
             return;
         }
-        if (submitData.loai_nguoi_dung === UserType.NHAN_VIEN && !vai_tro_id) {
+
+        if (submitData.loai_nguoi_dung === UserType.NHAN_VIEN && !submitData.vai_tro_id) {
             message.error('Vai trò là bắt buộc đối với Nhân viên.');
             return;
         }
+
+        // Xử lý mật khẩu
         if (!submitData.password) {
             delete submitData.password;
         }
 
-        try {
-            // === SỬA LỖI Ở ĐÂY ===
-            const payload = {
-                ...submitData,
-                vai_tro_id: (submitData.loai_nguoi_dung === UserType.KHACH_HANG) ? undefined : vai_tro_id,
-                permissions: [] // <-- Thêm dòng này để thỏa mãn kiểu UserFormInput
-            };
-            // ======================
+        // Xử lý vai trò cho khách hàng
+        if (submitData.loai_nguoi_dung === UserType.KHACH_HANG) {
+            delete submitData.vai_tro_id;
+        }
 
+        try {
             if (isEditMode) {
-                await updateUser({ id: Number(id), data: payload }).unwrap();
+                await updateUser({ id: Number(id), data: submitData }).unwrap();
                 message.success('Cập nhật người dùng thành công!');
             } else {
-                await createUser(payload).unwrap(); // Dòng 118
+                // THÊM permissions: [] vào payload
+                const payload = {
+                    ...submitData,
+                    permissions: [] // <-- Thêm dòng này
+                };
+                await createUser(payload).unwrap(); // Dòng 114
                 message.success('Thêm người dùng thành công!');
             }
             navigate('/users');
