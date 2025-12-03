@@ -35,7 +35,7 @@ import {
     handleGetPublicCategories as handleGetPublicBlogCategories
 } from '../controllers/blogCategory.controller';
 // ======================================
-
+import promotionPublicRoutes from './promotion.public.routes';
 const router = Router();
 
 /* ==========================================================
@@ -57,7 +57,7 @@ publicRouter.get('/blogs/slug/:slug', handleGetBlogBySlug); // Lấy chi tiết 
 publicRouter.use('/comments', blogCommentRoutes); // Gắn route bình luận (đã có public GET)
 publicRouter.use('/contact', contactRoutes);
 // ================================================
-
+router.use('/public/promotions', promotionPublicRoutes);
 router.use('/public', publicRouter);
 
 /* ==========================================================

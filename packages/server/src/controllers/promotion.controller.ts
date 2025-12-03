@@ -39,25 +39,24 @@ export const handleGetPromotionById = async (req: Request, res: Response) => {
 // ====================== TẠO MỚI KHUYẾN MÃI ======================
 export const handleCreatePromotion = async (req: Request, res: Response) => {
     try {
-        // Lấy dữ liệu từ body của request
         const { code_name, discount, quantity, valid_from, valid_to, type } = req.body;
 
-        // Gọi service để tạo mới khuyến mãi (chuyển đổi định dạng ngày và kiểu boolean)
+        // SỬA: Bỏ so sánh với 1, sử dụng trực tiếp giá trị boolean
         const newPromotion = await promotionService.createPromotion({
             code_name,
             discount,
             quantity,
-            valid_from: new Date(valid_from), // Ép kiểu sang Date
-            valid_to: new Date(valid_to),     // Ép kiểu sang Date
-            type: type === 1                  // Nếu type = 1 → true (ví dụ: mã giảm % hay cố định)
+            valid_from: new Date(valid_from),
+            valid_to: new Date(valid_to),
+            type: type // SỬA: Dùng trực tiếp giá trị boolean
         });
 
-        // Trả về phản hồi thành công
         res.status(201).json({ message: 'Tạo khuyến mãi thành công', data: newPromotion });
     } catch (error: any) {
         res.status(500).json({ message: 'Lỗi máy chủ', error: error.message });
     }
 };
+
 
 // ====================== CẬP NHẬT KHUYẾN MÃI ======================
 export const handleUpdatePromotion = async (req: Request, res: Response) => {
@@ -86,5 +85,42 @@ export const handleDeletePromotion = async (req: Request, res: Response) => {
         res.status(200).json({ message: 'Xóa khuyến mãi thành công' });
     } catch (error: any) {
         res.status(500).json({ message: 'Lỗi máy chủ', error: error.message });
+    }
+};
+
+// HÀM MỚI: Kiểm tra mã khuyến mãi
+export const handleCheckPromotion = async (req: Request, res: Response) => {
+    try {
+        const { promo_code, total_amount } = req.body;
+
+        if (!promo_code) {
+            return res.status(400).json({
+                valid: false,
+                message: 'Vui lòng nhập mã khuyến mãi.'
+            });
+        }
+
+        const result = await promotionService.checkPromotion(promo_code, total_amount || 0);
+
+        if (result.valid) {
+            return res.json({
+                valid: true,
+                discount_amount: result.discount_amount,
+                discount_type: result.discount_type,
+                promo_id: result.promo_id,
+                message: 'Mã khuyến mãi hợp lệ'
+            });
+        } else {
+            return res.status(400).json({
+                valid: false,
+                message: result.message
+            });
+        }
+    } catch (error) {
+        console.error('Error checking promotion:', error);
+        return res.status(500).json({
+            valid: false,
+            message: 'Đã xảy ra lỗi khi kiểm tra mã khuyến mãi.'
+        });
     }
 };

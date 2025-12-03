@@ -1,51 +1,51 @@
 // packages/admin/src/components/reservations/ReservationAddForm.tsx
 import React, { useState } from 'react';
-import { Form, Input, InputNumber, DatePicker, Select, TimePicker, Button, Spin, Row, Col, Divider, message, App, Table, Empty, Typography, } from 'antd';
+import { Form, Input, InputNumber, DatePicker, Select, TimePicker, Button, Spin, Row, Col, Divider, App, Table, Empty, Typography } from 'antd';
 import { useForm, Controller } from 'react-hook-form';
-import dayjs from 'dayjs'; // Cần cài: npm install dayjs
-import utc from 'dayjs/plugin/utc'; // Cần plugin utc
-import timezone from 'dayjs/plugin/timezone'; // Cần plugin timezone
-import vi from 'dayjs/locale/vi'; // Import locale tiếng Việt
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import vi from 'dayjs/locale/vi';
 
 import { useGetProductsQuery } from '../../features/products/productApi';
 import { useGetAvailableTablesByDateQuery } from '../../features/tables/tableApi';
 import { useCreateAdminReservationMutation } from '../../features/reservations/reservationApi';
-import { Table as RestaurantTable } from '../../types/product'; // Import từ reservation types
+import { useGetAdminPromotionsQuery } from '../../features/promotions/promotionApi';
+
+import { Table as RestaurantTable } from '../../types/product';
 import { formatCurrency } from '../../utils/FormatCurrency';
 import { useDebounce } from 'use-debounce';
+import { Promotion } from '../../types/promotion';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
-dayjs.locale(vi); // Set locale tiếng Việt
+dayjs.locale(vi);
 
 const { Option } = Select;
 const { Title, Text } = Typography;
 
 interface ReservationAddFormProps {
-    onSuccess?: () => void; // Callback khi tạo thành công
-    onCancel?: () => void; // Callback khi hủy
+    onSuccess?: () => void;
+    onCancel?: () => void;
 }
 
-// Kiểu dữ liệu cho form
 type FormData = {
     fullname: string;
     tel: string;
     email?: string;
-    reservation_date: dayjs.Dayjs | null; // Dùng dayjs object
+    reservation_date: dayjs.Dayjs | null;
     reservation_time: dayjs.Dayjs | null;
     party_size: number;
     note?: string;
-    ban_an_ids: number[]; // Bàn được chọn
+    ban_an_ids: number[];
 };
 
-// Kiểu dữ liệu món ăn trong form
 interface DishItem {
     productId: number;
     name: string;
     quantity: number;
     price: number;
 }
-
 
 const ReservationAddForm: React.FC<ReservationAddFormProps> = ({ onSuccess }) => {
     const { message } = App.useApp();
@@ -54,6 +54,7 @@ const ReservationAddForm: React.FC<ReservationAddFormProps> = ({ onSuccess }) =>
     const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
     const [selectedProductToAdd, setSelectedProductToAdd] = useState<number | undefined>(undefined);
     const [quantityToAdd, setQuantityToAdd] = useState<number>(1);
+    const [selectedPromoId, setSelectedPromoId] = useState<number | undefined>(undefined);
 
     const { control, handleSubmit, watch, reset, formState: { errors } } = useForm<FormData>({
         defaultValues: {
@@ -68,31 +69,36 @@ const ReservationAddForm: React.FC<ReservationAddFormProps> = ({ onSuccess }) =>
         }
     });
 
-    // Lấy giá trị ngày/giờ và số khách để tìm bàn
     const watchDate = watch('reservation_date');
     const watchTime = watch('reservation_time');
     const combinedDateTime = watchDate && watchTime ? watchDate.hour(watchTime.hour()).minute(watchTime.minute()).second(0).toISOString() : undefined;
 
-    // --- RTK Query ---
-    // Tìm bàn trống
-    // tableApi may export different hook names depending on version; pick the first available one.
     const { data: availableTablesResult, isLoading: isLoadingTables, isFetching: isFetchingTables } = useGetAvailableTablesByDateQuery({
-        date: combinedDateTime!, // Chỉ gọi khi có đủ ngày giờ
+        date: combinedDateTime!,
     }, {
-        skip: !combinedDateTime, // Bỏ qua nếu thiếu ngày giờ
+        skip: !combinedDateTime,
     });
     const availableTables = availableTablesResult?.data || [];
-    // Tìm sản phẩm để thêm
+
     const { data: productsData, isLoading: isLoadingProducts } = useGetProductsQuery({
         page: 1, pageSize: 50, searchName: debouncedSearchTerm, trang_thai: true,
     });
 
-
-
     const [createAdminReservation, { isLoading: isCreating }] = useCreateAdminReservationMutation();
 
+    const { data: promotionsData } = useGetAdminPromotionsQuery({
+        page: 1,
+        limit: 100,
+        search: '',
+    });
 
-    // --- Handlers ---
+    const validPromotions = promotionsData?.data?.filter((promo: Promotion) => {
+        const now = dayjs();
+        const start = dayjs(promo.ngay_hieu_luc);
+        const end = dayjs(promo.ngay_ket_thuc);
+        return now.isAfter(start) && now.isBefore(end) && promo.so_luong > 0;
+    }) || [];
+
     const handleAddDish = () => {
         if (!selectedProductToAdd || quantityToAdd <= 0) return;
         const product = productsData?.data.find(p => p.id === selectedProductToAdd);
@@ -103,12 +109,10 @@ const ReservationAddForm: React.FC<ReservationAddFormProps> = ({ onSuccess }) =>
         setSelectedDishes(prev => {
             const existingIndex = prev.findIndex(d => d.productId === selectedProductToAdd);
             if (existingIndex > -1) {
-                // Cập nhật số lượng
                 const updated = [...prev];
                 updated[existingIndex].quantity += quantityToAdd;
                 return updated;
             } else {
-                // Thêm mới
                 return [...prev, { productId: product.id, name: product.ten_san_pham, quantity: quantityToAdd, price }];
             }
         });
@@ -118,12 +122,34 @@ const ReservationAddForm: React.FC<ReservationAddFormProps> = ({ onSuccess }) =>
     };
 
     const handleDishQuantityChange = (productId: number, newQuantity: number | null) => {
-        if (newQuantity === null || newQuantity <= 0) { // Xóa nếu số lượng <= 0
+        if (newQuantity === null || newQuantity <= 0) {
             setSelectedDishes(prev => prev.filter(d => d.productId !== productId));
         } else {
             setSelectedDishes(prev => prev.map(d => d.productId === productId ? { ...d, quantity: newQuantity } : d));
         }
     };
+
+    const calculateTotal = () => {
+        const subtotal = selectedDishes.reduce((sum, dish) => sum + dish.price * dish.quantity, 0);
+
+        if (selectedPromoId) {
+            const promo = validPromotions.find((p: Promotion) => p.id === selectedPromoId);
+            if (promo) {
+                let discount = 0;
+                // Theo database: true = phần trăm, false = số tiền
+                if (promo.loai_giam_gia === true) { // true = phần trăm
+                    discount = (subtotal * promo.giam_gia) / 100;
+                } else { // false = giảm theo số tiền
+                    discount = promo.giam_gia;
+                }
+                return Math.max(0, subtotal - discount);
+            }
+        }
+        return subtotal;
+    };
+
+    const totalBill = calculateTotal();
+    const discountAmount = selectedDishes.reduce((sum, dish) => sum + dish.price * dish.quantity, 0) - totalBill;
 
     const onSubmit = async (data: FormData) => {
         if (!data.reservation_date || !data.reservation_time) {
@@ -131,12 +157,10 @@ const ReservationAddForm: React.FC<ReservationAddFormProps> = ({ onSuccess }) =>
             return;
         }
 
-        // === THÊM KIỂM TRA NÀY ===
         if (selectedDishes.length === 0) {
             message.error('Vui lòng chọn ít nhất một món ăn.');
             return;
         }
-        // ========================
 
         if (!data.ban_an_ids || data.ban_an_ids.length === 0) {
             message.error('Vui lòng chọn ít nhất một bàn ăn.');
@@ -147,9 +171,8 @@ const ReservationAddForm: React.FC<ReservationAddFormProps> = ({ onSuccess }) =>
             .hour(data.reservation_time.hour())
             .minute(data.reservation_time.minute())
             .second(0)
-            .utc() // Chuyển sang UTC trước khi gửi ISO string
+            .utc()
             .toISOString();
-
 
         const submitData = {
             fullname: data.fullname,
@@ -158,46 +181,40 @@ const ReservationAddForm: React.FC<ReservationAddFormProps> = ({ onSuccess }) =>
             reservation_date: submitDateTime,
             party_size: data.party_size,
             note: data.note || undefined,
-            ban_an_ids: data.ban_an_ids,// Gửi ID bàn đã chọn (hoặc undefined)
+            ban_an_ids: data.ban_an_ids,
             products: selectedDishes.map(d => ({ product_id: d.productId, quantity: d.quantity })),
-            // status: Mặc định backend sẽ xử lý
+            khuyen_mai_id: selectedPromoId || undefined,
         };
 
         try {
             await createAdminReservation(submitData).unwrap();
             message.success('Tạo đặt bàn thành công!');
-            reset(); // Reset form
-            setSelectedDishes([]); // Xóa món đã chọn
-            onSuccess?.(); // Gọi callback thành công (để đóng modal chẳng hạn)
+            reset();
+            setSelectedDishes([]);
+            setSelectedPromoId(undefined);
+            onSuccess?.();
         } catch (err: any) {
             console.error('Lỗi tạo đặt bàn:', err);
             message.error(err.data?.message || 'Tạo đặt bàn thất bại.');
         }
     };
 
-    // --- Disabled Date/Time ---
     const disabledDate = (current: dayjs.Dayjs) => {
-        // Không cho chọn quá khứ và quá 7 ngày tới
         const today = dayjs().startOf('day');
         const maxDate = today.add(7, 'day');
         return current && (current < today || current > maxDate);
     };
 
     const disabledTime = () => {
-        // Chỉ cho chọn từ 9h đến 20h
         const disabledHours = () => {
             const hours = [];
-            for (let i = 0; i < 9; i++) hours.push(i); // Trước 9h
-            for (let i = 21; i < 24; i++) hours.push(i); // Sau 20h (giờ bắt đầu là 20)
+            for (let i = 0; i < 9; i++) hours.push(i);
+            for (let i = 21; i < 24; i++) hours.push(i);
             return hours;
         };
-        return {
-            disabledHours,
-            // Có thể thêm disabledMinutes nếu cần chặn phút cụ thể
-        };
+        return { disabledHours };
     };
 
-    // --- Columns ---
     const dishColumns = [
         { title: 'Tên món', dataIndex: 'name', key: 'name' },
         {
@@ -210,13 +227,10 @@ const ReservationAddForm: React.FC<ReservationAddFormProps> = ({ onSuccess }) =>
         { title: 'Thành tiền', key: 'total', render: (record: DishItem) => formatCurrency(record.price * record.quantity) },
     ];
 
-    const totalBill = selectedDishes.reduce((sum, dish) => sum + dish.price * dish.quantity, 0);
-
     return (
         <Spin spinning={isCreating || isLoadingTables || isLoadingProducts}>
             <Form id="reservation-add-form" layout="vertical" onFinish={handleSubmit(onSubmit)}>
                 <Row gutter={24}>
-                    {/* Thông tin khách & đặt bàn */}
                     <Col xs={24} md={12}>
                         <Title level={5}>Thông tin Khách hàng & Đặt bàn</Title>
                         <Form.Item label="Họ tên KH" required validateStatus={errors.fullname ? 'error' : ''} help={errors.fullname?.message}>
@@ -249,13 +263,37 @@ const ReservationAddForm: React.FC<ReservationAddFormProps> = ({ onSuccess }) =>
                             <Controller name="party_size" control={control} rules={{ required: 'Nhập số khách', min: { value: 1, message: 'Ít nhất 1 khách' } }}
                                 render={({ field }) => <InputNumber {...field} min={1} style={{ width: '100%' }} placeholder="Số người" />} />
                         </Form.Item>
+
+                        <Form.Item label="Mã khuyến mãi">
+                            <Select
+                                value={selectedPromoId}
+                                onChange={(value) => setSelectedPromoId(value)}
+                                placeholder="Chọn mã khuyến mãi (nếu có)"
+                                allowClear
+                                loading={!promotionsData}
+                                showSearch
+                                filterOption={(input, option) =>
+                                    (option?.children?.toString() ?? '').toLowerCase().includes(input.toLowerCase())
+                                }
+                            >
+                                {validPromotions.map((promo: Promotion) => (
+                                    <Option key={promo.id} value={promo.id}>
+                                        {promo.ma_khuyen_mai} - Giảm: {
+                                            promo.loai_giam_gia === false ?
+                                                formatCurrency(promo.giam_gia) :
+                                                `${promo.giam_gia}%`
+                                        } (Còn: {promo.so_luong} lượt)
+                                    </Option>
+                                ))}
+                            </Select>
+                        </Form.Item>
+
                         <Form.Item label="Chọn bàn (Có thể chọn nhiều)" required validateStatus={errors.ban_an_ids ? 'error' : ''} help={errors.ban_an_ids?.message}>
                             <Controller name="ban_an_ids" control={control} rules={{ required: 'Vui lòng chọn bàn' }}
                                 render={({ field }) => (
-                                    // === SỬA: Dùng mode="multiple" ===
                                     <Select
                                         {...field}
-                                        mode="multiple" // <-- CHO PHÉP CHỌN NHIỀU
+                                        mode="multiple"
                                         placeholder="Chọn các bàn trống"
                                         loading={isFetchingTables}
                                         allowClear
@@ -278,7 +316,6 @@ const ReservationAddForm: React.FC<ReservationAddFormProps> = ({ onSuccess }) =>
                         </Form.Item>
                     </Col>
 
-                    {/* Chọn món ăn */}
                     <Col xs={24} md={12}>
                         <Title level={5}>Chọn món ăn</Title>
                         <Row gutter={8} align="bottom">
@@ -319,23 +356,34 @@ const ReservationAddForm: React.FC<ReservationAddFormProps> = ({ onSuccess }) =>
                             size="small"
                             bordered
                             summary={() => (
-                                <Table.Summary.Row>
-                                    <Table.Summary.Cell index={0} colSpan={3} align="right">Tổng tiền món:</Table.Summary.Cell>
-                                    <Table.Summary.Cell index={1} align="right"><Text strong>{formatCurrency(totalBill)}</Text></Table.Summary.Cell>
-                                </Table.Summary.Row>
+                                <>
+                                    {selectedPromoId && discountAmount > 0 && (
+                                        <Table.Summary.Row>
+                                            <Table.Summary.Cell index={0} colSpan={3} align="right">
+                                                Giảm giá:
+                                            </Table.Summary.Cell>
+                                            <Table.Summary.Cell index={1} align="right">
+                                                <Text type="danger">-{formatCurrency(discountAmount)}</Text>
+                                            </Table.Summary.Cell>
+                                        </Table.Summary.Row>
+                                    )}
+
+                                    <Table.Summary.Row>
+                                        <Table.Summary.Cell index={0} colSpan={3} align="right">
+                                            <Text strong>Tổng tiền:</Text>
+                                        </Table.Summary.Cell>
+                                        <Table.Summary.Cell index={1} align="right">
+                                            <Text strong>{formatCurrency(totalBill)}</Text>
+                                        </Table.Summary.Cell>
+                                    </Table.Summary.Row>
+                                </>
                             )}
                         />
                     </Col>
                 </Row>
-
-                {/* Nút submit được đặt bên ngoài hoặc trong modal footer */}
-                {/* <Form.Item>
-                    <Button type="primary" htmlType="submit" loading={isCreating}>Tạo Đặt Bàn</Button>
-                    <Button htmlType="button" onClick={onCancel} style={{ marginLeft: 8 }}>Hủy</Button>
-                 </Form.Item> */}
             </Form>
         </Spin>
     );
-}
+};
 
 export default ReservationAddForm;

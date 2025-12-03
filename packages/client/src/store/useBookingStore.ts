@@ -22,12 +22,20 @@ type BookingInfo = {
     party_size: number;
     note?: string;
 };
+// Thêm kiểu dữ liệu cho mã khuyến mãi
+type AppliedPromo = {
+    id: number;
+    code: string;
+    discount: number;
+    discount_type: boolean; // false = số tiền, true = phần trăm
+} | null;
 
 // Định nghĩa toàn bộ state của store
 type BookingState = {
-    info: Partial<BookingInfo>; // Thông tin cơ bản (Bước 1)
-    selectedTables: BanAn[]; // Bàn đã chọn (Bước 2)
-    cart: CartItem[]; // Món ăn đã chọn (Bước 2)
+    info: Partial<BookingInfo>;
+    selectedTables: BanAn[];
+    cart: CartItem[];
+    appliedPromo: AppliedPromo;
 
     // Actions
     setBookingInfo: (info: BookingInfo) => void;
@@ -38,12 +46,18 @@ type BookingState = {
     updateQuantity: (productId: number, quantity: number) => void;
     clearBooking: () => void;
     getTotalPrice: () => number;
+    applyPromo: (promo: AppliedPromo) => void;
+    removePromo: () => void;
+    getDiscountAmount: () => number;
+    getDiscountedTotal: () => number;
 };
+
 
 const initialState = {
     info: {},
     selectedTables: [],
     cart: [],
+    appliedPromo: null,
 };
 
 export const useBookingStore = create<BookingState>()(
@@ -51,19 +65,16 @@ export const useBookingStore = create<BookingState>()(
         (set, get) => ({
             ...initialState,
 
-            setBookingInfo: (info) => set({ info }),
+            setBookingInfo: (info: BookingInfo) => set({ info }),
 
-            // === SỬA LOGIC CHỌN BÀN ===
-            toggleTable: (table) => {
+            toggleTable: (table: BanAn) => {
                 set((state) => {
                     const isSelected = state.selectedTables.some(t => t.id === table.id);
                     if (isSelected) {
-                        // Nếu đã chọn -> Bỏ chọn
                         return {
                             selectedTables: state.selectedTables.filter(t => t.id !== table.id)
                         };
                     } else {
-                        // Nếu chưa chọn -> Thêm vào
                         return {
                             selectedTables: [...state.selectedTables, table]
                         };
@@ -75,11 +86,10 @@ export const useBookingStore = create<BookingState>()(
                 return get().selectedTables.reduce((total, table) => total + table.suc_chua, 0);
             },
 
-            addToCart: (product) => {
+            addToCart: (product: SanPham) => {
                 set((state) => {
                     const existingItem = state.cart.find(item => item.product_id === product.id);
                     if (existingItem) {
-                        // Tăng số lượng nếu đã tồn tại
                         return {
                             cart: state.cart.map(item =>
                                 item.product_id === product.id
@@ -88,7 +98,6 @@ export const useBookingStore = create<BookingState>()(
                             ),
                         };
                     } else {
-                        // Thêm mới vào giỏ hàng
                         const newItem: CartItem = {
                             product_id: product.id,
                             ten_san_pham: product.ten_san_pham,
@@ -101,19 +110,19 @@ export const useBookingStore = create<BookingState>()(
                 });
             },
 
-            removeFromCart: (productId) => {
+            removeFromCart: (productId: number) => {
                 set((state) => ({
                     cart: state.cart.filter(item => item.product_id !== productId),
                 }));
             },
 
-            updateQuantity: (productId, quantity) => {
+            updateQuantity: (productId: number, quantity: number) => {
                 set((state) => ({
                     cart: state.cart.map(item =>
                         item.product_id === productId
-                            ? { ...item, quantity: Math.max(0, quantity) } // Đảm bảo số lượng không âm
+                            ? { ...item, quantity: Math.max(0, quantity) }
                             : item
-                    ).filter(item => item.quantity > 0), // Xóa nếu số lượng là 0
+                    ).filter(item => item.quantity > 0),
                 }));
             },
 
@@ -121,11 +130,44 @@ export const useBookingStore = create<BookingState>()(
 
             getTotalPrice: () => {
                 return get().cart.reduce((total, item) => total + (item.gia * item.quantity), 0);
+            },
+
+            // === ACTIONS MỚI CHO MÃ KHUYẾN MÃI ===
+            applyPromo: (promo: AppliedPromo) => set({ appliedPromo: promo }),
+
+            removePromo: () => set({ appliedPromo: null }),
+
+            getDiscountAmount: () => {
+                const state = get();
+                if (!state.appliedPromo) return 0;
+
+                const total = state.cart.reduce((sum: number, item: CartItem) =>
+                    sum + (item.gia * item.quantity), 0);
+
+                if (state.appliedPromo.discount_type === false) { // false = số tiền
+                    return state.appliedPromo.discount;
+                } else { // true = phần trăm
+                    return (total * state.appliedPromo.discount) / 100;
+                }
+            },
+
+            getDiscountedTotal: () => {
+                const state = get();
+                const total = state.cart.reduce((sum: number, item: CartItem) =>
+                    sum + (item.gia * item.quantity), 0);
+                const discount = get().getDiscountAmount();
+                return Math.max(0, total - discount);
             }
         }),
         {
-            name: 'booking-storage', // Tên key trong localStorage
-            storage: createJSONStorage(() => sessionStorage), // Dùng sessionStorage (tùy chọn)
+            name: 'booking-storage',
+            storage: createJSONStorage(() => sessionStorage),
+            partialize: (state) => ({
+                info: state.info,
+                selectedTables: state.selectedTables,
+                cart: state.cart,
+                appliedPromo: state.appliedPromo,
+            }),
         }
     )
 );

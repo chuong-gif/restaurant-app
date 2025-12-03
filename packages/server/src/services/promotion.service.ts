@@ -72,7 +72,7 @@ export const createPromotion = async (data: {
             so_luong: data.quantity,         // 📦 Số lượng khuyến mãi
             ngay_hieu_luc: data.valid_from,  // ⏰ Ngày bắt đầu hiệu lực
             ngay_ket_thuc: data.valid_to,    // ⏳ Ngày hết hạn
-            loai_giam_gia: data.type,        // ⚖️ Kiểu giảm (theo % hay giá cố định)
+            loai_giam_gia: !data.type,        // ⚖️ Kiểu giảm (theo % hay giá cố định)
         },
     });
 };
@@ -93,7 +93,7 @@ export const updatePromotion = async (id: number, data: any) => {
             // 🕐 Chuyển đổi ngày sang đối tượng Date (nếu có)
             ngay_hieu_luc: data.valid_from ? new Date(data.valid_from) : undefined,
             ngay_ket_thuc: data.valid_to ? new Date(data.valid_to) : undefined,
-            loai_giam_gia: data.type,
+            loai_giam_gia: data.type !== undefined ? !data.type : undefined,
         },
     });
 };
@@ -105,4 +105,50 @@ export const updatePromotion = async (id: number, data: any) => {
 export const deletePromotion = async (id: number) => {
     // ❌ Xóa bản ghi khuyến mãi theo ID
     return prisma.khuyen_mai.delete({ where: { id } });
+};
+
+/**
+ * ✅ Kiểm tra mã khuyến mãi có hợp lệ không
+ */
+export const checkPromotion = async (promo_code: string, total_amount: number) => {
+    const now = new Date();
+
+    // Tìm mã khuyến mãi
+    const promotion = await prisma.khuyen_mai.findFirst({
+        where: {
+            ma_khuyen_mai: promo_code,
+            so_luong: { gt: 0 },
+            ngay_hieu_luc: { lte: now },
+            ngay_ket_thuc: { gte: now },
+        },
+    });
+
+    if (!promotion) {
+        return {
+            valid: false,
+            message: 'Mã khuyến mãi không hợp lệ, đã hết hạn hoặc hết số lượng.'
+        };
+    }
+
+    // Tính toán số tiền giảm
+    let discount_amount = 0;
+
+    // VÌ ĐÃ ĐẢO NGƯỢC KHI LƯU (createPromotion), nên:
+    // - promotion.loai_giam_gia = true: là phần trăm (frontend gửi false)
+    // - promotion.loai_giam_gia = false: là số tiền (frontend gửi true)
+
+    if (promotion.loai_giam_gia === true) { // true = phần trăm
+        discount_amount = (total_amount * promotion.giam_gia) / 100;
+    } else { // false = số tiền
+        discount_amount = promotion.giam_gia;
+    }
+
+    return {
+        valid: true,
+        discount_amount: Math.round(discount_amount),
+        // ĐẢO NGƯỢC LẠI KHI TRẢ VỀ cho frontend
+        discount_type: !promotion.loai_giam_gia, // false->true, true->false
+        promo_id: promotion.id,
+        message: 'Mã khuyến mãi hợp lệ'
+    };
 };

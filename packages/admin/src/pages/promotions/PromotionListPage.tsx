@@ -113,7 +113,8 @@ const PromotionListPage: React.FC = () => {
             align: 'right' as const,
             render: (_: any, record: Promotion) => (
                 <span className="text-green-600 font-semibold">
-                    {record.loai_giam_gia ? formatCurrency(record.giam_gia) : `${record.giam_gia}%`}
+                    {/* QUAN TRỌNG: Đảo ngược logic hiển thị */}
+                    {!record.loai_giam_gia ? formatCurrency(record.giam_gia) : `${record.giam_gia}%`}
                 </span>
             )
         },
