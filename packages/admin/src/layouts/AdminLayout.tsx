@@ -8,7 +8,7 @@ import {
     DashboardOutlined, AppstoreOutlined, FileTextOutlined, SettingOutlined, UserOutlined,
     CalendarOutlined, TeamOutlined, DownOutlined, GiftOutlined, ShopOutlined, ReadOutlined,
     MessageOutlined, SafetyCertificateOutlined, SolutionOutlined, RightOutlined, DeleteOutlined,
-    LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined, DesktopOutlined // <-- Thêm icon này
+    LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined, DesktopOutlined, InboxOutlined // <-- Thêm icon này
 } from '@ant-design/icons';
 
 interface MenuItem {
@@ -59,6 +59,28 @@ const menuItems: MenuItem[] = [
             { key: 'tables', icon: <AppstoreOutlined />, label: 'Quản lý bàn ăn', path: '/tables', requiredPermission: 'view_table' },
             { key: 'reservations', icon: <SolutionOutlined />, label: 'Quản lý đặt bàn', path: '/reservations', requiredPermission: 'view_reservation' },
             { key: 'reservations-trash', icon: <DeleteOutlined />, label: 'Đơn đã hủy', path: '/reservations/trash', requiredPermission: 'view_reservation_trash' },
+        ]
+    },
+    {
+        key: 'inventory',
+        icon: <InboxOutlined />,
+        label: 'Quản Lý Kho',
+        requiredPermission: 'view_inventory', // Hoặc 'view_supplier'
+        children: [
+            {
+                key: 'suppliers',
+                icon: <TeamOutlined />,
+                label: 'Nhà cung cấp',
+                path: '/inventory/suppliers',
+                requiredPermission: 'view_supplier'
+            },
+            {
+                key: 'materials',
+                icon: <AppstoreOutlined />,
+                label: 'Nguyên liệu',
+                path: '/inventory/materials',
+                requiredPermission: 'view_material'
+            },
         ]
     },
     {

@@ -19,7 +19,28 @@ interface DateRangeRevenue {
     totalRevenue: number;
     orderCount: number;
 }
+interface InventoryStats {
+    currentInventoryValue: number;
+    importCostThisMonth: number;
+}
 
+interface LowStockItem {
+    id: number;
+    ten_nguyen_lieu: string;
+    so_luong_ton: number;
+    muc_canh_bao: number;
+    don_vi_tinh: string;
+}
+interface MonthlyFinancials {
+    revenue: number[];
+    cost: number[];
+    profit: number[];
+}
+
+interface TopProduct {
+    name: string;
+    value: number;
+}
 
 export const dashboardApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
@@ -31,12 +52,18 @@ export const dashboardApi = baseApi.injectEndpoints({
         }),
 
         // 2. Lấy doanh thu theo tháng (cả năm)
-        getMonthlyRevenue: builder.query<MonthlyRevenue, { year: number }>({
+        getMonthlyFinancials: builder.query<MonthlyFinancials, { year: number }>({
             query: ({ year }) => ({
-                url: '/admin/statistical/monthly-revenue',
+                url: '/admin/statistical/financials',
                 params: { year },
             }),
-            transformResponse: (response: { message: string, data: MonthlyRevenue }) => response.data,
+            transformResponse: (response: { data: MonthlyFinancials }) => response.data,
+            providesTags: ['Reservation', 'Supplier'], // Refresh khi có đơn hoặc nhập kho
+        }),
+
+        getTopSellingProducts: builder.query<TopProduct[], void>({
+            query: () => '/admin/statistical/top-products',
+            transformResponse: (response: { data: TopProduct[] }) => response.data,
             providesTags: ['Reservation'],
         }),
 
@@ -59,13 +86,29 @@ export const dashboardApi = baseApi.injectEndpoints({
             transformResponse: (response: { message: string, data: DateRangeRevenue }) => response.data,
             providesTags: ['Reservation'],
         }),
+        // 5. Thống kê kho (Chi phí, Giá trị)
+        getInventoryStats: builder.query<InventoryStats, void>({
+            query: () => '/admin/statistical/inventory-stats',
+            transformResponse: (response: { data: InventoryStats }) => response.data,
+            providesTags: ['Material', 'Supplier'], // Refresh khi nhập kho
+        }),
+
+        // 6. Cảnh báo tồn kho
+        getLowStockAlerts: builder.query<LowStockItem[], void>({
+            query: () => '/admin/statistical/low-stock',
+            transformResponse: (response: { data: LowStockItem[] }) => response.data,
+            providesTags: ['Material'],
+        }),
 
     }),
 });
 
 export const {
     useGetOverviewStatsQuery,
-    useGetMonthlyRevenueQuery,
+    useGetMonthlyFinancialsQuery,
+    useGetTopSellingProductsQuery,
     useGetReservationStatusStatsQuery,
     useGetRevenueByDateRangeQuery,
+    useGetInventoryStatsQuery,
+    useGetLowStockAlertsQuery,
 } = dashboardApi;

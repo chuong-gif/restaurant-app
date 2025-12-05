@@ -283,29 +283,89 @@ export const changeDishes = async (reservationId: number, dishes: any[]) => {
         }
     });
 };
+/*
+===========================================================================
+ 📉 LOGIC TRỪ KHO TỰ ĐỘNG (HELPER)
+===========================================================================
+*/
+const deductInventory = async (reservationId: number, tx: Prisma.TransactionClient) => {
+    // 1. Lấy chi tiết đơn hàng + Công thức của từng món
+    const reservation = await tx.dat_ban.findUnique({
+        where: { id: reservationId },
+        include: {
+            chi_tiet_dat_ban: {
+                include: {
+                    san_pham: {
+                        include: {
+                            cong_thuc: true // Lấy định lượng
+                        }
+                    }
+                }
+            }
+        }
+    });
 
-/**
- * 🔄 Cập nhật trạng thái đặt bàn & trạng thái bàn ăn
- */
-export const updateReservationStatus = async (id: number, status: number) => { // status nhận Int
-    if (!Object.values(ReservationStatus).includes(status as any)) {
+    if (!reservation || !reservation.chi_tiet_dat_ban) return;
+
+    // 2. Duyệt qua từng món ăn trong đơn
+    for (const item of reservation.chi_tiet_dat_ban) {
+        if (item.san_pham && item.san_pham.cong_thuc.length > 0) {
+            // Duyệt qua từng nguyên liệu trong công thức của món đó
+            for (const recipe of item.san_pham.cong_thuc) {
+                // Tổng lượng cần trừ = Số lượng món khách gọi * Định lượng 1 món
+                const quantityDeduct = item.so_luong * recipe.so_luong_can;
+
+                // 3. Trừ trực tiếp vào kho
+                await tx.nguyen_lieu.update({
+                    where: { id: recipe.nguyen_lieu_id },
+                    data: {
+                        so_luong_ton: { decrement: quantityDeduct }
+                    }
+                });
+            }
+        }
+    }
+};
+
+/*
+===========================================================================
+ 🔄 CẬP NHẬT TRẠNG THÁI ĐẶT BÀN (CÓ TRỪ KHO)
+===========================================================================
+*/
+export const updateReservationStatus = async (id: number, status: number) => {
+    // Kiểm tra trạng thái hợp lệ
+    // (Bạn có thể bỏ qua check này nếu tin tưởng frontend, hoặc giữ lại để an toàn)
+    const validStatuses = Object.values(ReservationStatus) as number[];
+    if (!validStatuses.includes(status)) {
         throw new Error('Mã trạng thái không hợp lệ.');
     }
 
-    const updatedReservation = await prisma.dat_ban.update({
+    // Lấy trạng thái hiện tại để so sánh
+    const currentReservation = await prisma.dat_ban.findUnique({
         where: { id },
-        data: { trang_thai: status }, // Cập nhật Int status
+        select: { trang_thai: true }
     });
 
-    // if (updatedReservation.ban_an_id) {
-    //     // Sửa: Dùng boolean cho ban_an.trang_thai
-    //     const isOccupied = ([ReservationStatus.CHECKED_IN, ReservationStatus.PENDING_PAYMENT] as number[]).includes(status);
-    //     await prisma.ban_an.update({
-    //         where: { id: updatedReservation.ban_an_id },
-    //         data: { trang_thai: !isOccupied }, // true = trống, false = bận
-    //     });
-    // }
-    return updatedReservation;
+    if (!currentReservation) throw new Error('Đơn đặt bàn không tồn tại.');
+
+    // Dùng Transaction để đảm bảo: Cập nhật trạng thái + Trừ kho phải thành công cùng lúc
+    return prisma.$transaction(async (tx) => {
+        // 1. Cập nhật trạng thái đơn hàng
+        const updatedReservation = await tx.dat_ban.update({
+            where: { id },
+            data: { trang_thai: status },
+        });
+
+        // 2. LOGIC KÍCH HOẠT TRỪ KHO
+        // Nếu chuyển sang trạng thái COMPLETED (5) và trước đó chưa hoàn thành
+        if (status === ReservationStatus.COMPLETED && currentReservation.trang_thai !== ReservationStatus.COMPLETED) {
+            await deductInventory(id, tx);
+        }
+
+        // (Nâng cao: Nếu muốn làm chức năng "Hủy hoàn thành" để cộng lại kho thì viết thêm logic ở đây)
+
+        return updatedReservation;
+    });
 };
 
 // === THÊM MỚI HÀM NÀY ===

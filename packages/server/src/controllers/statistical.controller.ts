@@ -17,13 +17,13 @@ export const handleGetOverviewStats = async (req: Request, res: Response) => {
 /**
  * 🎮 Controller: Lấy doanh thu theo tháng
  */
-export const handleGetMonthlyRevenue = async (req: Request, res: Response) => {
+export const handleGetMonthlyFinancials = async (req: Request, res: Response) => {
     try {
         const year = req.query.year ? parseInt(req.query.year as string) : new Date().getFullYear();
-        const data = await statisticalService.getMonthlyRevenue(year);
-        res.status(200).json({ message: `Lấy doanh thu tháng năm ${year} thành công`, data });
+        const data = await statisticalService.getMonthlyFinancials(year); // Gọi hàm mới
+        res.status(200).json({ message: "Success", data });
     } catch (error: any) {
-        res.status(500).json({ message: "Lỗi máy chủ", error: error.message });
+        res.status(500).json({ message: "Error", error: error.message });
     }
 };
 
@@ -56,5 +56,32 @@ export const handleGetRevenueByDateRange = async (req: Request, res: Response) =
         res.status(200).json({ message: "Lấy doanh thu theo khoảng ngày thành công", data });
     } catch (error: any) {
         res.status(500).json({ message: "Lỗi máy chủ", error: error.message });
+    }
+};
+
+export const handleGetInventoryStats = async (req: Request, res: Response) => {
+    try {
+        const data = await statisticalService.getInventoryStats();
+        res.status(200).json({ message: "Success", data });
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export const handleGetLowStockAlerts = async (req: Request, res: Response) => {
+    try {
+        const data = await statisticalService.getLowStockMaterials();
+        res.status(200).json({ message: "Success", data });
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export const handleGetTopSellingProducts = async (req: Request, res: Response) => {
+    try {
+        const data = await statisticalService.getTopSellingProducts();
+        res.status(200).json({ message: "Success", data });
+    } catch (error: any) {
+        res.status(500).json({ message: "Error", error: error.message });
     }
 };

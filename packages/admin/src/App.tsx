@@ -27,6 +27,9 @@ import BlogListPage from './pages/blogs/BlogListPage';
 import BlogFormPage from './pages/blogs/BlogFormPage';
 import BlogCommentsPage from './pages/blogs/BlogCommentsPage';
 import TableMapPage from './pages/pos/TableMapPage';
+import SupplierListPage from './pages/inventory/SupplierListPage';
+import MaterialListPage from './pages/inventory/MaterialListPage';
+import ImportInventoryPage from './pages/inventory/ImportInventoryPage';
 
 function App() {
   return (
@@ -117,6 +120,13 @@ function App() {
             <Route element={<ProtectedRoute requiredPermission="view_blog_comment" />}>
               <Route path="/blog-comments/:blogId" element={<BlogCommentsPage />} />
             </Route>
+            {/* --- Quản lý Kho --- */}
+            <Route element={<ProtectedRoute requiredPermission="view_inventory" />}> {/* Hoặc view_supplier */}
+              <Route path="/inventory/suppliers" element={<SupplierListPage />} />
+              <Route path="/inventory/materials" element={<MaterialListPage />} />
+              <Route path="/inventory/import" element={<ImportInventoryPage />} />
+            </Route>
+
           </Route>
 
 

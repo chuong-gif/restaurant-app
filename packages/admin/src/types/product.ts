@@ -14,6 +14,18 @@ export interface ProductCategory {
     ten_danh_muc: string;
     trang_thai: boolean;
 }
+// Thêm interface cho công thức
+export interface Recipe {
+    id: number;
+    san_pham_id: number;
+    nguyen_lieu_id: number;
+    so_luong_can: number;
+    don_vi_tinh: string;
+    nguyen_lieu?: { // Join từ bảng nguyen_lieu
+        ten_nguyen_lieu: string;
+        don_vi_tinh: string; // Đơn vị gốc trong kho
+    };
+}
 
 // Dựa trên bảng `san_pham`
 export interface Product {
@@ -32,6 +44,7 @@ export interface Product {
     // Dữ liệu join (từ `include` trong service)
     media_files?: MediaFile | null;
     danh_muc_san_pham?: ProductCategory | null;
+    cong_thuc?: Recipe[];
 }
 
 // Kiểu dữ liệu trả về từ API lấy danh sách

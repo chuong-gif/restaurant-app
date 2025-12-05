@@ -191,7 +191,8 @@ model nguoi_dung {
   vai_tro                vai_tro?                   @relation(fields: [vai_tro_id], references: [id], onDelete: Restrict, map: "fk_nguoidung_vaitro")
   phuong_thuc_thanh_toan phuong_thuc_thanh_toan[]
   the_thanh_vien         the_thanh_vien?
-
+  phieu_nhap             phieu_nhap[]
+  
   @@index([anh_dai_dien_id], map: "fk_nguoidung_media")
   @@index([vai_tro_id], map: "fk_nguoidung_vaitro")
 }
@@ -240,6 +241,7 @@ model san_pham {
   danh_muc_san_pham danh_muc_san_pham  @relation(fields: [danh_muc_id], references: [id], map: "fk_sanpham_danhmuc")
   media_files       media_files?       @relation(fields: [hinh_anh_id], references: [id], map: "fk_sanpham_media")
   thay_doi_mon_an   thay_doi_mon_an[]
+  cong_thuc         cong_thuc[]
 
   @@index([danh_muc_id], map: "fk_sanpham_danhmuc")
   @@index([hinh_anh_id], map: "fk_sanpham_media")
@@ -299,4 +301,78 @@ model vai_tro_quyen {
 enum nguoi_dung_loai_nguoi_dung {
   Khach_Hang @map("Khách Hàng")
   Nhan_Vien  @map("Nhân Viên")
+}
+
+model nha_cung_cap {
+  id               Int          @id @default(autoincrement())
+  ten_nha_cung_cap String       @db.VarChar(255)
+  so_dien_thoai    String?      @db.VarChar(20)
+  email            String?      @db.VarChar(255)
+  dia_chi          String?      @db.Text
+  ghi_chu          String?      @db.Text
+  trang_thai       Boolean      @default(true)
+  created_at       DateTime     @default(now()) @db.Timestamp(0)
+  updated_at       DateTime     @default(now()) @updatedAt @db.Timestamp(0)
+  phieu_nhap       phieu_nhap[]
+}
+
+model nguyen_lieu {
+  id              Int                   @id @default(autoincrement())
+  ten_nguyen_lieu String                @db.VarChar(255)
+  don_vi_tinh     String                @db.VarChar(50) // VD: kg, g, lit, chai
+  so_luong_ton    Float                 @default(0) // Dùng Float vì có thể là 1.5kg
+  muc_canh_bao    Float                 @default(0) // Tồn kho dưới mức này thì báo động
+  gia_nhap_cuoi   Int? // Giá lần nhập gần nhất để tham khảo
+  trang_thai      Boolean               @default(true)
+  ghi_chu         String?               @db.Text
+  created_at      DateTime              @default(now()) @db.Timestamp(0)
+  updated_at      DateTime              @default(now()) @updatedAt @db.Timestamp(0)
+  chi_tiet_nhap   chi_tiet_phieu_nhap[]
+  cong_thuc       cong_thuc[]
+}
+
+model phieu_nhap {
+  id              Int                   @id @default(autoincrement())
+  ma_phieu        String                @unique @db.VarChar(50) // VD: PN-20251205-01
+  nha_cung_cap_id Int
+  nguoi_nhap_id   Int
+  tong_tien       Int
+  ghi_chu         String?               @db.Text
+  ngay_nhap       DateTime              @default(now()) @db.Timestamp(0)
+  created_at      DateTime              @default(now()) @db.Timestamp(0)
+  updated_at      DateTime              @default(now()) @updatedAt @db.Timestamp(0)
+  nha_cung_cap    nha_cung_cap          @relation(fields: [nha_cung_cap_id], references: [id])
+  nguoi_dung      nguoi_dung            @relation(fields: [nguoi_nhap_id], references: [id])
+  chi_tiet        chi_tiet_phieu_nhap[]
+
+  @@index([nha_cung_cap_id])
+  @@index([nguoi_nhap_id])
+}
+
+model chi_tiet_phieu_nhap {
+  id             Int         @id @default(autoincrement())
+  phieu_nhap_id  Int
+  nguyen_lieu_id Int
+  so_luong       Float
+  don_gia        Int
+  thanh_tien     Int
+  han_su_dung    DateTime?   @db.Date
+  phieu_nhap     phieu_nhap  @relation(fields: [phieu_nhap_id], references: [id], onDelete: Cascade)
+  nguyen_lieu    nguyen_lieu @relation(fields: [nguyen_lieu_id], references: [id])
+
+  @@index([phieu_nhap_id])
+  @@index([nguyen_lieu_id])
+}
+
+model cong_thuc {
+  id             Int         @id @default(autoincrement())
+  san_pham_id    Int
+  nguyen_lieu_id Int
+  so_luong_can   Float // Cần bao nhiêu nguyên liệu cho 1 đơn vị sản phẩm
+  don_vi_tinh    String      @db.VarChar(50) // VD: gram, ml (để quy đổi nếu cần)
+  san_pham       san_pham    @relation(fields: [san_pham_id], references: [id], onDelete: Cascade)
+  nguyen_lieu    nguyen_lieu @relation(fields: [nguyen_lieu_id], references: [id])
+
+  @@index([san_pham_id])
+  @@index([nguyen_lieu_id])
 }

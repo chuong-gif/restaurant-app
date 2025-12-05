@@ -2,6 +2,18 @@
 import { baseApi } from '../../services/baseApi';
 import { Product, ProductListResponse } from '../../types/product';
 
+// Định nghĩa lại ProductFormInput để bao gồm cả công thức
+interface RecipeItemInput {
+    nguyen_lieu_id: number;
+    so_luong_can: number;
+    don_vi_tinh: string;
+}
+
+// Mở rộng kiểu input
+interface ProductFormInput extends Omit<Product, 'id' | 'ma_san_pham' | 'created_at' | 'updated_at' | 'media_files' | 'danh_muc_san_pham' | 'cong_thuc'> {
+    cong_thuc?: RecipeItemInput[]; // Thêm trường này
+}
+
 interface GetProductsParams {
     page: number;
     pageSize: number;
@@ -14,9 +26,6 @@ interface ProductResponse {
     message: string;
     data: Product;
 }
-
-type ProductFormInput = Omit<Product, 'id' | 'ma_san_pham' | 'created_at' | 'updated_at' | 'media_files' | 'danh_muc_san_pham'>;
-
 
 export const productApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
@@ -35,7 +44,7 @@ export const productApi = baseApi.injectEndpoints({
         }),
 
         getProductById: builder.query<Product, number>({
-            query: (id) => `/admin/products/${id}`, // API này giờ đã hoạt động
+            query: (id) => `/admin/products/${id}`,
             transformResponse: (response: ProductResponse) => response.data,
             providesTags: (result, error, id) => [{ type: 'Product', id }],
         }),
@@ -69,7 +78,6 @@ export const productApi = baseApi.injectEndpoints({
             invalidatesTags: [{ type: 'Product', id: 'LIST' }],
         }),
 
-        // === THÊM MUTATION XÓA VĨNH VIỄN (SỬA LỖI 2) ===
         permanentlyDeleteProduct: builder.mutation<{ message: string }, number>({
             query: (id) => ({
                 url: `/admin/products/permanent/${id}`,
@@ -77,8 +85,6 @@ export const productApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: [{ type: 'Product', id: 'LIST' }],
         }),
-        // ============================================
-
     }),
 });
 
@@ -88,5 +94,5 @@ export const {
     useCreateProductMutation,
     useUpdateProductMutation,
     useDeleteProductMutation,
-    usePermanentlyDeleteProductMutation // <-- Export hook mới
+    usePermanentlyDeleteProductMutation
 } = productApi;

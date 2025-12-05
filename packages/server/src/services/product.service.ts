@@ -14,19 +14,9 @@ export const getProducts = async (
     trang_thai?: boolean
 ) => {
     const whereCondition: Prisma.san_phamWhereInput = {};
-
-    // === SỬA LỖI LỌC CHUỖI RỖNG ===
-    if (searchName) { // Chỉ thêm điều kiện này nếu searchName không rỗng
-        whereCondition.ten_san_pham = {
-            contains: searchName,
-        };
-    }
-    if (danh_muc_id) {
-        whereCondition.danh_muc_id = danh_muc_id;
-    }
-    if (trang_thai !== undefined) {
-        whereCondition.trang_thai = trang_thai;
-    }
+    if (searchName) whereCondition.ten_san_pham = { contains: searchName };
+    if (danh_muc_id) whereCondition.danh_muc_id = danh_muc_id;
+    if (trang_thai !== undefined) whereCondition.trang_thai = trang_thai;
 
     const [products, totalCount] = await prisma.$transaction([
         prisma.san_pham.findMany({
@@ -37,17 +27,13 @@ export const getProducts = async (
             include: {
                 danh_muc_san_pham: true,
                 media_files: true,
+                // Không cần include công thức ở danh sách cho nhẹ
             },
         }),
         prisma.san_pham.count({ where: whereCondition }),
     ]);
 
-    return {
-        data: products,
-        total: totalCount,
-        totalPages: Math.ceil(totalCount / pageSize),
-        currentPage: page,
-    };
+    return { data: products, total: totalCount, totalPages: Math.ceil(totalCount / pageSize), currentPage: page };
 };
 
 /* ===============================
@@ -60,12 +46,15 @@ export const getProductById = async (id: number) => {
         include: {
             danh_muc_san_pham: true,
             media_files: true,
+            // === INCLUDE CÔNG THỨC ===
+            cong_thuc: {
+                include: {
+                    nguyen_lieu: { select: { ten_nguyen_lieu: true, don_vi_tinh: true } }
+                }
+            }
         },
     });
-
-    if (!product) {
-        throw new Error('Sản phẩm không tồn tại');
-    }
+    if (!product) throw new Error('Sản phẩm không tồn tại');
     return product;
 };
 
@@ -88,18 +77,34 @@ export const getNewestProducts = async (limit: number = 8) => {
 ===================================================
 */
 export const createProduct = async (productData: any) => {
+    const { cong_thuc, ...data } = productData; // Tách công thức ra
+
+    // Tạo sản phẩm
     const newProduct = await prisma.san_pham.create({
         data: {
-            ma_san_pham: productData.ma_san_pham || `HS-${Date.now().toString().slice(-6)}`,
-            ten_san_pham: productData.ten_san_pham,
-            gia_ban: parseInt(productData.gia_ban, 10),
-            mo_ta: productData.mo_ta,
-            danh_muc_id: parseInt(productData.danh_muc_id, 10),
-            gia_khuyen_mai: productData.gia_khuyen_mai ? parseInt(productData.gia_khuyen_mai, 10) : 0,
-            trang_thai: productData.trang_thai,
-            hinh_anh_id: productData.hinh_anh_id ? parseInt(productData.hinh_anh_id, 10) : null,
+            ma_san_pham: data.ma_san_pham || `HS-${Date.now().toString().slice(-6)}`,
+            ten_san_pham: data.ten_san_pham,
+            gia_ban: parseInt(data.gia_ban, 10),
+            mo_ta: data.mo_ta,
+            danh_muc_id: parseInt(data.danh_muc_id, 10),
+            gia_khuyen_mai: data.gia_khuyen_mai ? parseInt(data.gia_khuyen_mai, 10) : 0,
+            trang_thai: data.trang_thai,
+            hinh_anh_id: data.hinh_anh_id ? parseInt(data.hinh_anh_id, 10) : null,
         }
     });
+
+    // Nếu có công thức -> Lưu vào bảng cong_thuc
+    if (cong_thuc && Array.isArray(cong_thuc) && cong_thuc.length > 0) {
+        await prisma.cong_thuc.createMany({
+            data: cong_thuc.map((ct: any) => ({
+                san_pham_id: newProduct.id,
+                nguyen_lieu_id: ct.nguyen_lieu_id,
+                so_luong_can: parseFloat(ct.so_luong_can),
+                don_vi_tinh: ct.don_vi_tinh // Đơn vị dùng trong công thức (VD: gram)
+            }))
+        });
+    }
+
     return newProduct;
 };
 
@@ -109,46 +114,46 @@ export const createProduct = async (productData: any) => {
 =====================================================
 */
 export const updateProduct = async (id: number, productData: any) => {
+    const { cong_thuc, ...data } = productData;
+
     const existing = await prisma.san_pham.findUnique({ where: { id } });
-    if (!existing) {
-        throw new Error('Sản phẩm không tồn tại');
-    }
+    if (!existing) throw new Error('Sản phẩm không tồn tại');
 
-    // --- SỬA LỖI: Tạo đối tượng data linh hoạt ---
-    // Điều này cho phép chúng ta chỉ gửi 1 trường (ví dụ: trang_thai) mà không làm hỏng các trường khác
+    // Cập nhật thông tin cơ bản (Logic cũ)
     const dataToUpdate: Prisma.san_phamUpdateInput = {};
+    if (data.ten_san_pham !== undefined) dataToUpdate.ten_san_pham = data.ten_san_pham;
+    if (data.gia_ban !== undefined) dataToUpdate.gia_ban = parseInt(data.gia_ban, 10);
+    if (data.gia_khuyen_mai !== undefined) dataToUpdate.gia_khuyen_mai = parseInt(data.gia_khuyen_mai, 10);
+    if (data.danh_muc_id !== undefined) (dataToUpdate as any).danh_muc_id = parseInt(data.danh_muc_id, 10);
+    if (data.mo_ta !== undefined) dataToUpdate.mo_ta = data.mo_ta;
+    if (data.trang_thai !== undefined) dataToUpdate.trang_thai = data.trang_thai;
+    if (data.hinh_anh_id !== undefined) (dataToUpdate as any).hinh_anh_id = data.hinh_anh_id ? parseInt(data.hinh_anh_id, 10) : null;
 
-    if (productData.ten_san_pham !== undefined) {
-        dataToUpdate.ten_san_pham = productData.ten_san_pham;
-    }
-    if (productData.gia_ban !== undefined) {
-        dataToUpdate.gia_ban = parseInt(productData.gia_ban, 10);
-    }
-    if (productData.gia_khuyen_mai !== undefined) {
-        dataToUpdate.gia_khuyen_mai = parseInt(productData.gia_khuyen_mai, 10);
-    }
-    if (productData.danh_muc_id !== undefined) {
-        // Prisma's generated UpdateInput may not expose the scalar FK field directly on the type,
-        // so cast to any to assign the parsed value without a type error.
-        (dataToUpdate as any).danh_muc_id = parseInt(productData.danh_muc_id, 10);
-    }
-    if (productData.mo_ta !== undefined) {
-        dataToUpdate.mo_ta = productData.mo_ta;
-    }
-    if (productData.trang_thai !== undefined) {
-        dataToUpdate.trang_thai = productData.trang_thai;
-    }
-    if (productData.hinh_anh_id !== undefined) {
-        (dataToUpdate as any).hinh_anh_id = productData.hinh_anh_id ? parseInt(productData.hinh_anh_id, 10) : null;
-    }
-    // --- KẾT THÚC SỬA LỖI ---
+    // Dùng transaction để đảm bảo toàn vẹn dữ liệu
+    await prisma.$transaction(async (tx) => {
+        // 1. Update sản phẩm
+        await tx.san_pham.update({ where: { id }, data: dataToUpdate });
 
-    const updatedProduct = await prisma.san_pham.update({
-        where: { id },
-        data: dataToUpdate, // Sử dụng đối tượng data linh hoạt
+        // 2. Update công thức (Xóa cũ -> Thêm mới)
+        if (cong_thuc !== undefined) { // Chỉ update nếu frontend có gửi trường cong_thuc lên
+            // Xóa hết công thức cũ
+            await tx.cong_thuc.deleteMany({ where: { san_pham_id: id } });
+
+            // Thêm lại công thức mới
+            if (Array.isArray(cong_thuc) && cong_thuc.length > 0) {
+                await tx.cong_thuc.createMany({
+                    data: cong_thuc.map((ct: any) => ({
+                        san_pham_id: id,
+                        nguyen_lieu_id: ct.nguyen_lieu_id,
+                        so_luong_can: parseFloat(ct.so_luong_can),
+                        don_vi_tinh: ct.don_vi_tinh
+                    }))
+                });
+            }
+        }
     });
 
-    return updatedProduct;
+    return { id, message: "Success" };
 };
 
 /*
@@ -183,3 +188,5 @@ export const permanentlyDeleteProduct = async (id: number) => {
         where: { id },
     });
 };
+
+

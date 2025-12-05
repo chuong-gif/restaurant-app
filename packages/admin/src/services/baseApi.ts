@@ -21,7 +21,7 @@ export const baseApi = createApi({
     tagTypes: [
         'User', 'Product', 'Category', 'Reservation', 'Blog', 'Role', 'Permission',
         // Thêm các tag mới dưới đây
-        'BlogCategory', 'BlogPost', 'Promotion', 'Table', 'Dashboard', 'BlogComment'
+        'BlogCategory', 'BlogPost', 'Promotion', 'Table', 'Dashboard', 'BlogComment', 'Supplier', 'Material',
     ],
 
     endpoints: () => ({}), // Các endpoints cụ thể sẽ được "inject" vào từ các file api khác

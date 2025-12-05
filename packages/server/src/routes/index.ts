@@ -37,12 +37,15 @@ import {
 // ======================================
 import promotionPublicRoutes from './promotion.public.routes';
 const router = Router();
+import inventoryRouter from './inventory.routes';
+
 
 /* ==========================================================
 🌍 ===== PUBLIC ROUTES =====
 ========================================================== */
 router.use('/auth', authRoutes);
 router.use('/admin/auth', adminAuthRoutes);
+router.use('/admin/inventory', inventoryRouter);
 
 const publicRouter = Router();
 publicRouter.use('/products', productPublicRoutes);

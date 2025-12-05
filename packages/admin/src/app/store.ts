@@ -7,6 +7,7 @@ import productFiltersReducer from '../features/products/productSlice';
 import categoryFiltersReducer from '../features/categories/categorySlice';
 import userFiltersReducer from '../features/users/userSlice'; // <-- THÊM DÒNG NÀY
 import reservationFiltersReducer from '../features/reservations/reservationSlice';
+import inventoryFiltersReducer from '../features/inventory/inventorySlice';
 
 export const store = configureStore({
     reducer: {
@@ -15,7 +16,8 @@ export const store = configureStore({
         productFilters: productFiltersReducer,
         categoryFilters: categoryFiltersReducer,
         userFilters: userFiltersReducer,
-        reservationFilters: reservationFiltersReducer, // <-- THÊM DÒNG NÀY
+        reservationFilters: reservationFiltersReducer,
+        inventoryFilters: inventoryFiltersReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware().concat(baseApi.middleware),
