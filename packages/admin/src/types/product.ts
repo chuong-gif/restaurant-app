@@ -56,6 +56,9 @@ export interface Table {
     updated_at?: string;
     media_files_ban_an_anh_ban_idTomedia_files?: { id: number; file_url: string } | null;
     media_files_ban_an_video_ban_idTomedia_files?: { id: number; file_url: string } | null;
+    status_code?: 'FREE' | 'OCCUPIED' | 'RESERVED'; // Thêm trường này
+    current_reservation?: any; // Thêm trường này để chứa thông tin đơn hàng đang ngồi
+
 }
 
 // Dựa trên bảng `khuyen_mai` (chỉ lấy các trường cần thiết)

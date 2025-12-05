@@ -5,7 +5,8 @@ import {
     handleCreateTable,
     handleUpdateTable,
     handleDeleteTable,
-    handleGetAvailableTablesByDate // Giữ lại route này cho public nếu cần
+    handleGetAvailableTablesByDate, // Giữ lại route này cho public nếu cần
+    handleGetTableMap
 } from '../controllers/table.controller';
 import { authenticateToken } from '../middlewares/auth.middleware'; // Import middleware
 
@@ -26,7 +27,7 @@ adminRouter.patch('/:id', handleUpdateTable);
 
 // DELETE /api/v1/admin/tables/:id -> Xóa bàn
 adminRouter.delete('/:id', handleDeleteTable);
-
+adminRouter.get('/map', handleGetTableMap);
 
 // === Public Routes (Không yêu cầu xác thực) ===
 const publicRouter = Router();

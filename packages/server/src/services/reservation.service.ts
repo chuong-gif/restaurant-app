@@ -71,8 +71,8 @@ const checkTablesAvailability = async (tableIds: number[], reservationDate: Date
  * 🧾 Tạo mới một đơn đặt bàn (ĐÃ SỬA: Hỗ trợ mảng ban_an_ids)
  */
 export const createReservation = async (data: any) => {
-    // Tách `ban_an_ids` (mảng ID bàn) ra khỏi data
-    const { products, ban_an_ids, fullname, tel, reservation_date, party_size, note, user_id, ...reservationData } = data;
+    // === SỬA DÒNG NÀY (Thêm 'status' vào destructuring để tách nó ra khỏi reservationData) ===
+    const { products, ban_an_ids, fullname, tel, reservation_date, party_size, note, user_id, status, promo_code, ...reservationData } = data;
 
     const partySizeNum = parseInt(party_size, 10);
     const reservationDateObj = new Date(reservation_date);
@@ -84,78 +84,82 @@ export const createReservation = async (data: any) => {
         throw new Error('Ngày đặt bàn không hợp lệ.');
     }
 
-    // === SỬA LOGIC CHỌN BÀN ===
-    // (Bỏ `findAvailableTable`)
-    // Yêu cầu client PHẢI gửi lên mảng ban_an_ids (kể cả khi chỉ chọn 1 bàn)
+    // Yêu cầu client PHẢI gửi lên mảng ban_an_ids
     if (!ban_an_ids || !Array.isArray(ban_an_ids) || ban_an_ids.length === 0) {
         throw new Error('Vui lòng chọn ít nhất một bàn ăn.');
     }
 
-
-    // ... (Giữ nguyên logic tính `initialTotalAmount` và `depositAmount`)
+    // Tính tiền (giữ nguyên logic cũ)
     let initialTotalAmount = 0;
-    let productPriceMap = new Map<number, number>(); // Dùng lại map này bên dưới
-
     if (products && Array.isArray(products) && products.length > 0) {
         const productIds = products.map((p: any) => p.product_id);
-
-        // 1. Lấy giá chính xác từ CSDL (chống gian lận)
         const dbProducts = await prisma.san_pham.findMany({
             where: { id: { in: productIds } },
             select: { id: true, gia_ban: true, gia_khuyen_mai: true },
         });
-
-        // 2. Tạo map giá (Ưu tiên giá KM)
-        productPriceMap = new Map(
+        const productPriceMap = new Map(
             dbProducts.map(p => [
                 p.id,
                 p.gia_khuyen_mai > 0 ? p.gia_khuyen_mai : p.gia_ban
             ])
         );
-
-        // 3. Tính tổng
         initialTotalAmount = products.reduce((sum: number, p: any) => {
             const price = productPriceMap.get(p.product_id) || 0;
             return sum + (price * p.quantity);
         }, 0);
     }
-    // ... (code tính tiền)
-    // Kiểm tra xem các bàn đã chọn có hợp lệ không
+
+    // Kiểm tra bàn trống
     await checkTablesAvailability(ban_an_ids, reservationDateObj, partySizeNum);
-    // ========================
 
     const depositAmount = initialTotalAmount * 0.3;
-    const initialStatus = ReservationStatus.PENDING_CONFIRMATION;
+
+    // === SỬA ĐOẠN NÀY: Ưu tiên lấy status từ Frontend gửi lên (cho POS), nếu không có thì mặc định là 1 (Web) ===
+    const initialStatus = status ? parseInt(status) : ReservationStatus.PENDING_CONFIRMATION;
+
+    // Xử lý sđt rỗng cho khách lẻ
+    const finalPhone = tel ? tel : "";
 
     return prisma.$transaction(async (tx) => {
         const newReservation = await tx.dat_ban.create({
             data: {
-                ...reservationData, // Gán các trường còn lại (tel, email, ghi_chu...)
-                ho_ten_khach: fullname, // <-- Gán `fullname` vào `ho_ten_khach`
-                dien_thoai: tel,      // <-- Gán `tel` vào `dien_thoai` 
-                ghi_chu: note || null, // Gán 'note' vào 'ghi_chu'
-                khach_hang_id: user_id ? parseInt(user_id, 10) : null, // Gán 'user_id' vào 'khach_hang_id'
+                ...reservationData, // Lúc này reservationData KHÔNG còn chứa 'status' nữa -> Hết lỗi
+                ho_ten_khach: fullname,
+                dien_thoai: finalPhone,
+                ghi_chu: note || null,
+                khach_hang_id: user_id ? parseInt(user_id, 10) : null,
                 ma_dat_ban: `DB-${Date.now()}`,
                 ngay_dat_ban: reservationDateObj,
                 so_luong_khach: partySizeNum,
                 tong_tien: initialTotalAmount,
                 tien_dat_coc: depositAmount,
-                trang_thai: initialStatus,
-                khuyen_mai_id: reservationData.promotion_id ? parseInt(reservationData.promotion_id, 10) : null,
 
-                // Quan hệ N-N
+                // Gán vào cột trang_thai
+                trang_thai: initialStatus,
+
+                khuyen_mai_id: reservationData.khuyen_mai_id ? parseInt(reservationData.khuyen_mai_id, 10) : null,
+
                 ban_an: {
                     connect: ban_an_ids.map((id: number) => ({ id: id }))
                 }
             },
         });
 
-        // ... (Giữ nguyên logic thêm `chi_tiet_dat_ban` và xử lý `khuyen_mai_id`)
+        // (Giữ nguyên logic thêm món ăn)
         if (products && Array.isArray(products) && products.length > 0) {
-            // ... (code)
-        }
-        if (reservationData.promotion_id) {
-            // ... (code)
+            const productPriceMap = new Map((await prisma.san_pham.findMany({
+                where: { id: { in: products.map((p: any) => p.product_id) } },
+                select: { id: true, gia_ban: true, gia_khuyen_mai: true }
+            })).map(p => [p.id, p.gia_khuyen_mai > 0 ? p.gia_khuyen_mai : p.gia_ban]));
+
+            await tx.chi_tiet_dat_ban.createMany({
+                data: products.map((p: any) => ({
+                    dat_ban_id: newReservation.id,
+                    san_pham_id: p.product_id,
+                    so_luong: p.quantity,
+                    gia_tai_thoi_diem: productPriceMap.get(p.product_id) || 0,
+                })),
+            });
         }
 
         return newReservation;

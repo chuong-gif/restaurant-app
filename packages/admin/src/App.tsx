@@ -26,6 +26,7 @@ import BlogCategoryListPage from './pages/blogCategories/BlogCategoryListPage';
 import BlogListPage from './pages/blogs/BlogListPage';
 import BlogFormPage from './pages/blogs/BlogFormPage';
 import BlogCommentsPage from './pages/blogs/BlogCommentsPage';
+import TableMapPage from './pages/pos/TableMapPage';
 
 function App() {
   return (
@@ -74,7 +75,10 @@ function App() {
             <Route element={<ProtectedRoute requiredPermission="edit_user" />}>
               <Route path="/users/edit/:id" element={<UserFormPage />} />
             </Route>
-
+            {/* Bảo vệ bằng quyền 'view_pos' vừa tạo trong DB */}
+            <Route element={<ProtectedRoute requiredPermission="view_pos" />}>
+              <Route path="/pos" element={<TableMapPage />} />
+            </Route>
 
             {/* --- Đặt bàn --- */}
             <Route element={<ProtectedRoute requiredPermission="view_reservation" />}>

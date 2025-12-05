@@ -186,3 +186,70 @@ export const getAvailableTablesByDate = async (date: Date): Promise<Table[]> => 
 
     return availableTables;
 };
+
+/**
+ * 🗺️ POS: Lấy sơ đồ bàn kèm trạng thái hiện tại (Real-time)
+ */
+export const getTableMapStatus = async () => {
+    // Lấy thời điểm hiện tại để so sánh đơn đặt trước
+    const now = new Date();
+    const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
+    const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
+
+    const tables = await prisma.ban_an.findMany({
+        where: { trang_thai: true }, // Chỉ lấy bàn đang hoạt động (ko bảo trì)
+        include: {
+            // Lấy đơn hàng ĐANG HOẠT ĐỘNG gắn với bàn này
+            dat_ban: {
+                where: {
+                    trang_thai: {
+                        in: [
+                            ReservationStatus.PENDING_CONFIRMATION, // 1: Vàng (Sắp tới)
+                            ReservationStatus.CONFIRMED_DEPOSIT_PAID, // 2: Vàng (Sắp tới)
+                            ReservationStatus.CHECKED_IN, // 3: Đỏ (Đang ăn)
+                            ReservationStatus.PENDING_PAYMENT // 4: Đỏ (Đang thanh toán)
+                        ]
+                    },
+                    // Logic thời gian:
+                    // 1. Hoặc là đang CHECKED_IN (3) hoặc PENDING_PAYMENT (4) -> Không quan tâm giờ
+                    // 2. Hoặc là PENDING (1)/CONFIRMED (2) nhưng giờ ăn nằm trong khoảng +/- 1 tiếng hiện tại
+                    OR: [
+                        { trang_thai: { in: [ReservationStatus.CHECKED_IN, ReservationStatus.PENDING_PAYMENT] } },
+                        {
+                            ngay_dat_ban: { gte: twoHoursAgo, lte: oneHourLater }
+                        }
+                    ]
+                },
+                orderBy: { ngay_dat_ban: 'asc' }, // Lấy đơn gần nhất
+                take: 1, // Chỉ cần lấy 1 đơn để hiển thị trạng thái
+                include: {
+                    nguoi_dung: { select: { ho_ten: true, dien_thoai: true } } // Lấy tên khách để hiện lên sơ đồ
+                }
+            }
+        },
+        orderBy: { so_ban: 'asc' }
+    });
+
+    // Map lại dữ liệu để Frontend dễ xử lý màu sắc
+    return tables.map(table => {
+        const activeReservation = table.dat_ban[0] || null;
+        let statusColor = 'FREE';
+
+        if (activeReservation) {
+            // === SỬA DÒNG NÀY (Ép kiểu mảng thành number[]) ===
+            const occupiedStatuses = [ReservationStatus.CHECKED_IN, ReservationStatus.PENDING_PAYMENT] as number[];
+
+            if (occupiedStatuses.includes(activeReservation.trang_thai)) {
+                statusColor = 'OCCUPIED';
+            } else {
+                statusColor = 'RESERVED';
+            }
+        }
+
+        return {
+            ...table,
+            status_code: statusColor,
+            current_reservation: activeReservation
+        };
+    });
+};

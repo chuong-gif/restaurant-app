@@ -64,6 +64,10 @@ export const tableApi = baseApi.injectEndpoints({
             }),
             // Không cần providesTags vì đây là data tạm thời cho form
         }),
+        getPosTableMap: builder.query<{ data: Table[] }, void>({
+            query: () => '/admin/tables/map',
+            providesTags: [{ type: 'Table', id: 'LIST' }], // Reload khi có thay đổi bàn
+        }),
 
     }),
 });
@@ -74,4 +78,5 @@ export const {
     useUpdateTableMutation,
     useDeleteTableMutation,
     useGetAvailableTablesByDateQuery,
+    useGetPosTableMapQuery,
 } = tableApi;

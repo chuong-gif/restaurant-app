@@ -104,3 +104,15 @@ export const handleGetAvailableTablesByDate = async (req: Request, res: Response
         res.status(400).json({ message: error.message || 'Lỗi khi tìm bàn trống.' });
     }
 };
+
+/**
+ * 🗺️ POS: Lấy sơ đồ bàn (Real-time)
+ */
+export const handleGetTableMap = async (req: Request, res: Response) => {
+    try {
+        const data = await tableService.getTableMapStatus();
+        res.status(200).json({ message: 'Lấy sơ đồ bàn thành công', data });
+    } catch (error: any) {
+        res.status(500).json({ message: 'Lỗi máy chủ', error: error.message });
+    }
+};

@@ -8,7 +8,7 @@ import {
     DashboardOutlined, AppstoreOutlined, FileTextOutlined, SettingOutlined, UserOutlined,
     CalendarOutlined, TeamOutlined, DownOutlined, GiftOutlined, ShopOutlined, ReadOutlined,
     MessageOutlined, SafetyCertificateOutlined, SolutionOutlined, RightOutlined, DeleteOutlined,
-    LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined
+    LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined, DesktopOutlined // <-- Thêm icon này
 } from '@ant-design/icons';
 
 interface MenuItem {
@@ -22,6 +22,7 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
     { key: 'dashboard', icon: <DashboardOutlined />, label: 'Dashboard', path: '/dashboard' },
+
     {
         key: 'food', icon: <ShopOutlined />, label: 'Quản Lý Món Ăn', requiredPermission: 'view_product_category', children: [
             { key: 'categories', icon: <AppstoreOutlined />, label: 'Danh mục', path: '/categories', requiredPermission: 'view_product_category' },
@@ -54,6 +55,7 @@ const menuItems: MenuItem[] = [
     },
     {
         key: 'booking', icon: <CalendarOutlined />, label: 'Quản Lý Đặt Bàn', requiredPermission: 'view_table', children: [
+            { key: 'pos', icon: <DesktopOutlined />, label: 'Sơ đồ bàn', path: '/pos', requiredPermission: 'view_pos' },
             { key: 'tables', icon: <AppstoreOutlined />, label: 'Quản lý bàn ăn', path: '/tables', requiredPermission: 'view_table' },
             { key: 'reservations', icon: <SolutionOutlined />, label: 'Quản lý đặt bàn', path: '/reservations', requiredPermission: 'view_reservation' },
             { key: 'reservations-trash', icon: <DeleteOutlined />, label: 'Đơn đã hủy', path: '/reservations/trash', requiredPermission: 'view_reservation_trash' },
@@ -159,20 +161,20 @@ const AdminLayout = () => {
                         <Link
                             to={item.path || '#'}
                             className={`flex items-center px-4 py-3 rounded-xl transition-all duration-300 group ${location.pathname === item.path ?
-                                    'bg-blue-600 border border-blue-400/50 shadow-lg' :
-                                    'hover:bg-blue-700/20'
+                                'bg-blue-600 border border-blue-400/50 shadow-lg' :
+                                'hover:bg-blue-700/20'
                                 }`}
                         >
                             <span className={`text-lg transition-colors ${location.pathname === item.path ?
-                                    'text-white' :
-                                    'text-blue-100 group-hover:text-white'
+                                'text-white' :
+                                'text-blue-100 group-hover:text-white'
                                 }`}>
                                 {item.icon}
                             </span>
                             {!sidebarCollapsed && (
                                 <span className={`ml-3 transition-colors ${location.pathname === item.path ?
-                                        'text-white font-medium' :
-                                        'text-blue-100 group-hover:text-white'
+                                    'text-white font-medium' :
+                                    'text-blue-100 group-hover:text-white'
                                     }`}>
                                     {item.label}
                                 </span>
