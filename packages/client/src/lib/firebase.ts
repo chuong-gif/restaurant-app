@@ -1,20 +1,19 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
-// [cite: 1-4]
 
-// Dựa trên file Firebase.js
+// Cấu hình Firebase sử dụng biến môi trường từ .env.local
 const firebaseConfig = {
-    apiKey: "AIzaSyCmwskfloA_osrDvKy_J7oDNHI3iVu5bPU",
-    authDomain: "huong-sen-restaurant.firebaseapp.com",
-    projectId: "huong-sen-restaurant",
-    storageBucket: "huong-sen-restaurant.appspot.com",
-    messagingSenderId: "293477909059",
-    appId: "1:293477909059:web:8f97e9dea82f5702a5caf6",
-    measurementId: "G-QF876EG003"
-}; // [cite: 7-14]
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+    measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+};
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig); // [cite: 17]
-export const storage = getStorage(app); // [cite: 18]
-export const db = getFirestore(app); // [cite: 19]
+const app = initializeApp(firebaseConfig);
+export const storage = getStorage(app);
+export const db = getFirestore(app);

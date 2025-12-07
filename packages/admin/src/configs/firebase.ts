@@ -3,14 +3,15 @@ import { initializeApp } from "firebase/app";
 import { getStorage } from "firebase/storage";
 
 // Cấu hình Firebase
+// Sử dụng import.meta.env cho dự án Vite (Admin)
 const firebaseConfig = {
-    apiKey: "AIzaSyCmwskfloA_osrDvKy_J7oDNHI3iVu5bPU",
-    authDomain: "huong-sen-restaurant.firebaseapp.com",
-    projectId: "huong-sen-restaurant",
-    storageBucket: "huong-sen-restaurant.appspot.com",
-    messagingSenderId: "293477909059",
-    appId: "1:293477909059:web:8f97e9dea82f5702a5caf6",
-    measurementId: "G-QF876EG003"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Khởi tạo Firebase
